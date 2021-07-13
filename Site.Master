@@ -1,0 +1,241 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="Unchained.SiteMaster" %>
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+
+    <!-- contains the sidebar menu color (l154): -->
+   	<link rel="stylesheet" type="text/css" href="~/content/sidenav.css" />
+    <link rel="stylesheet" type="text/css" href="~/content/bootstrap.css" />
+
+
+    <link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/Offside/css/index.css?fin20" />
+	<link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/Offside/css/responsive.css?fin20" />
+	
+    <link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/Offside/css/font-awesome.css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
+	<link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/Offside/css/animate.min.css" />
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+	<link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/default/css/webkit.css" />
+    <link rel="stylesheet" type="text/css" id="admin_css" href="https://forum.biblepay.org/Themes/default/css/admin.css" />
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+    <title><%: Page.Title %> - <%=Unchained.Common.GetLongSiteName(this.Page)%></title>
+
+    <asp:PlaceHolder runat="server">
+       <%: Scripts.Render("~/bundles/modernizr") %>
+    </asp:PlaceHolder>
+
+    <webopt:bundlereference runat="server" path="~/Content/css" />
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <script type='text/javascript' src='https://www.google.com/jsapi'></script>
+
+
+
+    <script>
+
+        function GetItem(n) {
+            if (!localStorage.getItem(n))
+                return '';
+            return localStorage.getItem(n);
+        }
+        function GetStorage0(n) {
+            var v = GetItem(n);
+            var s = n + "<COL>" + v + "<ROW>";
+            return s;
+        }
+        function GetStorage(n) {
+            var s = GetStorage0('testnet_' + n);
+            s += GetStorage0('mainnet_' + n);
+            return s;
+        }
+        function SerializeLocalStorage() {
+            var session = '';
+            // For each encrypted key, put in session
+            session += GetStorage('NickName');
+            session += GetStorage('bbp_address');
+            session += GetStorage('bbp_privkey');
+            session += GetStorage('enc');
+            var o1 = document.getElementById('sessionLocalStorage');
+            o1.value = window.btoa(session);
+            
+            return session;
+        }
+
+        function getRemoteValue(sessionid) {
+            $.ajax({    
+                type: "GET",
+                url: "Web.ashx/sessionid=" + sessionid,
+                dataType: "html",   //expect html to be returned                
+                success: function (response) {
+                    var s = response + "%";
+                    $("#spanLoader1").html(s);
+                }
+            });
+        }
+
+        var spinning = false;
+        function showSpinner() {
+            spinning = true;
+            UpdateSpinner();
+            $("#load1").removeClass("hidden");
+        }
+
+        function hideSpinner() {
+            spinning = false;
+            $("#load1").addClass("hidden");
+        }
+
+        function UpdateSpinner() {
+            if (spinning) {
+                getRemoteValue(1);
+                setTimeout(UpdateSpinner, 1000);
+            }
+
+        }
+
+
+        function afterload() {
+
+            SerializeLocalStorage();
+
+            var pageheight = $(".Page").height() + 70;
+           
+            if (pageheight < $(window).height()) {
+                $(".footer_wrapper").addClass("fixed");
+                $(".footer_wrapper").removeClass("hidden");
+            } else {
+                $(".footer_wrapper").removeClass("fixed");
+                $(".footer_wrapper").removeClass("hidden");
+            }
+        }
+
+        function closeNav() {
+            $("#mySidenav").css("transform", "translate(-240px,0)");
+            $('#rightmenubutton').removeClass('hidden-lg');
+            $('#rightmenubutton').removeClass('hidden-sm');
+        }
+
+        function openNav() {
+            $("#mySidenav").css("transform", "translate(0px,0)");
+        }
+
+    </script>
+    <style>
+
+        .pagination {
+          display: inline-block;
+        }
+
+        .pagination a {
+          color: grey;
+          float: left;
+          padding: 8px 16px;
+          text-decoration: none;
+          transition: background-color .3s;
+          border: 1px solid grey;
+        }
+
+        .pagination a.active {
+              background-color: lime;
+                color: black;
+                  border: 1px solid grey;
+        }
+
+        .pagination a:hover:not(.active) 
+        {
+            background-color: lime;
+        }
+
+
+    </style>
+</head>
+
+<body onload="afterload();">
+    <form runat="server">
+        
+
+        <asp:ScriptManager runat="server">
+            <Scripts>
+                <%--To learn more about bundling scripts in ScriptManager see https://go.microsoft.com/fwlink/?LinkID=301884 --%>
+                <%--Framework Scripts--%>
+                <asp:ScriptReference Name="MsAjaxBundle" />
+                <asp:ScriptReference Name="jquery" />
+                <asp:ScriptReference Name="WebForms.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebForms.js" />
+                <asp:ScriptReference Name="WebUIValidation.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebUIValidation.js" />
+                <asp:ScriptReference Name="MenuStandards.js" Assembly="System.Web" Path="~/Scripts/WebForms/MenuStandards.js" />
+                <asp:ScriptReference Name="GridView.js" Assembly="System.Web" Path="~/Scripts/WebForms/GridView.js" />
+                <asp:ScriptReference Name="DetailsView.js" Assembly="System.Web" Path="~/Scripts/WebForms/DetailsView.js" />
+                <asp:ScriptReference Name="TreeView.js" Assembly="System.Web" Path="~/Scripts/WebForms/TreeView.js" />
+                <asp:ScriptReference Name="WebParts.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebParts.js" />
+                <asp:ScriptReference Name="Focus.js" Assembly="System.Web" Path="~/Scripts/WebForms/Focus.js" />
+                <asp:ScriptReference Name="WebFormsBundle" />
+                <%--Site Scripts--%>
+               
+            </Scripts>
+        </asp:ScriptManager>
+        <div class="Page" id="main">
+            
+    <input type='hidden' name='passforencryption' value='' id='passforencryption' />
+    <input type="hidden" name='sessionLocalStorage' value='12345' id='sessionLocalStorage' />
+
+
+        <!--Above div height is used to calculate the whole page size (so the footer knows the page height)-->
+
+        <div class="navbar navbar-inverse navbar-fixed-top" style="z-index:256;">
+            <div class="container" style="padding-left:100px;">
+                <div style="max-height:75px;overflow:hidden;">
+                    <img src="<%=Unchained.UICommon.GetHeaderImage(this.Page) %>" height="75px" />
+                    <span style="font-family:candara;color:antiquewhite;font-size:22px;">&nbsp;<%=Unchained.UICommon.GetHeaderBanner(this.Page) %></span>
+                     <div id='rightmenubutton' style='float:right;' class="close-sidebar hidden-lg hidden-sm">
+                        <a href="#" onclick="openNav();" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                            <i class="fa fa-navicon">
+                            </i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <%=Unchained.Common.GetGlobalAlert(this.Page) %>
+        </div>
+            <%=Unchained.UICommon.GetSideBar(this.Page) %>
+            <div class="container body-content">
+
+                <div id="load1" class="hidden">
+                        <div class="loader"></div>
+                        <span style="position:relative; top:-70px;left:50px;" id="spanLoader1">50%</span>
+                </div>
+
+                <asp:ContentPlaceHolder ID="MainContent" runat="server">
+                </asp:ContentPlaceHolder>
+            </div>
+
+         <p></p><p></p>
+         <div class="footer_wrapper hidden" >
+            <div class="footer">  
+                <table width="100%"><tr>
+                    <td width='95%' align="center" style="color:silver;"> &nbsp;&nbsp;&nbsp; &copy;<%=Unchained.UICommon.GetFooter(this.Page) %> </td>
+                </tr></table>
+             </div>
+        </div>  
+    </div>        
+    </form>
+    
+    <script> 
+        <!-- This is for our popup bible verses: -->
+        var refTagger = {
+            settings: {
+                bibleVersion: "ESV"
+            }
+        };
+        (function (d, t) {
+            var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+            g.src = '//api.reftagger.com/v2/RefTagger.js';
+            s.parentNode.insertBefore(g, s);
+        }(document, 'script'));
+    </script>
+ </body>
+</html>
+
