@@ -7,55 +7,74 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using static BiblePayDLL.Shared;
+using static BiblePayCommon.DataTableExtensions;
 
 namespace Unchained
 {
-    public partial class Media : Page
+    public partial class Media : BBPPage
     {
-        protected void Page_Load(object sender, EventArgs e)
+        protected new void Page_Load(object sender, EventArgs e)
         {
         }
 
-        private string GetInnerVideo(string sID, string sURL)
+        protected override void Event(BBPEvent e)
         {
-            bool fPlayable = true;
-            int DimsX = 1000;
-            int DimsY = 700;
-            string sDims = "width='" + DimsX.ToString() + "' height='" + DimsY.ToString() + "'";
-            string sAutoPlay = fPlayable ? "autostart autoplay controls playsinline" : "preload='metadata'";
-            string sHTML = "<video id='vid" + sID + "' class='connect-bg' " + sDims + " " + sAutoPlay + " style='background-color:black'>";
-            string sLoc = !fPlayable ? "#t=7" : "#t=7";
-            sHTML += "<source src='" + sURL + sLoc + "' type='video/mp4'></video>";
-            return sHTML;
+            if (e.EventAction == "EditVideo_Click")
+            {
+                Response.Redirect("FormView?action=edit&id=" + e.EventValue + "&table=video1");
+            }
+            else if (e.EventAction == "ContextMenu_Back")
+            {
+                Response.Redirect("VideoList");
+            }
+            
         }
-        private string CurateVideo(string sID, string sNickName, string sURL, string sAdded, string sSubject, string sNotes)
-        {
-            string sDiv = "<div style='height: 1000px; width:900px; overflow: hidden; '>";
-            sDiv += GetInnerVideo(sID, sURL);
-            string sSpeed1 = "<a id='aSlow' href='#' onclick='slowPlaySpeed();'>.5x</a>";
-            string sSpeed2 = "<a id='aNormal' href='#' onclick='normalPlaySpeed();'>1x</a>";
-            string sSpeed3 = "<a id='aFast' href='#' onclick='fastPlaySpeed();'>1.75x</a>";
-            string sFooter = sSpeed1 + " • " + sSpeed2 + " • " + sSpeed3 + " • ? view(s) • " + sAdded;
-            sDiv += "<br>" + sSubject +  " • Uploaded by " + sNickName + "<br>" + sFooter + "<br></div>";
-            return sDiv;
-        }
+
 
         protected string GetVideo()
         {
-            string id = Request.QueryString["mediaid"].ToNonNullString();
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1","", "", "username,time,id,body,URL,subject", "", "");
-            string html = "";
-            for (int y = 0; y < dt.Rows.Count; y++)
+            BiblePayVideo.Video video1 = new BiblePayVideo.Video(this);
+
+            string sID = Request.QueryString["id"].ToNonNullString();
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
+            dt=dt.FilterDataTable("id='" + sID + "'");
+
+            if (dt.Rows.Count < 1)
+                return String.Empty;
+            string html = String.Empty;
+            
+            video1.URL = dt.GetColValue("URL");
+            video1.SVID = dt.GetColValue("SVID");
+            video1.Body = dt.GetColValue("Body");
+            video1.Title = dt.GetColValue("Title");
+            
+            video1.Width = 900;
+            video1.Height = 600;
+            string sFID = dt.GetColValue("FID");
+
+            video1.Footer = "Uploaded by " 
+                + UICommon.GetUserAvatarAndName(this, dt.GetColValue("userid"), true)
+                + " • " + GetObjectRating(IsTestNet(this), sID) + " • "
+                + GetFollowControl(IsTestNet(this), dt.GetColValue("userid"), gUser(this).BiblePayAddress)
+                + "<br>" + GetWatchSum(IsTestNet(this), sID) + " view(s) • " 
+                + UnixTimeStampToDateTime(dt.GetColDouble(0, "time")).ToString();
+            video1.Playable = true;
+            if (HasOwnership(IsTestNet(this), sID, "video1", gUser(this).BiblePayAddress))
             {
-                string sURL = dt.Rows[y]["URL"].ToNonNullString();
-                string sID = dt.Rows[y]["id"].ToNonNullString();
-                if (sID == id)
-                { 
-                    string sVideo = CurateVideo(dt.Rows[y]["id"].ToNonNullString(), dt.Rows[y]["username"].ToNonNullString(), dt.Rows[y]["URL"].ToNonNullString(),
-                        dt.Rows[y]["time"].ToNonNullString(), dt.Rows[y]["Subject"].ToNonNullString(), dt.Rows[y]["Body"].ToNonNullString());
-                    html += sVideo;
-                }
+                string sButton = "<button id='btnEdit' onclick=\""
+                    + "__doPostBack('Event_EditVideo_" + "_" + sID + "_', 'EditVideo_Click');\">Edit</button> ";
+
+                video1.Footer += sButton;
+                string sContext = UICommon.GetContextMenu(sID, "Edit Video;Back to Video List", 
+                    "EditVideo_Click;ContextMenu_Back");
+                video1.Footer += sContext;
             }
+
+            html += UICommon.RenderControl(video1);
+            html += UICommon.GetComments(IsTestNet(this), sID, this);
+
+            // Increment the count
+            UICommon.StoreCount(sID, this, "video");
             return html;
         }
     }

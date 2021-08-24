@@ -1,17 +1,14 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using OpenHtmlToPdf;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Dynamic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Web.UI;
+using static BiblePayCommon.Common;
 using static Unchained.Common;
-using static BiblePayDLL.Encryption;
+using RestSharp;
+using System.Net.Http;
+using static BiblePayCommon.DataTableExtensions;
 
 namespace Unchained
 {
@@ -22,9 +19,30 @@ namespace Unchained
 
          
         }
+        public void GetNotesHTML(string data, out string sTitle, out string sNotes)
+        {
+            string[] vData = data.Split("\r\n");
+            if (vData.Length < 2)
+            {
+                sTitle = data;
+                sNotes = "";
+                return;
+            }
+            sTitle = vData[0];
 
+            sNotes = "";
+            for (int i = 1; i < vData.Length; i++)
+            {
+                if (vData[i] != "")
+                {
+                    sNotes += vData[i] + "<br>";
+                }
+            }
+            
+            return;
+        }
 
-        protected void BatchJob1()
+        protected void BatchJob1(bool fTestNet)
         {
             // rapture videos
             string sql = "Select * from Rapture where filename like '%.mp4%'";
@@ -32,114 +50,86 @@ namespace Unchained
             
             for (int i = 0; i < d11.Rows.Count; i++)
             {
-                string sURL = d11.Rows[i]["url"].ToString();
-                string sFN = d11.Rows[i]["FileName"].ToString();
-                string sPath = "s:\\san\\Rapture2\\" + sFN;
-                bool fExists = System.IO.File.Exists(sPath);
-                if (fExists)
-                {
-                    BiblePayDLL.SharedCommon.DACResult r = BiblePayDLL.Sidechain.UploadFileTypeVideo(false, sPath, GetFundingAddress(IsTestNet(this)), GetFundingKey(IsTestNet(this)));
-                    string url2 = r.Result;
+                        string sURL = d11.Rows[i]["url"].ToString();
+                        string sFN = d11.Rows[i]["FileName"].ToString();
+                        string sPath = "s:\\san\\Rapture2\\" + sFN;
+                        BiblePayCommon.Entity.video1 v = new BiblePayCommon.Entity.video1();
+                        v.Classification = "video";
+                        v.deleted = 0;
+                        string sTitle = "";
+                        string notes = "";
+                        GetNotesHTML(d11.GetColValue(i, "Notes"), out sTitle, out notes);
+                        v.Title = sTitle;
+                        v.Body = notes;
+                        v.Subject = d11.GetColValue(i, "Category");
+                        v.UserID = gUser(this).BiblePayAddress;
+                        v.time = UnixTimestampUTC();
+                        v.URL = d11.GetColValue(i, "URL");
 
-                    if (url2 != "")
-                    {
-                        sql = "Update Rapture set Url='" + url2 + "',san='1' where url = '" + sURL + "'";
-                        gData.Exec(sql);
-                        Debug.WriteLine(sql);
-                    }
-                }
+                        DACResult r3 = BiblePayDLL.Sidechain.InsertIntoDSQL(fTestNet, v, "video1", GetFundingAddress(fTestNet), GetFundingKey(fTestNet));
+
+
             }
         }
 
 
-        protected void BatchJob2()
-        {
-            // rapture videos
-            string sql = "Select * from Rapture where filename like '%.mp4%'";
-            DataTable d11 = gData.GetDataTable(sql, false);
-            for (int i = 0; i < d11.Rows.Count; i++)
-            {
-                string sURL = d11.Rows[i]["url"].ToString();
-                dynamic o = new System.Dynamic.ExpandoObject();
-                string sFN = d11.Rows[i]["FileName"].ToString();
-                o.Subject =  d11.Rows[i]["Title"].ToString();
-                o.Body  = d11.Rows[i]["Notes"].ToString();
-                o.UserName = gUser(this).UserName.ToString();
-                o.URL = d11.Rows[i]["URL"].ToString();
-                o.Body = Mid(o.Body, 0, 777);
-                string sID = GetSha256Hash(o.URL);
-                BiblePayDLL.SharedCommon.DACResult r = DataOps.InsertIntoTable(IsTestNet(this), o, "video1", sID);
-                string t = r.TXID;
-            }
-        }
-
-        public static class ExpandoObjectHelper
-        {
-            public static bool HasProperty(ExpandoObject obj, string propertyName)
-            {
-                return obj != null && ((IDictionary<String, object>)obj).ContainsKey(propertyName);
-            }
-        }
 
         private void MigrateVideos(bool fTestNet)
         {
-            DataTable dt1 = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "object", "", "", "url", "", "");
+            DataTable dt1 = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
+
             for (int i = 0; i < dt1.Rows.Count; i++)
             {
-                string sURL1 = dt1.Rows[i]["URL"].ToString();
-            }
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1", "", "", "username,time,id,body,URL,subject", "", "");
-            for (int y = 0; y < dt.Rows.Count; y++)
-            {
-                string sURL = dt.Rows[y]["URL"].ToNonNullString();
-                string sID = dt.Rows[y]["id"].ToNonNullString();
-                dynamic o = new System.Dynamic.ExpandoObject();
-                o.Size = 1000000;
-                o.FileName = "";
-                o.DirectoryName = "";
-                o.URL = sURL;
-                BiblePayDLL.SharedCommon.DACResult r = DataOps.InsertIntoTable(IsTestNet(this), o, "object", sID);
-                string t = r.TXID;
-            }
-        }
-        private void Migrate(string sTable, bool fTestNetFromChain, bool fTestNetToChain)
-        {
-            Internals.BBPWebClient w = new Internals.BBPWebClient();
-            string sURL = BiblePayDLL.Sidechain.GetChosenSanctuary(fTestNetFromChain) + "/rest/dsqlquery/" + sTable;
-            string sData = w.DownloadString(sURL);
-            dynamic oJson = JsonConvert.DeserializeObject<dynamic>(sData);
-            int i = 0;
-            foreach (var j in oJson)
-            {
-                string sKey = j.Name;
-                dynamic oNewton = j.Value;
-                if (j.Value != null)
+                // if the UserID is blank.
+                string FID = dt1.GetColValue(i, "FID");
+                if (FID == "")
                 {
-                    dynamic oDSQL = BiblePayDLL.Sidechain.NewtonSoftToExpando(oNewton);
-                    if (oDSQL != null)
+                    
+                    BiblePayCommon.Entity.video1 v = new BiblePayCommon.Entity.video1();
+                    v.Body = dt1.GetColValue(i, "Body");
+                    v.Classification = dt1.GetColValue(i, "Classification");
+                    v.deleted = 0;
+                    v.ParentID = dt1.GetColValue(i, "ParentID");
+                    v.Subject = dt1.GetColValue(i, "Subject");
+                    v.URL = dt1.GetColValue(i, "URL");
+                    v.UserID = gUser(this).BiblePayAddress;
+                    //v.Size = (int)dt1.GetColDouble(i, "Size");
+                    string sOrigFilename = "s:\\san\\rapture2\\"; // + UrlToFn(v.URL);
+                    if (System.IO.File.Exists(sOrigFilename))
                     {
-                        if (ExpandoObjectHelper.HasProperty(oDSQL, "table"))
-                        {
-                            if (oDSQL.table == sTable)
-                            {
-                                i++;
-                                BiblePayDLL.Sidechain.SidechainDSQLInsert(fTestNetToChain, ref oDSQL, sTable, i.ToString(), GetFundingKey(IsTestNet(this)), GetFundingAddress(IsTestNet(this)));
-                            }
-                        }
+                        DACResult r = BiblePayDLL.Sidechain.UploadFileTypeBlob(fTestNet, sOrigFilename, 
+                            GetFundingAddress(fTestNet), GetFundingKey(fTestNet));
+                        v.FID = r.TXID;
+                        v.URL = r.Result;
+                        DataOps.InsertIntoTable(fTestNet, v);
                     }
+
                 }
             }
         }
+
+
+        private void InitializeObject(bool fTestNet)
+        {
+            BiblePayCommon.Entity.versememorizer1 n = new BiblePayCommon.Entity.versememorizer1();
+
+            DataOps.InsertIntoTable(true, n);
+            DataOps.InsertIntoTable(false, n);
+
+        }
+
 
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
-            //  Migrate("pray1", true, false);
-            //  Migrate("comment1", true, false);
-            //  Migrate("video1", true, false);
-            //  MigrateVideos(false);
-            MsgBox("Success", "1", this);
+
+            BatchJob1(false);
+
+            // Mission Critical Todo:  Genesis block for VerseMemorizer
+
             return;
+
+    
         }
     }
 }

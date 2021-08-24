@@ -8,23 +8,12 @@ using static Unchained.StringExtension;
 
 namespace Unchained
 {
-    public partial class MessagePage : Page
+    public partial class MessagePage : BBPPage
     {
-        protected void Page_Load(object sender, EventArgs e)
+        protected new void Page_Load(object sender, EventArgs e)
         {
-            string postMonitor = Session["MSGBOX_POSTMONITOR"].ToNonNullString();
-            if (postMonitor != "")
-            {
-                string postValue= Request.Form[postMonitor].ToNonNullString();
-                string postBack = Session["MSGBOX_POSTBACK"].ToNonNullString();
-                if (postBack != "" && postValue != "")
-                {
-                    Session["POSTBACK_" + postMonitor] = postValue;
-                    Session["MSGBOX_POSTMONITOR"] = "";
-                    Session["MSGBOX_POSTBACK"] = "";
-                    Response.Redirect(postBack);
-                }
-            }
+           
+
         }
 
         public string GetMessagePage()

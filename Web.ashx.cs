@@ -8,6 +8,8 @@ using System.Text;
 using System.Web;
 using static Unchained.StringExtension;
 using static Unchained.Common;
+using System.Web.Services;
+using Newtonsoft.Json;
 
 namespace Unchained
 {
@@ -18,17 +20,12 @@ namespace Unchained
     {
 
         public static int nPerc = 0;
+
+       
         public void ProcessRequest(HttpContext context)
         {
-            byte[] bytes = context.Request.BinaryRead(context.Request.ContentLength);
-            string s = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+        
 
-            string path = HttpContext.Current.Request.Url.AbsolutePath;
-            string[] vID = path.Split("/");
-            
-            string SessionID = GetElement(vID[vID.Length-1], "=", 1);
-            nPerc++;
-            context.Response.Write(nPerc.ToString());
         }
 
         public bool IsReusable

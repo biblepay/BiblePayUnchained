@@ -2,27 +2,51 @@
 using System.Data;
 using System.Data.SqlClient;
 using static BiblePayDLL.Shared;
-using static BiblePayDLL.SharedCommon;
 using static Unchained.Common;
+using static BiblePayCommon.Common;
+using System.Web.UI;
+using BiblePayDLL;
 
 namespace Unchained
 {
     public static class DataOps
     {
 
-        public static DACResult InsertIntoTable(bool fTestNet, dynamic o, string sTableName, string sID)
+        public static void FilterDataTable(ref DataTable dt, string sSQL)
         {
-            DACResult r = BiblePayDLL.Sidechain.SidechainDSQLInsert(fTestNet, ref o, sTableName, sID, GetFundingAddress(fTestNet), GetFundingKey(fTestNet));
+            try
+            {
+                dt = dt.Select(sSQL).CopyToDataTable();
+            }
+            catch (Exception)
+            {
+                DataTable dt1 = new DataTable();
+                dt = dt1;
+            }
+        }
+
+
+        public static BiblePayCommon.Common.DACResult SpendMoney(bool fTestnet, Page p, double nAmount, string sSpendAddress, string sSpendPrivKey, string sXML)
+        {
+            p.Session["balance"] = null;
+            BiblePayCommon.Common.DACResult r = BiblePayDLL.Sidechain.CreateFundingTransaction(fTestnet, nAmount, sSpendAddress, sSpendPrivKey, sXML, true);
             return r;
         }
- 
-        public static DACResult SpendMoney(double nAmount, string sSpendAddress, string sEncCookie, string sXML)
+
+
+        public static DACResult InsertIntoTable(bool fTestNet, BiblePayCommon.IBBPObject o)
         {
-            BiblePayDLL.Data b = new BiblePayDLL.Data();
-            DACResult r = SpendMoney(nAmount, sSpendAddress, sEncCookie, sXML);
+            string sEntityName = BiblePayCommon.EntityCommon.GetEntityName(fTestNet, o);
+
+            DACResult r = BiblePayDLL.Sidechain.InsertIntoDSQL(fTestNet, o, sEntityName, GetFundingAddress(fTestNet), GetFundingKey(fTestNet));
+            
             return r;
         }
-        
+
+        public static void InsertIntoTable_Background(bool fTestNet, string sTable, BiblePayCommon.IBBPObject o)
+        {
+            BiblePayDLL.Sidechain.InsertIntoDSQL_Background(fTestNet, o, sTable,  GetFundingAddress(fTestNet), GetFundingKey(fTestNet), false);
+        }
 
         public static double GetTotalFrom(string userid, string table)
         {
@@ -259,7 +283,7 @@ namespace Unchained
                     {
                         oOut = dt1.Rows[0][Convert.ToInt32(vCol)];
                     }
-                    double dOut = Common.GetDouble(oOut.ToString());
+                    double dOut = GetDouble(oOut.ToString());
 
                     return dOut;
                 }
@@ -315,7 +339,7 @@ namespace Unchained
                     {
                         oOut = dt1.Rows[0][Convert.ToInt32(vCol)];
                     }
-                    double dOut = Common.GetDouble(oOut.ToString());
+                    double dOut = GetDouble(oOut.ToString());
 
                     return dOut;
                 }

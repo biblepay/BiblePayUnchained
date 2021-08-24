@@ -11,9 +11,9 @@ using static Unchained.Common;
 
 namespace Unchained
 {
-    public partial class PrayerAdd : Page
+    public partial class PrayerAdd : BBPPage
     {
-        protected void Page_Load(object sender, EventArgs e)
+        protected new void Page_Load(object sender, EventArgs e)
         {
             if (!gUser(this).LoggedIn)
             {
@@ -41,12 +41,11 @@ namespace Unchained
                 return;
             }
 
-            dynamic o = new System.Dynamic.ExpandoObject();
+            BiblePayCommon.Entity.pray1 o = new BiblePayCommon.Entity.pray1();
             o.Subject = txtSubject.Text;
             o.Body = txtBody.Text;
-            o.UserName = gUser(this).UserName.ToString();
-            string sID = GetSha256Hash(txtSubject.Text);
-            BiblePayDLL.SharedCommon.DACResult r = DataOps.InsertIntoTable(IsTestNet(this), o, "pray1", sID);
+            o.UserID = gUser(this).BiblePayAddress.ToString();
+            BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(IsTestNet(this), o);
             if (r.Error == "")
             {
                 Response.Redirect("PrayerBlog");

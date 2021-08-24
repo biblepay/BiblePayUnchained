@@ -1,57 +1,48 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using static BiblePayDLL.Shared;
+using static BiblePayCommon.DataTableExtensions;
 using static Unchained.Common;
 
 namespace Unchained
 {
-    public partial class PrayerView : Page
+    public partial class PrayerView : BBPPage
     {
-        protected void Page_Load(object sender, EventArgs e)
+        protected new void Page_Load(object sender, EventArgs e)
         {
-            string sSave = Request.Form["btnSaveComment"].ToNonNullString();
-            string id = Request.QueryString["id"] ?? "";
-            if (sSave != "")
+        }
+
+        protected override void Event(BBPEvent e)
+        {
+            if (e.EventAction == "PrayerDelete_Click")
             {
-                if (gUser(this).UserName == "")
+                if (HasOwnership(IsTestNet(this), e.EventID, "pray1", gUser(this).BiblePayAddress))
                 {
-                    MsgBox("Nick Name must be populated", "Sorry, you must have a username to add a prayer.  Please navigate to Account Settings | Edit to set your UserName.", this);
-                    return;
-                }
-
-                dynamic o = new System.Dynamic.ExpandoObject();
-                o.UserName = gUser(this).UserName;
-                string theBody = Request.Form["txtComment"].ToString();
-                o.Body = theBody;
-                o.ParentID = id;
-                string sID = GetSha256Hash(theBody);
-
-                BiblePayDLL.SharedCommon.DACResult r = DataOps.InsertIntoTable(IsTestNet(this), o, "comment1", sID);
-                if (r.Error == "")
-                {
-                    Response.Redirect("PrayerBlog");
+                    // Delete the object (logically)
+                    bool fDeleted = BiblePayDLL.Sidechain.DeleteObject(IsTestNet(this), "pray1", 
+                        e.EventID, GetFundingAddress(IsTestNet(this)), GetFundingKey(IsTestNet(this)));
+                    if (fDeleted)
+                    {
+                        Response.Redirect("PrayerBlog.aspx");
+                    }
+                    else
+                    {
+                        MsgBox("Error", "Sorry, the object could not be deleted.", this);
+                    }
                 }
                 else
                 {
-                    MsgBox("Error while inserting comment", "Sorry, the comment was not saved: " + r.Error, this);
+                    MsgBox("Error", "Sorry, you must have ownership of this object to delete it.", this);
                 }
-
             }
         }
-
         public string GetPrayer()
         {
             // Displays the prayer that the user clicked on from the web list.
             string id = Request.QueryString["id"] ?? "";
             if (id == "")
                 return "N/A";
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "pray1", id, "", "time,subject,username", "", "");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "pray1");
+            DataOps.FilterDataTable(ref dt, "id='" + id + "'");
 
             if (dt.Rows.Count < 1)
             {
@@ -59,19 +50,19 @@ namespace Unchained
                 return "";
             }
 
-            string sUserPic = EmptyAvatar();
             string sUserName = NotNull(dt.Rows[0]["subject"].ToString());
             if (sUserName == "")
                 sUserName = "N/A";
-            string sBody = " <textarea style='width: 70%;' id=txtbody rows=10 cols=65>" + dt.Rows[0]["body"].ToString() + "</textarea>";
+            string sBody = " <textarea style='width: 70%;' id=txtbody rows=10 cols=65 readonly>" + dt.Rows[0]["body"].ToString() + "</textarea>";
 
-            string div = "<table style='padding:10px;' width=100%><tr><td>User:<td>" + sUserPic + "</tr>"
-                + "<tr><td>User Name:<td><h2>" + dt.Rows[0]["UserName"].ToString() + "</h2></tr>"
-                + "<tr><td>Added:<td>" + dt.Rows[0]["time"].ToString() + "</td></tr>"
+            string div = "<table style='padding:10px;' width=100%>"
+                + "<tr><th class='objheader'><h3>Prayer - View</h3><th class='objheader' colspan=3><div style = 'text-align:right;' > "
+                + "<a onclick=\"__doPostBack('Event_" + id + "', 'PrayerDelete_Click');\"><i class='fa fa-trash'></i></a></div></th></tr>"
+                + "<tr><td width=10%>User:<td>" + UICommon.GetUserAvatarAndName(this, dt.GetColValue("UserID")) 
+                + "<tr><td>Added:<td>" + UnixTimeStampToDateTime(dt.GetColDouble(0, "time")).ToString() + "</td></tr>"
                 + "<tr><td>Subject:<td>" + dt.Rows[0]["subject"].ToString() + "</td></tr>"
-                + "<tr><td>Body:<td colspan=2>" + sBody + "</td></tr></table>";
-            div += UICommon.GetComments(id,this);
-
+                + "<tr><td>Body:<td colspan=2>" + sBody + "<br>" + GetObjectRating(IsTestNet(this), id) + "</td></tr></table>";
+            div += UICommon.GetComments(IsTestNet(this), id, this);
             return div;
         }
     }

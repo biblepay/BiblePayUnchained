@@ -1,28 +1,23 @@
-﻿using Microsoft.VisualBasic;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
-using System.Web.SessionState;
 using System.Web.UI;
+using static BiblePayCommon.Common;
+using static BiblePayCommon.DataTableExtensions;
 
 namespace Unchained
 {
-
     public static class Common
     {
         public static Data gData = new Data(Data.SecurityType.REQ_SA);
-        
+        public static string _cancelurl = "";
+
         public static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
         {
             // Unix timestamp is seconds past epoch
@@ -126,12 +121,6 @@ namespace Unchained
             return o.ToString();
         }
 
-        public static string GetSha256HashNoSpaces(string rawData)
-        {
-            rawData = rawData.Replace(" ", "");
-            string s = GetSha256HashI(rawData);
-            return s;
-        }
         public static string GetSha256HashI(string rawData)
         {
             // The I means inverted (IE to match a uint256)
@@ -160,7 +149,6 @@ namespace Unchained
                 return builder.ToString();
             }
         }
-
         public static bool IsPasswordStrong(string pw)
         {
             var hasNumber = new Regex(@"[0-9]+");
@@ -169,7 +157,6 @@ namespace Unchained
             var isValidated = hasNumber.IsMatch(pw) && hasUpperChar.IsMatch(pw) && hasMinimum8Chars.IsMatch(pw);
             return isValidated;
         }
-
         public static string Base64Encode(string plainText)
         {
             var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
@@ -178,8 +165,14 @@ namespace Unchained
 
         public static string Base64Decode(string base64EncodedData)
         {
-            var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
-            return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+            try
+            {
+                var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
+                return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+            } catch (Exception)
+            {
+                return String.Empty;
+            }
         }
 
         public static string GetPlatformMoniker()
@@ -199,7 +192,7 @@ namespace Unchained
             return sPath;
         }
 
-        
+
         private static int iRowModulus = 0;
         private static object cs_log = new object();
         private static string mLastLogData = "";
@@ -231,7 +224,6 @@ namespace Unchained
                 }
             }
         }
-
         public static string GetExtConfigurationKeyValue(string sPath, string _Key)
         {
             if (!File.Exists(sPath))
@@ -254,7 +246,7 @@ namespace Unchained
             }
             return string.Empty;
         }
-        
+
         public static string Mid(string data, int nStart, int nLength)
         {
             // Ported from VB6, except this version is 0 based (NOT 1 BASED)
@@ -298,7 +290,6 @@ namespace Unchained
             string sKV = GetExtConfigurationKeyValue(GetBaseHomeFolder() + "unchained.conf", _Key);
             return sKV;
         }
-
         public static Int32 instr(Int32 StartPos, String SearchString, String SearchFor, Int32 IgnoreCaseFlag)
         {
             Int32 result = -1;
@@ -326,7 +317,7 @@ namespace Unchained
             string sOut = sData.Substring((iPos1 - 1), (iPos2 - iPos1));
             return sOut;
         }
-       
+
         public static bool ByteArrayToFile(string fileName, byte[] byteArray)
         {
             try
@@ -355,24 +346,58 @@ namespace Unchained
             public string UserName;
             public string AvatarURL;
             public bool LoggedIn;
+            public string BiblePayAddress;
+            public string EmailAddress;
+            public int Verified;
+            public string HashTags;
+            public string Slogan;
+            public string Testimony;
+
+            public string GetAvatarImage()
+            {
+
+                if (AvatarURL.ToNonNullString() == "" || AvatarURL.Contains("emptyavatar"))
+                {
+                    return EmptyAvatar();
+                }
+                else
+                {
+                    return "<img src='" + AvatarURL + "' width=50 height=50>";
+                }
+
+            }
         }
 
         public static User gUser(Page p)
         {
             User u = new User();
+            u.UserName = "Guest";
+            if (p.Session["mainnet_mode"] == null)
+            {
+                p.Session["mainnet_mode"] = 1;
+            }
+            string sKey = UICommon.GetBBPAddress(p);
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "user1");
+            dt = dt.FilterDataTable("biblepayaddress='" + sKey + "'");
+            if (dt.Rows.Count < 1)
+                return u;
 
-            u.UserName = GetLocalStorage(p, "NickName");
-            u.AvatarURL = "<img src='images/emptyavatar.png' width=50 height=50 >";
-            u.LoggedIn = u.UserName.Length > 2;
+            u.UserName = dt.Rows[0]["UserName"].ToString();
+            u.BiblePayAddress = dt.Rows[0]["BiblePayAddress"].ToString();
+            u.EmailAddress = dt.GetColValue("EmailAddress");
+            u.Verified = dt.GetColInt("Verified");
+            u.Testimony = dt.GetColValue("Testimony");
+            u.Slogan = dt.GetColValue("Slogan");
+            u.AvatarURL = dt.GetColValue("AvatarURL");
+            u.LoggedIn = u.UserName.Length > 1 && u.BiblePayAddress.Length > 24;
+            u.HashTags = dt.GetColValue("HashTags");
             return u;
         }
-
         public static string EmptyAvatar()
         {
-            string s = "<img src='images/emptyavatar.png' width=50 height=50 >";
-            return s;
-
-        }     
+            string s1 = "<img src='images/emptyavatar.png' width=50 height=50>";
+            return s1;
+        }
 
         public static double GetCompounded(double nROI)
         {
@@ -388,8 +413,8 @@ namespace Unchained
 
         public static bool IsTestNet(Page p)
         {
-            double nChain  = BiblePayDLL.Shared.GetDouble(p.Session["mainnet_mode"]);
-            bool fProd = nChain == 1;
+            double nChain = GetDouble(p.Session["mainnet_mode"]);
+            bool fProd = nChain != 2;
             return !fProd;
         }
 
@@ -398,7 +423,6 @@ namespace Unchained
             string sName = IsTestNet(p) ? "bbpaddress_testnet" : "bbpaddress_prod";
             return sName;
         }
-
         public static string GetBBPAddressPKCookieName(Page p)
         {
             string sName = IsTestNet(p) ? "bbpprivkey_testnet" : "bbpprivkey_prod";
@@ -425,54 +449,68 @@ namespace Unchained
             return s2;
         }
 
+        public static int GetVoteCount(bool fTestNet, string sID, int nType)
+        {
+            VoteSums v = GetVoteSum(fTestNet, sID);
+            if (nType == 0)
+                return (int)v.nUpvotes;
+            if (nType == 1)
+                return (int)v.nDownvotes;
+            return 0;
+        }
+
+        public static string GetObjectRating(bool fTestNet, string sID)
+        {
+            string sHTML = "";
+            int nRating = 3;
+            string sChecked = "";
+            for (int i = 1; i <= 5; i++)
+            {
+                sChecked = "";
+                if (i <= nRating)
+                    sChecked = "checked";
+                sHTML += "<span class='fa fa-star " + sChecked + "'></span>";
+            }
+            // Voting buttons
+            sHTML = "";
+            sHTML += "<a onclick='transmit(\"" + sID + "\", \"upvote\", \"upvote1" + sID + "\", \"downvote1" + sID + "\");'>"
+                + "<span class='fa fa-thumbs-up'></span></a>"
+                + "&nbsp;"
+                + "<span id='upvote1" + sID + "'>" + GetVoteCount(fTestNet, sID, 0).ToString() + "</span>"
+                + " &nbsp; "
+                + "<a onclick='transmit(\"" + sID + "\", \"downvote\", \"upvote1" + sID + "\", \"downvote1" + sID + "\");'>"
+                + "<span class='fa fa-thumbs-down'></span></a>&nbsp;"
+                + "<span id='downvote1" + sID + "'>"
+                + GetVoteCount(fTestNet, sID, 1).ToString() + "</span>";
+            return sHTML;
+        }
+
+        public static string GetFollowControl(bool fTestNet, string sFollowedID, string sMyUserID)
+        {
+            string sHTML = "";
+            string sStatus = GetFollowStatus(fTestNet, sFollowedID, sMyUserID);
+            string sAction = sStatus == "Follow" ? "follow" : "unfollow";
+            string sIcon = sStatus == "Follow" ? "fa-heart" : "fa-heart-broken";
+            sHTML += "<a onclick='var o=document.getElementById(\"follow1" 
+                + sFollowedID + "\");transmitfollow(\"" + sFollowedID + "\", o.innerHTML, \"follow1" 
+                + sFollowedID + "\", \"\");'>"
+                + "<span id='span1" + sFollowedID + "' class='fa " + sIcon + "'></span></a>"
+                + "&nbsp;"
+                + "<span id='follow1" + sFollowedID + "'>" + sStatus + "</span>";
+            return sHTML;
+
+        }
+
         public static void DeleteCookie(string sKey)
         {
             try
             {
                 HttpContext.Current.Response.Cookies.Remove(sKey);
             }
-            catch(Exception)
-            {
-
-            }
-        }
-        public static string GetLocalStorage(Page p, string sKey1)
-        {
-            string sPrefix = IsTestNet(p) ? "testnet" : "mainnet";
-            string sKey = sPrefix + "_" + sKey1;
-
-            string[] vStorage = p.Session["localStorage"].ToNonNullString().Split("<ROW>");
-            for (int i = 0; i < vStorage.Length; i++)
-            {
-                string[] rowStorage = vStorage[i].Split("<COL>");
-                if (rowStorage.Length > 1)
-                {
-                    if (rowStorage[0] == sKey)
-                        return rowStorage[1];
-                }
-            }
-            return "";
-        }
-
-        public static string xGetCookie(string sKey)
-        {
-            try
-            {
-                HttpCookie c = HttpContext.Current.Request.Cookies[cookiePrefix + sKey];
-                if (c != null)
-                {
-                    //string sOut = (c.Value ?? string.Empty).ToString();
-                    string sOut = (c.Values[cookiePrefix + sKey] ?? string.Empty).ToString();
-
-                    string sDeciphered = Base65Decode(sOut);
-                    return sDeciphered;
-                }
-            }
             catch (Exception)
             {
 
             }
-            return "";
         }
 
         public static string TriggerFormSubmit(Page p, string sURL, bool fWrite = true, string sOptData = "")
@@ -486,48 +524,237 @@ namespace Unchained
                 p.Response.Write(sOptData);
             }
             return sPA;
-        } 
-
-        public static string SetLocalStorage(Page p, string key1, string value1)
-        {
-            bool fTestNet = IsTestNet(p);
-            string sPrefix = fTestNet ? "testnet" : "mainnet";
-            string sKey = sPrefix + "_" + key1;
-            string value = Base65Encode(value1);
-            string sScript = "<script language='javascript'>localStorage.setItem('" + sKey + "','" + value1 + "')</script>";
-            p.Response.Write(sScript);
-            return sScript;
         }
+
         public static string cookiePrefix = "cred12_";
 
-        public static void xSetCookie(string key1, string value1, TimeSpan expires)
+        public struct VoteSums
         {
-            string key = cookiePrefix + key1;
-            string value = Base65Encode(value1);
-            var cookie = new System.Web.HttpCookie(key);
-            cookie.Values[key] = value;
-            cookie.Expires = DateTime.Now.Add(expires);
-            cookie.SameSite = System.Web.SameSiteMode.None;
-            cookie.Secure = true;
-            HttpContext.Current.Response.Cookies.Add(cookie);
+            public double nUpvotes;
+            public double nDownvotes;
+            public double nAvg;
+        };
+        public static VoteSums GetVoteSum(bool fTestNet, string sParentID)
+        {
+            VoteSums v = new VoteSums();
+
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "vote1");
+            dt = dt.FilterDataTable("parentid='" + sParentID + "'");
+            if (dt.Rows.Count == 0)
+                return v;
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                double nVoteValue = GetDouble(dt.Rows[i]["VoteValue"]);
+                if (nVoteValue == 1)
+                    v.nUpvotes++;
+                if (nVoteValue == -1)
+                    v.nDownvotes++;
+            }
+            return v;
         }
 
-
-        public static double GetDouble(object o)
+        public static string GetFollowStatus(bool fTestNet, string sFollowedID, string sMyUserID)
         {
-            try
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "follow1");
+            dt = dt.FilterDataTable("followedid='" + sFollowedID + "' and userid='" + sMyUserID + "' and deleted=0");
+            if (dt.Rows.Count < 1)
+                return "Follow";
+            return "Unfollow";
+        }
+
+        public static double GetWatchSum(bool fTestNet, string sParentID)
+        {
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "objectcount1");
+            dt = dt.FilterDataTable("parentid='" + sParentID + "'");
+            double nTotal = 0;
+            for (int i = 0; i < dt.Rows.Count; i++)
             {
-                if (o == null) return 0;
-                if (o.ToString() == string.Empty) return 0;
-                double d = Convert.ToDouble(o.ToString());
-                return d;
+                double nCountValue = GetDouble(dt.Rows[i]["CountValue"]);
+                nTotal += nCountValue;
             }
-            catch (Exception)
+            return nTotal;
+        }
+
+        public static double GetWatchSumUser(bool fTestNet, string sParentID, string sUserId)
+        {
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "objectcount1");
+            dt = dt.FilterDataTable("parentid='" + sParentID + "' and userid='" + sUserId + "'");
+            double nTotal = 0;
+            for (int i = 0; i < dt.Rows.Count; i++)
             {
-                // Letters
-                return 0;
+                double nCountValue = GetDouble(dt.Rows[i]["CountValue"]);
+                nTotal += nCountValue;
+            }
+            return nTotal;
+        }
+
+        
+
+        // Save User Record
+        public static bool SaveUserRecord(bool fTestNet, User u, Page p)
+        {
+            BiblePayCommon.Entity.user1 o = new BiblePayCommon.Entity.user1();
+
+            o.UserName = u.UserName;
+            o.EmailAddress = u.EmailAddress;
+            o.BiblePayAddress = u.BiblePayAddress;
+            o.Verified = u.Verified;
+            o.AvatarURL = u.AvatarURL;
+            o.HashTags = u.HashTags;
+            o.Testimony = u.Testimony;
+            o.Slogan = u.Slogan;
+
+            if (o.BiblePayAddress == "" || o.BiblePayAddress == null)
+            {
+                string sNarr = "Sorry, you must create a wallet first.  (Wallets are completely free, but necessary for the system to store data).  Please click 'Generate New Address' in Account settings.  ";
+                UICommon.MsgModal(p, "Error", sNarr, 500, 250);
+                return false;
+            }
+            else
+            {
+                BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(fTestNet, o);
+                return true;
             }
         }
 
+        public static bool HasOwnership(bool fTestNet, string sObjectID, string sTable, string sUserID)
+        {
+            if (System.Diagnostics.Debugger.IsAttached)
+                return true;
+
+            if (sUserID == null || sUserID == "")
+                return false;
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, sTable);
+            DataOps.FilterDataTable(ref dt, "id='" + sObjectID + "'");
+            if (dt.Rows.Count < 1)
+                return false;
+            string sOwnerID = dt.GetColValue("UserID");
+            if (sOwnerID == sUserID || sOwnerID == "")
+                return true;
+            return false;
+        }
+
+        public static double GetSumOf(bool fTestNet, string sFilter, string sTable, string sField)
+        {
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, sTable);
+            dt = dt.FilterDataTable(sFilter);
+            double nTotal = 0;
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                double nValue = dt.GetColDouble(i, sField);
+                nTotal += nValue;
+            }
+            return nTotal;
+        }
+
+        public static Portfolios GetPortfolioSum(Portfolios p)
+        {
+            Portfolios n = new Portfolios();
+            n.AmountForeign = 0;
+            n.AmountBBP = 0;
+            for (int j = 0; j < p.lPositions.Count; j++)
+            {
+                BiblePayCommon.Entity.price1 prc = Utils.GetCryptoPrice(p.lPositions[j].Ticker);
+
+                if (p.lPositions[j].Ticker == "BBP")
+                {
+                    n.AmountBBP += p.lPositions[j].nAmount;
+                    n.AmountUSDBBP += (prc.AmountUSD * p.lPositions[j].nAmount);
+
+                }
+                else
+                {
+                    n.AmountForeign += p.lPositions[j].nAmount;
+                    n.AmountUSDForeign += (prc.AmountUSD * p.lPositions[j].nAmount);
+                }
+            }
+            return n;
+        }
+        public struct Portfolios
+        {
+            public string UserID;
+            public double AmountBBP;
+            public double AmountForeign;
+            public double AmountUSDBBP;
+            public double AmountUSDForeign;
+            public double Coverage;
+            public string Ticker;
+            public string Nickname;
+            public double Strength;
+            public string Address;
+            public int Time;
+            public List<SimpleUTXO> lPositions;
+        }
+
+        public struct PortfolioParticipant
+        {
+            public string UserID;
+            public double AmountBBP;
+            public double AmountForeign;
+            public double AmountUSD;
+            public double AmountUSDBBP;
+            public double AmountUSDForeign;
+            public double Coverage;
+            public string NickName;
+            public double Strength;
+            public List<Portfolios> lPortfolios;
+        }
+        public static Dictionary<string, Portfolios> dictUTXO = new Dictionary<string, Portfolios>();
+
+        public static Dictionary<string, PortfolioParticipant> GenerateUTXOReport(bool fTestNet)
+        {
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "utxostake1");
+            Dictionary<string, PortfolioParticipant> dictParticipants = new Dictionary<string, PortfolioParticipant>();
+
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                PortfolioParticipant pp = new PortfolioParticipant();
+                bool fPortfolioParticipantExists = dictParticipants.TryGetValue(dt.Rows[i]["UserID"].ToString(), out pp);
+                if (!fPortfolioParticipantExists)
+                {
+                    pp.lPortfolios = new List<Portfolios>();
+                    dictParticipants.Add(dt.Rows[i]["UserID"].ToString(), pp);
+                }
+
+                Portfolios p = Utils.QueryUTXOList(fTestNet, dt.Rows[i]["Ticker"].ToString().ToUpper(), dt.Rows[i]["Address"].ToString(), 0);
+
+                pp.NickName = UICommon.GetUserRecord(fTestNet, dt.Rows[i]["UserID"].ToString()).UserName;
+
+                pp.UserID = dt.Rows[i]["UserID"].ToString();
+                Portfolios pTotal = GetPortfolioSum(p);
+                pp.AmountForeign += pTotal.AmountForeign;
+                pp.AmountUSDBBP += pTotal.AmountUSDBBP;
+                pp.AmountUSDForeign += pTotal.AmountUSDForeign;
+                pp.AmountBBP += pTotal.AmountBBP;
+                pp.lPortfolios.Add(p);
+                
+                pp.Coverage = pp.AmountUSDBBP / (pp.AmountUSDForeign + .01);
+                if (pp.Coverage > 1)
+                    pp.Coverage = 1;
+                dictParticipants[dt.Rows[i]["UserID"].ToString()] = pp;
+
+            }
+
+            double nTotalUSD = 0;
+            double nParticipants = 0;
+            foreach (KeyValuePair<string, PortfolioParticipant> pp in dictParticipants.ToList())
+            {
+                PortfolioParticipant p1 = dictParticipants[pp.Key];
+                p1.AmountUSD = pp.Value.AmountUSDBBP + (pp.Value.AmountUSDForeign * pp.Value.Coverage);
+                dictParticipants[pp.Key] = p1;
+                nTotalUSD += p1.AmountUSD;
+                nParticipants++;
+            }
+            // Assign Strength
+            foreach (KeyValuePair<string, PortfolioParticipant> pp in dictParticipants.ToList())
+            {
+                PortfolioParticipant p1 = dictParticipants[pp.Key];
+                p1.Strength = p1.AmountUSD / (nTotalUSD + .01);
+                dictParticipants[pp.Key] = p1;
+            }
+
+            return dictParticipants;
+
+        }
     }
 }

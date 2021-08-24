@@ -5,18 +5,23 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Web;
+using Twilio.Clients;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Types;
 
 namespace Unchained
 {
     public static class BMS
     {
 
-        public static string ExecMVCCommand(string URL, int iTimeout = 30)
+        public static string ExecMVCCommand(string URL, int iTimeout = 30, string sOptionalHeaderName = "", string sOptionalHeaderValue = "")
         {
             BiblePayClient wc = new BiblePayClient();
             try
             {
                 wc.SetTimeout(iTimeout);
+                if (sOptionalHeaderName != "")
+                               wc.Headers.Add(sOptionalHeaderName, sOptionalHeaderValue);
                 string d = wc.FetchObject(URL).ToString();
                 return d;
             }
@@ -76,6 +81,36 @@ namespace Unchained
                 value = "";
             return value;
         }
+
+
+
+        public static bool SendSMSCode(string sToPhone1, int nCode)
+        {
+            try
+            {
+                var authToken = Common.Config("twilioauthtoken");
+                var accountSid = Common.Config("twilioaccountsid");
+                Twilio.TwilioClient.Init(accountSid, authToken);
+                var client = new TwilioRestClient(accountSid, authToken);
+                string sFrom = Common.Config("twiliofromphonenumber");
+                if (!sToPhone1.Contains("+"))
+                {
+                    sToPhone1 = "+1" + sToPhone1;
+                }
+                var message = MessageResource.Create(
+                    to: new PhoneNumber(sToPhone1),
+                    from: new PhoneNumber(sFrom),
+                    body: "Hello from BiblePay!  Your pin is " + nCode.ToString(), client: client);
+                return true;
+            }
+            catch(Exception ex)
+            {
+                Common.Log("Error while sending SMS: " + ex.Message);
+                return false;
+            }
+
+        }
+
     }
 
     

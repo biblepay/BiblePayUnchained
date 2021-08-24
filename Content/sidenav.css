@@ -150,19 +150,29 @@ body.hold-transition .main-header .logo {
     color: #97a0b3;
   }
 }
+
+.navbar-inverse {
+    #top horizontal-main-horizontal-header-background-color:0;
+    background-color: black;
+    border-color: #080808;
+}
+
 .main-sidebar,
 .left-side {
-  background-color: maroon;
-  position: fixed;
-  top: 0;
-  left: 0;
-  min-height: 100%;
-  width: 240px;
-  z-index: 810;
-  -webkit-transition: -webkit-transform 0.3s ease-in-out, width 0.3s ease-in-out;
-  -moz-transition: -moz-transform 0.3s ease-in-out, width 0.3s ease-in-out;
-  -o-transition: -o-transform 0.3s ease-in-out, width 0.3s ease-in-out;
-  transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+    xthisistheleft-menubackgroudncolor-left-menu-mid-to-bottom: #500000;
+    background-color: black;
+    position: fixed;
+    top: 0;
+    left: 0;
+    min-height: 100%;
+    width: 240px;
+    max-width:240px;
+    overflow:hidden;
+    z-index: 810;
+    -webkit-transition: -webkit-transform 0.3s ease-in-out, width 0.3s ease-in-out;
+    -moz-transition: -moz-transform 0.3s ease-in-out, width 0.3s ease-in-out;
+    -o-transition: -o-transform 0.3s ease-in-out, width 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
 }
 @media (max-width: 767px) {
   .main-sidebar,
@@ -301,8 +311,8 @@ body.hold-transition .main-header .logo {
 }
 .sidebar-menu > li > .treeview-menu {
     margin: 0;
-    #second color;
-    background: #600000;
+    #second-color-left-menu-expanded-menus-background;
+    background: #111;
 }
 .sidebar-menu .treeview-menu .treeview-menu {
   padding-left: 20px;
@@ -316,9 +326,10 @@ body.hold-transition .main-header .logo {
   font-size: 12px;
 }
 .sidebar-menu .treeview-menu > li > a:hover {
-	color: #DDDDDD;
-	#second color
-	background: #700000;
+	#color: silver;
+	#second color:1;
+    #font-size:110%;
+	background-color: maroon;
 }
 .sidebar-menu .treeview-menu > li > a > .fa,
 .sidebar-menu .treeview-menu > li > a > .glyphicon,
@@ -417,14 +428,15 @@ body.hold-transition .main-header .logo {
     color: #4b646f;
     background: #1a2226;
 }
-.sidebar-menu li > a {
-#second color;
-  border-bottom: 1px solid #500000;
-  text-transform: uppercase;
-  color: #FFFFFF;
-  position: relative;
-  text-decoration: none;
-}
+    .sidebar-menu li > a {
+        #second color-left-menu-500000;
+        #second color-top-and-bottom-border
+        border-bottom: 1px solid #500000;
+        xtext-transform: uppercase;
+        color: #FFFFFF;
+        position: relative;
+        text-decoration: none;
+    }
 .sidebar-menu li > a > .pull-right-container {
   position: absolute;
   right: 10px;
@@ -433,8 +445,8 @@ body.hold-transition .main-header .logo {
 }
 .sidebar-menu > li:hover > a, .sidebar-menu > li.active > a {
     color: #DDDDDD;
-    #second color;
-    background: #500000;
+    #second color-left-menu-hover-color-over-major-areas:500000;
+    background: maroon;
 	text-decoration: none;
 }
 

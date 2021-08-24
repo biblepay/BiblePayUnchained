@@ -1,4 +1,5 @@
 ﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="Unchained.SiteMaster" %>
+<%@ Register TagPrefix="BBP" Namespace="BiblePayWallet"  Assembly="BiblePayWallet"%>
 
 <!DOCTYPE html>
 
@@ -9,11 +10,8 @@
     <!-- contains the sidebar menu color (l154): -->
    	<link rel="stylesheet" type="text/css" href="~/content/sidenav.css" />
     <link rel="stylesheet" type="text/css" href="~/content/bootstrap.css" />
-
-
     <link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/Offside/css/index.css?fin20" />
 	<link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/Offside/css/responsive.css?fin20" />
-	
     <link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/Offside/css/font-awesome.css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
 	<link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/Offside/css/animate.min.css" />
@@ -21,6 +19,9 @@
 	<link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/default/css/webkit.css" />
     <link rel="stylesheet" type="text/css" id="admin_css" href="https://forum.biblepay.org/Themes/default/css/admin.css" />
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
+
+    <link href='~/Content/themes/base/jquery-ui.css' rel="stylesheet" type="text/css" />
+   	<link rel="stylesheet" type="text/css" href="~/Content/jquery.toast.css" />
 
     <title><%: Page.Title %> - <%=Unchained.Common.GetLongSiteName(this.Page)%></title>
 
@@ -31,10 +32,62 @@
     <webopt:bundlereference runat="server" path="~/Content/css" />
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
     <script type='text/javascript' src='https://www.google.com/jsapi'></script>
-
-
+    <script src="/Content/embed-player.min.js"></script>
 
     <script>
+
+
+        function showModalDialog(title, body, width, height)
+        {
+            $("#divdialog").dialog({
+                "body": body,
+                "title": title,
+                "show": true,
+                "width": width,
+                "height": height,
+                buttons: {
+                    OK: function () { $(this).dialog("close"); }
+                },
+            });
+            var e = document.getElementById("spandialog");
+            e.innerHTML = body;
+
+        }
+
+        function transmit(id,action,affectedID,affectedID2)
+        {
+            setRemoteValue('voting', id + "|" + action, affectedID, affectedID2);
+        }
+
+        function transmitfollow(id, action, affectedID, affectedID2) {
+            
+            // Change class in affectedID2
+            var curaction = $("#follow1" + id).html();
+            if (curaction == "Unfollow") {
+                $("#span1" + id).addClass("fa-heart");
+                $("#span1" + id).removeClass("fa-heart-broken");
+                $("#follow1" + id).html("Follow");
+                setRemoteValue('voting', id + "|unfollow", '', '');
+
+            }
+            else {
+                $("#span1" + id).addClass("fa-heart-broken");
+                $("#span1" + id).removeClass("fa-heart");
+                $("#follow1" + id).html("Unfollow");
+                setRemoteValue('voting', id + "|follow", '', '');
+            }
+
+        }
+
+        function showToast() {
+            $.toast({ heading: heading, text: text1, icon: 'info', loader: true, loaderBg: '#9EC600' });
+        }
+
+
+
+        function populateWiki(url) {
+            setRemoteValue('wiki', url, 'wiki', '');
+        }
 
         function GetItem(n) {
             if (!localStorage.getItem(n))
@@ -46,22 +99,9 @@
             var s = n + "<COL>" + v + "<ROW>";
             return s;
         }
-        function GetStorage(n) {
-            var s = GetStorage0('testnet_' + n);
-            s += GetStorage0('mainnet_' + n);
-            return s;
-        }
-        function SerializeLocalStorage() {
-            var session = '';
-            // For each encrypted key, put in session
-            session += GetStorage('NickName');
-            session += GetStorage('bbp_address');
-            session += GetStorage('bbp_privkey');
-            session += GetStorage('enc');
-            var o1 = document.getElementById('sessionLocalStorage');
-            o1.value = window.btoa(session);
-            
-            return session;
+        function SetItem(sKey, sValue) {
+            localStorage.setItem(sKey, sValue);
+            TransmitSerializedLocalStorage();
         }
 
         function getRemoteValue(sessionid) {
@@ -75,6 +115,45 @@
                 }
             });
         }
+
+        function setRemoteValue(actionname, data1, elementToUpdate, elementToUpdate2) {
+            $.ajax({
+                type: "POST",
+                url: "LandingPage.aspx/" + actionname,
+                data: { mydata: data1 },
+                headers: { headeraction: data1 },
+                success: function (response) {
+                   
+                    if (elementToUpdate == "wiki") {
+                        loadWikiDocument(response);
+                    }
+                    else {
+                        var parts = response.split("|");
+                        if (parts.length > 1) {
+
+                            if (parts[0] == "notloggedin") {
+                                // User is not logged in
+                                showModalDialog("Action failed", "Sorry, you must have a wallet and nickname first.  Please go to account settings, ensure you have Generated an address, then save your NickName on your account record.   <br><br>Thank you for using BIBLEPAY! ", 475, 400);
+                            }
+                            else {
+                                if (elementToUpdate) {
+                                    var e = document.getElementById(elementToUpdate);
+                                    e.innerHTML = parts[0];
+                                }
+                                if (elementToUpdate2) {
+                                    var f = document.getElementById(elementToUpdate2);
+                                    f.innerHTML = parts[1];
+                                }
+                            }
+                        }
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert('Wallet error');
+                }
+            });
+        }
+
 
         var spinning = false;
         function showSpinner() {
@@ -96,13 +175,24 @@
 
         }
 
+        function AddEncryptedPassword() {
+            var p1 = prompt('Enter Password (Note: Once you encrypt your wallet, it cannot be used without the password, and can ONLY be re-created if you have the seed words.  This password is NOT stored on your device, so please remember it): ', '');
+            var o1 = document.getElementById('passforencryption');
+            o1.value = p1;
+        }
+
+        function AddDecryptionPassword() {
+            var p1 = prompt('Enter Decryption Password:', '');
+            var o1 = document.getElementById('passforencryption');
+            o1.value = p1;
+        }
 
         function afterload() {
 
-            SerializeLocalStorage();
-
+           /*
+        
             var pageheight = $(".Page").height() + 70;
-           
+
             if (pageheight < $(window).height()) {
                 $(".footer_wrapper").addClass("fixed");
                 $(".footer_wrapper").removeClass("hidden");
@@ -110,7 +200,10 @@
                 $(".footer_wrapper").removeClass("fixed");
                 $(".footer_wrapper").removeClass("hidden");
             }
+            */
+
         }
+
 
         function closeNav() {
             $("#mySidenav").css("transform", "translate(-240px,0)");
@@ -122,11 +215,16 @@
             $("#mySidenav").css("transform", "translate(0px,0)");
         }
 
+
+
     </script>
     <style>
 
         .pagination {
           display: inline-block;
+          width:100%;
+          padding-left:20px;
+          white-space: nowrap;
         }
 
         .pagination a {
@@ -151,7 +249,7 @@
 
 
     </style>
-</head>
+</head>     
 
 <body onload="afterload();">
     <form runat="server">
@@ -163,6 +261,7 @@
                 <%--Framework Scripts--%>
                 <asp:ScriptReference Name="MsAjaxBundle" />
                 <asp:ScriptReference Name="jquery" />
+                
                 <asp:ScriptReference Name="WebForms.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebForms.js" />
                 <asp:ScriptReference Name="WebUIValidation.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebUIValidation.js" />
                 <asp:ScriptReference Name="MenuStandards.js" Assembly="System.Web" Path="~/Scripts/WebForms/MenuStandards.js" />
@@ -176,18 +275,29 @@
                
             </Scripts>
         </asp:ScriptManager>
-        <div class="Page" id="main">
+
+
+        
+    <script src="Scripts/jquery-ui-112.js"></script>
+    <!-- context menus -->
+    <script src="Scripts/jquery.contextMenu.js"></script>
+    <!-- Toast -->
+    <script src="Scripts/jquery.toast.js"></script>
+
+    <div class="Page" id="main">
             
     <input type='hidden' name='passforencryption' value='' id='passforencryption' />
     <input type="hidden" name='sessionLocalStorage' value='12345' id='sessionLocalStorage' />
+   
+    <div id="divdialog" title="" style="background-color:black;color:white;"><span id="spandialog"></span></div>
 
 
         <!--Above div height is used to calculate the whole page size (so the footer knows the page height)-->
 
         <div class="navbar navbar-inverse navbar-fixed-top" style="z-index:256;">
-            <div class="container" style="padding-left:100px;">
-                <div style="max-height:75px;overflow:hidden;">
-                    <img src="<%=Unchained.UICommon.GetHeaderImage(this.Page) %>" height="75px" />
+            <div class="container" style="padding-left:20%;">
+                <div style="max-height:83px;overflow:hidden;">
+                    <img src="<%=Unchained.UICommon.GetHeaderImage(this.Page) %>" height="83px" />
                     <span style="font-family:candara;color:antiquewhite;font-size:22px;">&nbsp;<%=Unchained.UICommon.GetHeaderBanner(this.Page) %></span>
                      <div id='rightmenubutton' style='float:right;' class="close-sidebar hidden-lg hidden-sm">
                         <a href="#" onclick="openNav();" class="sidebar-toggle" data-toggle="offcanvas" role="button">
@@ -200,6 +310,7 @@
 
             <%=Unchained.Common.GetGlobalAlert(this.Page) %>
         </div>
+
             <%=Unchained.UICommon.GetSideBar(this.Page) %>
             <div class="container body-content">
 
@@ -208,18 +319,21 @@
                         <span style="position:relative; top:-70px;left:50px;" id="spanLoader1">50%</span>
                 </div>
 
+
+                <BBP:WalletControl id="wallet1" runat="server"></BBP:WalletControl>
+                
+                
                 <asp:ContentPlaceHolder ID="MainContent" runat="server">
+
+                       
                 </asp:ContentPlaceHolder>
             </div>
 
          <p></p><p></p>
-         <div class="footer_wrapper hidden" >
-            <div class="footer">  
-                <table width="100%"><tr>
-                    <td width='95%' align="center" style="color:silver;"> &nbsp;&nbsp;&nbsp; &copy;<%=Unchained.UICommon.GetFooter(this.Page) %> </td>
-                </tr></table>
-             </div>
-        </div>  
+
+
+        
+
     </div>        
     </form>
     

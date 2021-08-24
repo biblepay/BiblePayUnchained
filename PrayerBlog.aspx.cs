@@ -1,86 +1,52 @@
-﻿using static Unchained.Common;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Data;
 using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using static BiblePayDLL.Shared;
-using static Unchained.DataOps;
+using static Unchained.Common;
+using static BiblePayCommon.DataTableExtensions;
 
 namespace Unchained
 {
-    public partial class PrayerBlog : Page
+    public partial class PrayerBlog : BBPPage
     {
-        public int GetOwnerRow(DataTable dt, string id)
+        protected new void Page_Load(object sender, EventArgs e)
         {
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                if (dt.Rows[i]["id"].ToString() == id)
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
-        protected void Page_Load(object sender, EventArgs e)
-        {
-            string sDel = Request.Form["btnDelete"].ToNonNullString();
-            int nDeleted = 0;
-            if (sDel == "1")
-            {
 
-                if (!gUser(this).LoggedIn)
-                {
-                    MsgBox("Not Logged In", "Sorry, you must be logged in to save a prayer comment.", this);
-                    return;
-                }
-                DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "pray1", "", "", "username,time,id", "", "");
-
-                foreach (string key in Request.Form)
-                {
-                    if (!key.StartsWith("delete_")) continue;
-                    string id = key.Replace("delete_", "");
-                    int row1= GetOwnerRow(dt, id);
-                    string owner = dt.Rows[row1]["UserName"].ToString();
-                    if (owner == gUser(this).UserName && Request.Form[key]=="on")
-                    {
-                        // Delete?
-                        dynamic o = new System.Dynamic.ExpandoObject();
-                        o.Subject = dt.Rows[row1]["subject"];
-                        o.Body = "";
-                        o.UserName = gUser(this).UserName.ToString();
-                        string sID = GetSha256Hash(dt.Rows[row1]["subject"].ToString());
-
-                        BiblePayDLL.SharedCommon.DACResult r = DataOps.InsertIntoTable(IsTestNet(this), o, "pray1", sID);
-                        nDeleted++;
-                    }
-                }
-                MsgBox("Success", "Successfully deleted " + nDeleted.ToString() + " records.", this);
-            }
         }
 
-
+        
+        protected override void Event(BBPEvent e)
+        {
+            if (e.EventAction == "AddPrayer_Click")
+            {
+                Response.Redirect("PrayerAdd");
+            }
+        }
         protected string GetPrayerBlogs()
         {
             // Harvest To Do:  Add Order by, PrayerRequest.Added desc (and inner join equiv for avatar display)
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "pray1", "", "", "username,time,id,body", "", "");
-            string html = "<table class=saved><tr><th width=20%>User</th><th width=20%>Added<th width=50%>Subject<th>Delete";
+            BiblePayCommon.BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "pray1");
+            dt = dt.FilterBBPDataTable("isnull(deleted,0) <> 1");
+
+            // Order by
+            dt = dt.OrderBy("time desc");
+            
+            string html = "<table class=saved><tr class='objheader'><th class='objheader'>"
+               + "<h3>Prayer Requests</h3><th class='objheader' colspan=2><div style='text-align:right;'>"
+               + "<a onclick=\"__doPostBack('Event','AddPrayer_Click');\"><i class='fa fa-plus'></i></a></div></th></tr>"
+               + "<tr><th width=20%>User</th><th width=20%>Added<th width=50%>Subject</tr>";
             for (int y = 0; y < dt.Rows.Count; y++)
             {
-                string sAnchor = "<a href='PrayerView.aspx?id=" + dt.Rows[y]["id"].ToString() + "'>";
-                string sDele = "<input type='checkbox' name='delete_" + dt.Rows[y]["id"].ToString() + "'/> ";
                 string sBody = dt.Rows[y]["body"].ToString();
                 if (sBody != "")
                 {
-                    string div = "<tr><td>" + EmptyAvatar() + "&nbsp;"
-                        + dt.Rows[y]["UserName"].ToString() + "</td>" + UICommon.GetTd(dt.Rows[y], "Time", sAnchor)
-                        + UICommon.GetTd(dt.Rows[y], "subject", sAnchor) + "<td>" + sDele + "</tr>";
+                    string div = "<tr>" 
+                        + "<td>" + UICommon.GetUserAvatarAndName(this, dt.GetColValue(y, "UserID"))
+                        + "<td>" + UnixTimeStampToDateTime(dt.GetColDouble(y, "Time"))
+                        + UICommon.GetTd(dt.Rows[y], "subject", "PrayerView") + "</tr>";
                     html += div + "\r\n";
                 }
             }
-            html += "</table><button id='btnDelete' name='btnDelete' value='1'>Delete Records</button>";
+            html += "</table>";
             return html;
         }
     }

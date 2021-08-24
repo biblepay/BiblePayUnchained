@@ -46,14 +46,21 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BiblePayDLL, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+    <Reference Include="BiblePayWallet, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>BiblePayDLL\bin\Debug\BiblePayDLL.dll</HintPath>
+      <HintPath>..\BiblePayProtected\BiblePayWalletControl\bin\Debug\BiblePayWallet.dll</HintPath>
     </Reference>
+    <Reference Include="netstandard" />
     <Reference Include="Google.Authenticator, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\GoogleAuthenticator.2.1.1\lib\net45\Google.Authenticator.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.IdentityModel.Logging, Version=1.1.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Logging.1.1.2\lib\net451\Microsoft.IdentityModel.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Tokens, Version=5.1.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Tokens.5.1.2\lib\net451\Microsoft.IdentityModel.Tokens.dll</HintPath>
+    </Reference>
     <Reference Include="OpenHtmlToPdf">
       <HintPath>Code\OpenHtmlToPdf.dll</HintPath>
     </Reference>
@@ -61,6 +68,9 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="QRCoder, Version=1.3.9.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\QRCoder.1.3.9\lib\net40\QRCoder.dll</HintPath>
+    </Reference>
+    <Reference Include="RestSharp, Version=106.12.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
+      <HintPath>packages\RestSharp.106.12.0\lib\net452\RestSharp.dll</HintPath>
     </Reference>
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
@@ -72,11 +82,44 @@
     <Reference Include="System.Drawing.Common, Version=4.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Drawing.Common.4.7.0\lib\net461\System.Drawing.Common.dll</HintPath>
     </Reference>
+    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=5.1.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\System.IdentityModel.Tokens.Jwt.5.1.2\lib\net451\System.IdentityModel.Tokens.Jwt.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.Web.DataVisualization" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Http, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.WebApi.Core.5.2.7\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.WebApi.WebHost.5.2.7\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=4.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>packages\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>packages\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>packages\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>packages\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>packages\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
@@ -117,6 +160,17 @@
       <HintPath>packages\Microsoft.AspNet.FriendlyUrls.Core.1.0.2\lib\net45\Microsoft.AspNet.FriendlyUrls.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="Telerik.Web.Design, Version=2021.2.616.45, Culture=neutral, PublicKeyToken=121fae78165ba3d4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Dependencies\Telerik.Web.Design.dll</HintPath>
+    </Reference>
+    <Reference Include="Telerik.Web.UI, Version=2021.2.616.45, Culture=neutral, PublicKeyToken=121fae78165ba3d4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Dependencies\Telerik.Web.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="Twilio, Version=5.64.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Twilio.5.64.0\lib\net451\Twilio.dll</HintPath>
+    </Reference>
     <Reference Include="WebGrease">
       <HintPath>packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
     </Reference>
@@ -129,9 +183,64 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Admin1.aspx" />
+    <Content Include="RPCConsole.aspx" />
     <Content Include="Content\bootstrap2.css" />
+    <Content Include="Content\embed-player.min.js" />
+    <Content Include="Content\jquery.toast.css" />
     <Content Include="Content\sidenav.css" />
+    <Content Include="Content\telerikstyles.css" />
+    <Content Include="Content\themes\base\accordion.css" />
+    <Content Include="Content\themes\base\all.css" />
+    <Content Include="Content\themes\base\autocomplete.css" />
+    <Content Include="Content\themes\base\base.css" />
+    <Content Include="Content\themes\base\button.css" />
+    <Content Include="Content\themes\base\core.css" />
+    <Content Include="Content\themes\base\datepicker.css" />
+    <Content Include="Content\themes\base\dialog.css" />
+    <Content Include="Content\themes\base\draggable.css" />
+    <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
+    <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_65_ffffff_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_75_dadada_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_75_e6e6e6_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_glass_95_fef1ec_1x400.png" />
+    <Content Include="Content\themes\base\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
+    <Content Include="Content\themes\base\images\ui-icons_222222_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_2e83ff_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_444444_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_454545_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_555555_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_777620_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_777777_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_888888_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_cc0000_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_cd0a0a_256x240.png" />
+    <Content Include="Content\themes\base\images\ui-icons_ffffff_256x240.png" />
+    <Content Include="Content\themes\base\jquery-ui.css" />
+    <Content Include="Content\themes\base\jquery-ui.min.css" />
+    <Content Include="Content\themes\base\menu.css" />
+    <Content Include="Content\themes\base\progressbar.css" />
+    <Content Include="Content\themes\base\resizable.css" />
+    <Content Include="Content\themes\base\selectable.css" />
+    <Content Include="Content\themes\base\selectmenu.css" />
+    <Content Include="Content\themes\base\slider.css" />
+    <Content Include="Content\themes\base\sortable.css" />
+    <Content Include="Content\themes\base\spinner.css" />
+    <Content Include="Content\themes\base\tabs.css" />
+    <Content Include="Content\themes\base\theme.css" />
+    <Content Include="Content\themes\base\tooltip.css" />
+    <Content Include="BibleViewer.aspx" />
+    <Content Include="Chat.aspx" />
+    <Content Include="TownHallAdd.aspx" />
+    <Content Include="TownHallList.aspx" />
+    <Content Include="TownHallView.aspx" />
+    <Content Include="ProposalAdd.aspx" />
+    <Content Include="Leaderboard.aspx" />
+    <Content Include="PortfolioBuilder.aspx" />
+    <Content Include="GospelViewer.aspx" />
     <Content Include="Default.aspx" />
+    <Content Include="AddObject.aspx" />
     <Content Include="Images\Armageddon.jpg" />
     <Content Include="Images\bbphoriz.png" />
     <Content Include="Images\bbp_logo.png" />
@@ -154,6 +263,9 @@
     <Content Include="Images\KnockKnock.png" />
     <Content Include="Images\Luke2127.jpg" />
     <Content Include="Images\Maranatha.jpg" />
+    <Content Include="Images\news-icon.png" />
+    <Content Include="Images\news-icon2.png" />
+    <Content Include="Images\news_icon3.png" />
     <Content Include="Images\r900.jpg" />
     <Content Include="Images\Rainbow1.jpg" />
     <Content Include="Images\RockMarriage.jpg" />
@@ -167,8 +279,174 @@
     <Content Include="Images\TheChurchAge1.gif" />
     <Content Include="Images\TheMessianicKingdomEternalOrder8.gif" />
     <Content Include="Images\workers.png" />
+    <Content Include="CreateNewDocument.aspx" />
+    <Content Include="DownloadFile.aspx" />
+    <Content Include="FormView.aspx" />
+    <Content Include="BBPUniversity.aspx" />
+    <Content Include="BBPUnivFinalExam.aspx" />
+    <Content Include="CoreGospel.aspx" />
+    <Content Include="JesusChrist\ApostlesCreed.htm" />
+    <Content Include="JesusChrist\JesusConciseCommandments.htm" />
+    <Content Include="JesusChrist\NiceneCreed.htm" />
+    <Content Include="JesusChrist\TenCommandments.htm" />
+    <Content Include="JesusChrist\TheLordsPrayer.htm" />
+    <Content Include="JesusChrist\TheSinnersPrayer.htm" />
+    <Content Include="MemorizeScriptures.aspx" />
+    <Content Include="net_cs\bin\CuteWebUI.AjaxUploader.dll" />
+    <Content Include="net_cs\default.htm" />
+    <Content Include="net_cs\images\mac-bar.png" />
+    <Content Include="net_cs\images\win7-bar.png" />
+    <Content Include="net_cs\images\win7-bg.png" />
+    <Content Include="net_cs\installation.htm" />
+    <Content Include="net_cs\samples\Customize-Progress-Bar.aspx" />
+    <Content Include="net_cs\samples\default.aspx" />
+    <Content Include="net_cs\samples\demo.css" />
+    <Content Include="net_cs\samples\Drag-drop-file.aspx" />
+    <Content Include="net_cs\samples\Large-File-Upload.aspx" />
+    <Content Include="net_cs\samples\multiple-files-upload-control-file-number.aspx" />
+    <Content Include="net_cs\samples\multiple-files-upload.aspx" />
+    <Content Include="net_cs\samples\Persist-upload-file.aspx" />
+    <Content Include="net_cs\samples\selecting-multiple-files.aspx" />
+    <Content Include="net_cs\samples\simple-upload-UI.aspx" />
+    <Content Include="net_cs\samples\simple-upload-Validation.aspx" />
+    <Content Include="net_cs\samples\simple-upload.aspx" />
+    <Content Include="net_cs\samples\Simulate-File-Upload.aspx" />
+    <Content Include="net_cs\samples\Start-uploading-manually.aspx" />
+    <Content Include="net_cs\uploader.css" />
+    <Content Include="net_cs\uploadertheme.css" />
+    <Content Include="PetShop.aspx" />
+    <Content Include="ListView.aspx" />
+    <Content Include="Scripts\jquery.contextMenu.js" />
+    <Content Include="Scripts\jquery.toast.js" />
+    <Content Include="ServiceProviderDemo.aspx" />
+    <Content Include="NewsList.aspx" />
+    <Content Include="Status.aspx" />
     <Content Include="Media.aspx" />
     <Content Include="LandingPage.aspx" />
+    <Content Include="richtexteditor\lang\rte-lang-af.js" />
+    <Content Include="richtexteditor\lang\rte-lang-ar.js" />
+    <Content Include="richtexteditor\lang\rte-lang-bg.js" />
+    <Content Include="richtexteditor\lang\rte-lang-bn.js" />
+    <Content Include="richtexteditor\lang\rte-lang-bs.js" />
+    <Content Include="richtexteditor\lang\rte-lang-ca.js" />
+    <Content Include="richtexteditor\lang\rte-lang-cs.js" />
+    <Content Include="richtexteditor\lang\rte-lang-cy.js" />
+    <Content Include="richtexteditor\lang\rte-lang-da.js" />
+    <Content Include="richtexteditor\lang\rte-lang-de.js" />
+    <Content Include="richtexteditor\lang\rte-lang-el.js" />
+    <Content Include="richtexteditor\lang\rte-lang-en.js" />
+    <Content Include="richtexteditor\lang\rte-lang-es.js" />
+    <Content Include="richtexteditor\lang\rte-lang-et.js" />
+    <Content Include="richtexteditor\lang\rte-lang-fa.js" />
+    <Content Include="richtexteditor\lang\rte-lang-fi.js" />
+    <Content Include="richtexteditor\lang\rte-lang-fil.js" />
+    <Content Include="richtexteditor\lang\rte-lang-fj.js" />
+    <Content Include="richtexteditor\lang\rte-lang-fr.js" />
+    <Content Include="richtexteditor\lang\rte-lang-ga.js" />
+    <Content Include="richtexteditor\lang\rte-lang-gu.js" />
+    <Content Include="richtexteditor\lang\rte-lang-he.js" />
+    <Content Include="richtexteditor\lang\rte-lang-hi.js" />
+    <Content Include="richtexteditor\lang\rte-lang-hr.js" />
+    <Content Include="richtexteditor\lang\rte-lang-ht.js" />
+    <Content Include="richtexteditor\lang\rte-lang-hu.js" />
+    <Content Include="richtexteditor\lang\rte-lang-id.js" />
+    <Content Include="richtexteditor\lang\rte-lang-is.js" />
+    <Content Include="richtexteditor\lang\rte-lang-it.js" />
+    <Content Include="richtexteditor\lang\rte-lang-ja.js" />
+    <Content Include="richtexteditor\lang\rte-lang-kn.js" />
+    <Content Include="richtexteditor\lang\rte-lang-ko.js" />
+    <Content Include="richtexteditor\lang\rte-lang-lt.js" />
+    <Content Include="richtexteditor\lang\rte-lang-lv.js" />
+    <Content Include="richtexteditor\lang\rte-lang-mg.js" />
+    <Content Include="richtexteditor\lang\rte-lang-mi.js" />
+    <Content Include="richtexteditor\lang\rte-lang-ml.js" />
+    <Content Include="richtexteditor\lang\rte-lang-mr.js" />
+    <Content Include="richtexteditor\lang\rte-lang-ms.js" />
+    <Content Include="richtexteditor\lang\rte-lang-mt.js" />
+    <Content Include="richtexteditor\lang\rte-lang-mww.js" />
+    <Content Include="richtexteditor\lang\rte-lang-nb.js" />
+    <Content Include="richtexteditor\lang\rte-lang-nl.js" />
+    <Content Include="richtexteditor\lang\rte-lang-otq.js" />
+    <Content Include="richtexteditor\lang\rte-lang-pa.js" />
+    <Content Include="richtexteditor\lang\rte-lang-pl.js" />
+    <Content Include="richtexteditor\lang\rte-lang-pt-pt.js" />
+    <Content Include="richtexteditor\lang\rte-lang-pt.js" />
+    <Content Include="richtexteditor\lang\rte-lang-ro.js" />
+    <Content Include="richtexteditor\lang\rte-lang-ru.js" />
+    <Content Include="richtexteditor\lang\rte-lang-sk.js" />
+    <Content Include="richtexteditor\lang\rte-lang-sl.js" />
+    <Content Include="richtexteditor\lang\rte-lang-sm.js" />
+    <Content Include="richtexteditor\lang\rte-lang-sr-Cyrl.js" />
+    <Content Include="richtexteditor\lang\rte-lang-sr-Latn.js" />
+    <Content Include="richtexteditor\lang\rte-lang-sv.js" />
+    <Content Include="richtexteditor\lang\rte-lang-sw.js" />
+    <Content Include="richtexteditor\lang\rte-lang-ta.js" />
+    <Content Include="richtexteditor\lang\rte-lang-te.js" />
+    <Content Include="richtexteditor\lang\rte-lang-th.js" />
+    <Content Include="richtexteditor\lang\rte-lang-tlh-Latn.js" />
+    <Content Include="richtexteditor\lang\rte-lang-tlh-Piqd.js" />
+    <Content Include="richtexteditor\lang\rte-lang-to.js" />
+    <Content Include="richtexteditor\lang\rte-lang-tr.js" />
+    <Content Include="richtexteditor\lang\rte-lang-ty.js" />
+    <Content Include="richtexteditor\lang\rte-lang-uk.js" />
+    <Content Include="richtexteditor\lang\rte-lang-ur.js" />
+    <Content Include="richtexteditor\lang\rte-lang-vi.js" />
+    <Content Include="richtexteditor\lang\rte-lang-yua.js" />
+    <Content Include="richtexteditor\lang\rte-lang-zh-Hans.js" />
+    <Content Include="richtexteditor\lang\rte-lang-zh-Hant.js" />
+    <Content Include="richtexteditor\lang\rte-lang.js" />
+    <Content Include="richtexteditor\plugins\-combine-plugin.txt" />
+    <Content Include="richtexteditor\plugins\all_plugins.js" />
+    <Content Include="richtexteditor\plugins\html2pdf.js" />
+    <Content Include="richtexteditor\plugins\imageeditor.js" />
+    <Content Include="richtexteditor\plugins\insertcode.js" />
+    <Content Include="richtexteditor\plugins\insertemoji.js" />
+    <Content Include="richtexteditor\plugins\insertgallery.js" />
+    <Content Include="richtexteditor\plugins\inserttemplate.js" />
+    <Content Include="richtexteditor\plugins\samples\insertcode_v1.js" />
+    <Content Include="richtexteditor\plugins\tui.image-editor\fabric.min.js" />
+    <Content Include="richtexteditor\plugins\tui.image-editor\note.txt" />
+    <Content Include="richtexteditor\plugins\tui.image-editor\svg\icon-a.svg" />
+    <Content Include="richtexteditor\plugins\tui.image-editor\svg\icon-b.svg" />
+    <Content Include="richtexteditor\plugins\tui.image-editor\svg\icon-c.svg" />
+    <Content Include="richtexteditor\plugins\tui.image-editor\svg\icon-d.svg" />
+    <Content Include="richtexteditor\plugins\tui.image-editor\tui-code-snippet.min.js" />
+    <Content Include="richtexteditor\plugins\tui.image-editor\tui-color-picker.min.css" />
+    <Content Include="richtexteditor\plugins\tui.image-editor\tui-color-picker.min.js" />
+    <Content Include="richtexteditor\plugins\tui.image-editor\tui-image-editor.min.css" />
+    <Content Include="richtexteditor\plugins\tui.image-editor\tui-image-editor.min.js" />
+    <Content Include="richtexteditor\rte.js" />
+    <Content Include="richtexteditor\rte_theme_default.css" />
+    <Content Include="richtexteditor\runtime\colorpicker_more_ns.htm" />
+    <Content Include="richtexteditor\runtime\help.htm" />
+    <Content Include="richtexteditor\runtime\images\1x1.gif" />
+    <Content Include="richtexteditor\runtime\images\cpie_Color.cur" />
+    <Content Include="richtexteditor\runtime\images\cpie_GradientPositionDark.gif" />
+    <Content Include="richtexteditor\runtime\images\cpie_GradientPositionLight.gif" />
+    <Content Include="richtexteditor\runtime\images\cpie_gradients.png" />
+    <Content Include="richtexteditor\runtime\images\cpie_VerticalPosition.gif" />
+    <Content Include="richtexteditor\runtime\images\cpie_WebSafe.gif" />
+    <Content Include="richtexteditor\runtime\images\cpns_Color.cur" />
+    <Content Include="richtexteditor\runtime\images\cpns_ColorSpace1.png" />
+    <Content Include="richtexteditor\runtime\images\cpns_ColorSpace2.png" />
+    <Content Include="richtexteditor\runtime\images\cpns_GradientPositionDark.gif" />
+    <Content Include="richtexteditor\runtime\images\cpns_GradientPositionLight.gif" />
+    <Content Include="richtexteditor\runtime\images\cpns_gradients.png" />
+    <Content Include="richtexteditor\runtime\images\cpns_hue2.png" />
+    <Content Include="richtexteditor\runtime\images\cpns_Vertical1.png" />
+    <Content Include="richtexteditor\runtime\images\cpns_Vertical2.png" />
+    <Content Include="richtexteditor\runtime\images\cpns_VerticalPosition.gif" />
+    <Content Include="richtexteditor\runtime\images\cpns_WebSafe.gif" />
+    <Content Include="richtexteditor\runtime\images\formbn.gif" />
+    <Content Include="richtexteditor\runtime\images\multiclavier.gif" />
+    <Content Include="richtexteditor\runtime\richtexteditor_content.css" />
+    <Content Include="richtexteditor\runtime\richtexteditor_preview.css" />
+    <Content Include="richtexteditor\runtime\richtexteditor_preview.js" />
+    <Content Include="Scripts\indexvideo.js" />
+    <Content Include="Scripts\jquery-ui-1.12.1.js" />
+    <Content Include="Scripts\jquery-ui-1.12.1.min.js" />
+    <Content Include="Scripts\jquery-ui-111.js" />
+    <Content Include="Scripts\jquery-ui-112.js" />
     <Content Include="VideoList.aspx" />
     <Content Include="RegisterMe.aspx" />
     <Content Include="MessagePage.aspx" />
@@ -192,6 +470,8 @@
     <Content Include="Content\bootstrap-theme.min.css.map" />
     <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="LICENSE" />
+    <Content Include="net_cs\bin\ajaxuploader4.lic" />
+    <Content Include="net_cs\Web.Config" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <Content Include="README.md" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
@@ -229,11 +509,21 @@
     <Content Include="Bundle.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="RPCConsole.aspx.cs">
+      <DependentUpon>RPCConsole.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="RPCConsole.aspx.designer.cs">
+      <DependentUpon>RPCConsole.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Code\FileSplitter.cs" />
+    <Compile Include="Code\Service.cs" />
     <Compile Include="Code\UICommon.cs" />
     <Compile Include="Code\Utilities.cs" />
     <Compile Include="Code\BMS.cs" />
-    <Compile Include="Code\Entity.cs" />
+    <Compile Include="Code\ToDelete.cs" />
     <Compile Include="Admin1.aspx.cs">
       <DependentUpon>Admin1.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -241,12 +531,167 @@
     <Compile Include="Admin1.aspx.designer.cs">
       <DependentUpon>Admin1.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\MediaTypeController.cs" />
+    <Compile Include="BibleViewer.aspx.cs">
+      <DependentUpon>BibleViewer.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="BibleViewer.aspx.designer.cs">
+      <DependentUpon>BibleViewer.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Chat.aspx.cs">
+      <DependentUpon>Chat.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Chat.aspx.designer.cs">
+      <DependentUpon>Chat.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="TownHallAdd.aspx.cs">
+      <DependentUpon>TownHallAdd.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TownHallAdd.aspx.designer.cs">
+      <DependentUpon>TownHallAdd.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="TownHallList.aspx.cs">
+      <DependentUpon>TownHallList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TownHallList.aspx.designer.cs">
+      <DependentUpon>TownHallList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="TownHallView.aspx.cs">
+      <DependentUpon>TownHallView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TownHallView.aspx.designer.cs">
+      <DependentUpon>TownHallView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ProposalAdd.aspx.cs">
+      <DependentUpon>ProposalAdd.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ProposalAdd.aspx.designer.cs">
+      <DependentUpon>ProposalAdd.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Leaderboard.aspx.cs">
+      <DependentUpon>Leaderboard.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Leaderboard.aspx.designer.cs">
+      <DependentUpon>Leaderboard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="PortfolioBuilder.aspx.cs">
+      <DependentUpon>PortfolioBuilder.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="PortfolioBuilder.aspx.designer.cs">
+      <DependentUpon>PortfolioBuilder.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GospelViewer.aspx.cs">
+      <DependentUpon>GospelViewer.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GospelViewer.aspx.designer.cs">
+      <DependentUpon>GospelViewer.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="CreateNewDocument.aspx.cs">
+      <DependentUpon>CreateNewDocument.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CreateNewDocument.aspx.designer.cs">
+      <DependentUpon>CreateNewDocument.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="DownloadFile.aspx.cs">
+      <DependentUpon>DownloadFile.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="DownloadFile.aspx.designer.cs">
+      <DependentUpon>DownloadFile.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="AddObject.aspx.cs">
+      <DependentUpon>AddObject.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AddObject.aspx.designer.cs">
+      <DependentUpon>AddObject.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="FormView.aspx.cs">
+      <DependentUpon>FormView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="FormView.aspx.designer.cs">
+      <DependentUpon>FormView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="BBPUniversity.aspx.cs">
+      <DependentUpon>BBPUniversity.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="BBPUniversity.aspx.designer.cs">
+      <DependentUpon>BBPUniversity.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="BBPUnivFinalExam.aspx.cs">
+      <DependentUpon>BBPUnivFinalExam.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="BBPUnivFinalExam.aspx.designer.cs">
+      <DependentUpon>BBPUnivFinalExam.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="CoreGospel.aspx.cs">
+      <DependentUpon>CoreGospel.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CoreGospel.aspx.designer.cs">
+      <DependentUpon>CoreGospel.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="MemorizeScriptures.aspx.cs">
+      <DependentUpon>MemorizeScriptures.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="MemorizeScriptures.aspx.designer.cs">
+      <DependentUpon>MemorizeScriptures.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="PetShop.aspx.cs">
+      <DependentUpon>PetShop.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="PetShop.aspx.designer.cs">
+      <DependentUpon>PetShop.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ListView.aspx.cs">
+      <DependentUpon>ListView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ListView.aspx.designer.cs">
+      <DependentUpon>ListView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ServiceProviderDemo.aspx.cs">
+      <DependentUpon>ServiceProviderDemo.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ServiceProviderDemo.aspx.designer.cs">
+      <DependentUpon>ServiceProviderDemo.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="NewsList.aspx.cs">
+      <DependentUpon>NewsList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="NewsList.aspx.designer.cs">
+      <DependentUpon>NewsList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Status.aspx.cs">
+      <DependentUpon>Status.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Status.aspx.designer.cs">
+      <DependentUpon>Status.aspx</DependentUpon>
     </Compile>
     <Compile Include="Media.aspx.cs">
       <DependentUpon>Media.aspx</DependentUpon>
@@ -334,6 +779,8 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Images\Gauge\" />
+    <Folder Include="net_cs\UploaderTemp\" />
+    <Folder Include="Views\Media\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -349,6 +796,27 @@
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="packages\AWSSDK.S3.3.5.0-beta\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BiblePayCommon\BiblePayCommon.csproj">
+      <Project>{417014b8-4baf-4a14-8c30-d683a16eeaad}</Project>
+      <Name>BiblePayCommon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BiblePayDLL2\BiblePayDLL2\BiblePayDLL2.csproj">
+      <Project>{af71ae0f-07a3-4b0e-a945-43e1a9bfd386}</Project>
+      <Name>BiblePayDLL2</Name>
+    </ProjectReference>
+    <ProjectReference Include="Controls\BiblePayPaginatorControl\BiblePayPaginator.csproj">
+      <Project>{a654c466-afd4-4469-b00a-6df3b55b4d01}</Project>
+      <Name>BiblePayPaginator</Name>
+    </ProjectReference>
+    <ProjectReference Include="Controls\BiblePayVideoControl\BiblePayVideo.csproj">
+      <Project>{1cff26ef-9b2c-464c-a9fc-b532809f30dc}</Project>
+      <Name>BiblePayVideo</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -400,7 +868,9 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets'))" />
   </Target>
+  <Import Project="packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets" Condition="Exists('packages\NETStandard.Library.2.0.3\build\netstandard2.0\NETStandard.Library.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

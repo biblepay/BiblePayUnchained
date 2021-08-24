@@ -13,5 +13,14 @@ namespace Unchained
 
     public partial class Media
     {
+
+        /// <summary>
+        /// Up3 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.UpdatePanel Up3;
     }
 }

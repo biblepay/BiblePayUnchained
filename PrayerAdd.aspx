@@ -1,7 +1,7 @@
 ﻿<%@ Page Title="Prayer Add" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="PrayerAdd.aspx.cs" Inherits="Unchained.PrayerAdd" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-    <h2>Prayer Request - Add New Prayer Request</h2>
+    <h3>Prayer Request - Add New Prayer Request</h3>
     
 
         <asp:Label ID="Label3" runat="server" Text="Prayer Body"></asp:Label>

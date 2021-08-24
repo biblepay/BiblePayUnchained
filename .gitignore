@@ -41,3 +41,4 @@ Properties/PublishProfiles/FolderProfile.pubxml.user
 .vs/BiblePayUnchained/v16/TestStore/0/testlog.manifest
 .vs/BiblePayUnchained/config/applicationhost.config
 .vs/BiblePayUnchained/DesignTimeBuild/.dtbcache
+*.tmp

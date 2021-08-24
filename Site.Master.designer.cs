@@ -24,6 +24,15 @@ namespace Unchained
         protected global::System.Web.UI.HtmlControls.HtmlLink admin_css;
 
         /// <summary>
+        /// wallet1 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::BiblePayWallet.WalletControl wallet1;
+
+        /// <summary>
         /// MainContent control.
         /// </summary>
         /// <remarks>
