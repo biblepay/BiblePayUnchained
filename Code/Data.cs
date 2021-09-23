@@ -11,7 +11,6 @@ namespace Unchained
 {
     public static class DataOps
     {
-
         public static void FilterDataTable(ref DataTable dt, string sSQL)
         {
             try
@@ -25,27 +24,28 @@ namespace Unchained
             }
         }
 
-
         public static BiblePayCommon.Common.DACResult SpendMoney(bool fTestnet, Page p, double nAmount, string sSpendAddress, string sSpendPrivKey, string sXML)
         {
             p.Session["balance"] = null;
             BiblePayCommon.Common.DACResult r = BiblePayDLL.Sidechain.CreateFundingTransaction(fTestnet, nAmount, sSpendAddress, sSpendPrivKey, sXML, true);
             return r;
         }
-
-
-        public static DACResult InsertIntoTable(bool fTestNet, BiblePayCommon.IBBPObject o)
+       
+        public static DACResult InsertIntoTable(Page p, bool fTestNet, BiblePayCommon.IBBPObject o, User u=new User())
         {
             string sEntityName = BiblePayCommon.EntityCommon.GetEntityName(fTestNet, o);
 
-            DACResult r = BiblePayDLL.Sidechain.InsertIntoDSQL(fTestNet, o, sEntityName, GetFundingAddress(fTestNet), GetFundingKey(fTestNet));
-            
+            DACResult r = BiblePayDLL.Sidechain.InsertIntoDSQL(fTestNet, o, u);
+            if (r.fError())
+            {
+                BiblePayCommonNET.UICommonNET.MsgModal(p, "Error while saving record", r.Error + "<br>You may need to log in first.", 700, 350, true);
+            }
             return r;
         }
 
-        public static void InsertIntoTable_Background(bool fTestNet, string sTable, BiblePayCommon.IBBPObject o)
+        public static void InsertIntoTable_Background(bool fTestNet, BiblePayCommon.IBBPObject o, User u)
         {
-            BiblePayDLL.Sidechain.InsertIntoDSQL_Background(fTestNet, o, sTable,  GetFundingAddress(fTestNet), GetFundingKey(fTestNet), false);
+            BiblePayDLL.Sidechain.InsertIntoDSQL_Background(fTestNet, o, u);
         }
 
         public static double GetTotalFrom(string userid, string table)
@@ -79,7 +79,6 @@ namespace Unchained
 
             return data;
         }
-
     }
 
     public class Data
@@ -119,7 +118,6 @@ namespace Unchained
             }
             return sCS;
         }
-
         public Data(SecurityType sa, string _RemoteHostName = "")
         {
             // Constructor goes here; since we use SQL Server connection pooling, dont create connection here, for best practices create connection at usage point and destroy connection after Using goes out of scope - see GetDataTable

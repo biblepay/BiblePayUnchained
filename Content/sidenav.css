@@ -153,14 +153,14 @@ body.hold-transition .main-header .logo {
 
 .navbar-inverse {
     #top horizontal-main-horizontal-header-background-color:0;
-    background-color: black;
+    background-color: black_black;
     border-color: #080808;
 }
 
 .main-sidebar,
 .left-side {
     xthisistheleft-menubackgroudncolor-left-menu-mid-to-bottom: #500000;
-    background-color: black;
+    background-color: black_black;
     position: fixed;
     top: 0;
     left: 0;
@@ -212,8 +212,8 @@ body.hold-transition .main-header .logo {
   width: 100%;
   height: 85px;
   overflow: hidden;
-  #left-menu color2
-  background: #400000;
+  #xleft-menu: color2;
+  background: grey_grey;
   border-bottom: 1px solid #343e4a;
 }
 .user-panel:before,
@@ -312,7 +312,7 @@ body.hold-transition .main-header .logo {
 .sidebar-menu > li > .treeview-menu {
     margin: 0;
     #second-color-left-menu-expanded-menus-background;
-    background: #111;
+    background: primary_darker_color;
 }
 .sidebar-menu .treeview-menu .treeview-menu {
   padding-left: 20px;
@@ -329,7 +329,7 @@ body.hold-transition .main-header .logo {
 	#color: silver;
 	#second color:1;
     #font-size:110%;
-	background-color: maroon;
+	background-color: maroon_maroon;
 }
 .sidebar-menu .treeview-menu > li > a > .fa,
 .sidebar-menu .treeview-menu > li > a > .glyphicon,
@@ -446,7 +446,7 @@ body.hold-transition .main-header .logo {
 .sidebar-menu > li:hover > a, .sidebar-menu > li.active > a {
     color: #DDDDDD;
     #second color-left-menu-hover-color-over-major-areas:500000;
-    background: maroon;
+    background: maroon_maroon;
 	text-decoration: none;
 }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BiblePayCommon;
+using System;
 using System.IO;
 using System.Net;
 using System.Net.Security;
@@ -14,24 +15,47 @@ namespace Unchained
     public static class BMS
     {
 
-        public static string ExecMVCCommand(string URL, int iTimeout = 30, string sOptionalHeaderName = "", string sOptionalHeaderValue = "")
+
+        public static string GetCookie(string sKey)
         {
-            BiblePayClient wc = new BiblePayClient();
             try
             {
-                wc.SetTimeout(iTimeout);
-                if (sOptionalHeaderName != "")
-                               wc.Headers.Add(sOptionalHeaderName, sOptionalHeaderValue);
-                string d = wc.FetchObject(URL).ToString();
-                return d;
+                HttpCookie _pool = HttpContext.Current.Request.Cookies["c_" + sKey];
+                if (_pool != null)
+                {
+                    string sOut = (_pool.Value ?? string.Empty).ToString();
+                    string sDeciphered = BiblePayCommon.Encryption.Base65Decode(sOut);
+                    return sDeciphered;
+                }
             }
             catch (Exception)
             {
-                Console.WriteLine("Exec MVC Failed for " + URL);
 
-                return "";
+            }
+            return "";
+        }
+
+        public static void StoreCookie(string sKey, string sValue)
+        {
+            try
+            {
+                string sEnc = BiblePayCommon.Encryption.Base65Encode(sValue);
+                HttpCookie _pool = new HttpCookie("c_" + sKey);
+                _pool[sKey] = sEnc;
+                _pool.Expires = DateTime.Now.AddDays(7);
+                if (HttpContext.Current != null)
+                {
+                    HttpContext.Current.Response.Cookies.Add(_pool);
+                }
+                HttpContext.Current.Response.Cookies["c_" + sKey].Value = sEnc;
+            }
+            catch (Exception ex)
+            {
+                string sError = ex.Message;
+                
             }
         }
+        
 
         public static byte[] StrToByteArray(string str)
         {
@@ -48,17 +72,8 @@ namespace Unchained
             response.BinaryWrite(bytes);
             response.End();
         }
-        private static string Clean(string sKey, string sData, bool fRemoveColons = true)
-        {
-            sData = sData.Replace(sKey, "");
-            sData = sData.Replace("\r\n", "");
-            if (fRemoveColons)
-                sData = sData.Replace(":", "");
-            sData = sData.Replace(",", "");
-            sData = sData.Replace("\"", "");
-            return sData.Trim();
-        }
-
+     
+        // We don't use ansi 92 sql on this server, just saving this in case we need to make a call to another server.
         public static string PurifySQL(string value, double maxlength)
         {
             if (value == null)
@@ -81,8 +96,6 @@ namespace Unchained
                 value = "";
             return value;
         }
-
-
 
         public static bool SendSMSCode(string sToPhone1, int nCode)
         {
@@ -109,37 +122,6 @@ namespace Unchained
                 return false;
             }
 
-        }
-
-    }
-
-    
-
-    public class BiblePayClient : System.Net.WebClient
-    {
-        static bool ValidateCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors errors)
-        {
-            return true;
-        }
-
-        private int DEFAULT_TIMEOUT = 30000;
-
-        public object FetchObject(string URL)
-        {
-            object o = this.DownloadString(URL);
-            return o;
-        }
-
-        public void SetTimeout(int iTimeout)
-        {
-            DEFAULT_TIMEOUT = iTimeout * 1000;
-        }
-        protected override System.Net.WebRequest GetWebRequest(Uri uri)
-        {
-            ServicePointManager.ServerCertificateValidationCallback += new System.Net.Security.RemoteCertificateValidationCallback(ValidateCertificate);
-            System.Net.WebRequest w = base.GetWebRequest(uri);
-            w.Timeout = DEFAULT_TIMEOUT;
-            return w;
         }
     }
 }

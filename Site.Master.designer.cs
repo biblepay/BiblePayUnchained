@@ -15,6 +15,15 @@ namespace Unchained
     {
 
         /// <summary>
+        /// sitecss control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal sitecss;
+
+        /// <summary>
         /// admin_css control.
         /// </summary>
         /// <remarks>
@@ -24,13 +33,13 @@ namespace Unchained
         protected global::System.Web.UI.HtmlControls.HtmlLink admin_css;
 
         /// <summary>
-        /// wallet1 control.
+        /// hidSourceID control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::BiblePayWallet.WalletControl wallet1;
+        protected global::System.Web.UI.WebControls.HiddenField hidSourceID;
 
         /// <summary>
         /// MainContent control.
