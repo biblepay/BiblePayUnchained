@@ -3,7 +3,8 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
-    <script type="text/javascript" src="/scripts/indexvideo.js"></script>
+    <!--     <script type="text/javascript" src="/scripts/indexvideo.js"></script> -->
+
     
     <h3>Admin 1</h3>
     <div>
@@ -13,10 +14,10 @@
   <div>
          <br />
 
-         <asp:Button ID="btnSave" runat="server" onclick="btnSave_Click"  Text="Save" style="width:85px" />
+         <asp:Button ID="btnSave" runat="server" onclick="btnSave_Click"  Text="Save" />
          <br /><br />
         
-      <input type="button" onclick="showModalDialog('This is my title', '<br><br>This is the body<br><br>Testing');" value="showmodal"/>
+      <input type="button" onclick="var e = RSAEncrypt('this is a test.');showModalDialog('This is my title', e);" value="showmodal"/>
       <input type="button" onclick="<%=Unchained.UICommon.Toast("title", "thetoast")%>" value="The Toast" />
 
 

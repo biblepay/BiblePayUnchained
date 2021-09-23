@@ -20,7 +20,7 @@ namespace Unchained
     {
         protected void btnChat_Click(object sender, EventArgs e)
         {
-            string sRow = gUser(this).UserName + " [" + DateTime.Now.ToString() + "]: " + txtChat.Text;
+            string sRow = gUser(this).FullUserName() + " [" + DateTime.Now.ToString() + "]: " + txtChat.Text;
             Chatter.lChat.Add(sRow);
             txtChat.Text = "";
             txtChat.Focus();
@@ -30,7 +30,7 @@ namespace Unchained
 
         protected string GetChat()
         {
-            string sScreen = "<div id='chat' style='overflow-y:scroll;border:1px solid gold;height:500px;min-height:500px;'>";
+            string sScreen = "<div id='chat' class='chat'>";
             for (int i = 0; i < Chatter.lChat.Count; i++)
             {
                 sScreen += "" + Chatter.lChat[i] + "<br>";

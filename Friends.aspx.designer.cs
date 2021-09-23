@@ -11,7 +11,7 @@ namespace Unchained
 {
 
 
-    public partial class TownHallView
+    public partial class Friends
     {
     }
 }

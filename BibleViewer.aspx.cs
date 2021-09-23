@@ -6,8 +6,9 @@ using System.Web;
 using System.Web.Services;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using static Unchained.StringExtension;
 using static Unchained.Common;
+using static BiblePayCommonNET.StringExtension;
+
 
 namespace Unchained
 {
@@ -39,7 +40,7 @@ namespace Unchained
         }
 
 
-        protected new void Page_Load(object sender, EventArgs e)
+        protected void Page_Load(object sender, EventArgs e)
         {
 
             if (!IsPostBack)

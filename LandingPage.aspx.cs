@@ -6,8 +6,9 @@ using System.Web;
 using System.Web.Services;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using static Unchained.StringExtension;
 using static Unchained.Common;
+using static BiblePayCommonNET.StringExtension;
+using static BiblePayCommon.Common;
 
 namespace Unchained
 {
@@ -22,7 +23,7 @@ namespace Unchained
             }
 
             BiblePayCommon.Entity.vote1 o = new BiblePayCommon.Entity.vote1();
-            o.UserID = gUser(this).BiblePayAddress;
+            o.UserID = gUser(this).id;
             o.ParentID = parentID;
             o.VoteType = sVoteType;
             if (sVoteType == "upvote")
@@ -37,12 +38,10 @@ namespace Unchained
             {
                 return false;
             }
-            o.UserID = UICommon.GetBBPAddress(this);
             if (o.UserID == "")
                 return false;
-            BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(IsTestNet(this), o);
-           
-            if (r.Error != "")
+            BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), o, gUser(this));
+            if (r.fError())
                 return false;
             return true;
         }
@@ -52,18 +51,23 @@ namespace Unchained
             if (!gUser(this).LoggedIn)
                 return false;
             BiblePayCommon.Entity.follow1 o = new BiblePayCommon.Entity.follow1();
-            o.UserID = gUser(this).BiblePayAddress;
+            o.UserID = gUser(this).id;
             o.FollowedID = sFollowedID;
             o.deleted = fFollowing ? 0 : 1;
             o.Status = fFollowing ? "FOLLOWING" : "NOT FOLLOWING";
-            BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(IsTestNet(this), o);
-            if (r.Error != "")
-                return false;
-            return true;
+            BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), o, gUser(this));
+            return !r.fError();
         }
 
         protected new void Page_Load(object sender, EventArgs e)
         {
+            if (Request.Path.Contains("session1"))
+            {
+                //string s1 = Request.Headers["headeraction"].ToNonNullString();
+                //BiblePayWallet.WalletControl w = (BiblePayWallet.WalletControl)this.Master.FindControl("w");
+                //w.DeserializeLocalStorage(s1);
+                //Log("Session1::" + s1);
+            }
 
             if (Request.Path.Contains("voting"))
             {
@@ -93,23 +97,17 @@ namespace Unchained
                 else if (sAct1 == "follow")
                 {
                     UpdateFollowStatus(sID, true);
-                    string sStatus = GetFollowStatus(IsTestNet(this), sID, gUser(this).BiblePayAddress);
+                    string sStatus = UICommon.GetFollowStatus(IsTestNet(this), sID, gUser(this).BiblePayAddress);
                     Response.Write(sStatus + "|");
                     Response.End();
                 }
                 else if (sAct1 == "unfollow")
                 {
                     UpdateFollowStatus(sID, false);
-                    string sStatus = GetFollowStatus(IsTestNet(this), sID, gUser(this).BiblePayAddress);
+                    string sStatus = UICommon.GetFollowStatus(IsTestNet(this), sID, gUser(this).BiblePayAddress);
                     Response.Write(sStatus + "|");
                     Response.End();
                 }
-            }
-            else if (Request.Path.Contains("canceldownload"))
-            {
-                string sSourceURL = Request.Headers["headeraction"].ToNonNullString();
-                _cancelurl = sSourceURL;
-
             }
             else if (Request.Path.Contains("wiki"))
             {
@@ -138,12 +136,12 @@ namespace Unchained
                 sData = sData.Replace("var refTagger", "");
                 sExtract2 = ExtractXML(sData, "<div class=\"printfooter\">", "</html>");
                 if (sExtract2.Length > 0)
-                                    sData = sData.Replace(sExtract2, "");
-
+                   sData = sData.Replace(sExtract2, "");
 
                 Response.Write(sData);
                 Response.End();
             }
+           
 
 
             string sAction = Request.QueryString["action"].ToNonNullString();
@@ -153,16 +151,13 @@ namespace Unchained
                 string sKey = Request.QueryString["key"].ToNonNullString();
                 string sNewPage = Request.QueryString["newpage"].ToNonNullString();
                 Session["key_" + sKey] = sValue;
-                
+                Session["PageNumber"] = 0;
+                this.Page.Session["PageNumber"] = 0;
                 var uri = new Uri(this.Request.Url.AbsoluteUri);
-
                 string sURL = uri.GetLeftPart(UriPartial.Path);
                 sURL = sURL.Replace("LandingPage", sNewPage);
-
                 Session["pag_" + sURL] = "0";
-
                 Response.Redirect(sNewPage);
-
             }
         }
 

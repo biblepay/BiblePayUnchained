@@ -1,12 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using static BiblePayDLL.Shared;
 using static Unchained.Common;
 
 namespace Unchained
@@ -17,9 +9,10 @@ namespace Unchained
         {
             if (!gUser(this).LoggedIn)
             {
-                MsgBox("Not Logged In", "Sorry, you must be logged in to save a prayer request.", this);
+                UICommon.MsgBox("Not Logged In", "Sorry, you must be logged in to add a new item.", this);
                 return;
             }
+            this.Title = _ObjectName + " Add";
         }
 
         protected void btnSave_Click(object sender, EventArgs e)
@@ -27,32 +20,32 @@ namespace Unchained
             
             if (!gUser(this).LoggedIn)
             {
-                MsgBox("Not Logged In", "Sorry, you must be logged in to save a prayer request.", this);
+                UICommon.MsgBox("Not Logged In", "Sorry, you must be logged in first.", this);
                 return;
             }
-            if (txtSubject.Text.Length < 5 || txtBody.Text.Length < 25)
+            if (txtSubject.Text.Length < 4 || txtBody.Text.Length < 10)
             {
-                MsgBox("Content Too Short", "Sorry, the content of the Body or the Subject must be longer.", this);
+                UICommon.MsgBox("Content Too Short", "Sorry, the content of the Body or the Subject must be longer.", this);
                 return;
             }
-            if (gUser(this).UserName == "")
+            if (gUser(this).FirstName == "")
             {
-                MsgBox("Nick Name must be populated", "Sorry, you must have a username to add a prayer.  Please navigate to Account Settings | Edit to set your username.", this);
+                UICommon.MsgBox("Name must be populated", "Please navigate to Account Settings | Edit to set your username.", this);
                 return;
             }
 
-            BiblePayCommon.Entity.pray1 o = new BiblePayCommon.Entity.pray1();
-            o.Subject = txtSubject.Text;
-            o.Body = txtBody.Text;
-            o.UserID = gUser(this).BiblePayAddress.ToString();
-            BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(IsTestNet(this), o);
-            if (r.Error == "")
+            BiblePayCommon.IBBPObject o = (BiblePayCommon.IBBPObject)BiblePayCommon.EntityCommon.GetInstance("BiblePayCommon.Entity+" + _EntityName);
+            BiblePayCommon.EntityCommon.SetEntityValue(o, "Subject", txtSubject.Text);
+            BiblePayCommon.EntityCommon.SetEntityValue(o, "Body", txtBody.Text);
+            BiblePayCommon.EntityCommon.SetEntityValue(o, "UserID", gUser(this).BiblePayAddress.ToString());
+            BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), o, gUser(this));
+            if (!r.fError())
             {
-                Response.Redirect("PrayerBlog");
+                Response.Redirect("PrayerBlog?entity=" + _EntityName);
             }
             else
             {
-                MsgBox("Error while inserting prayer", "Sorry, the prayer was not saved: " + r.Error, this);
+                UICommon.MsgBox("Error while inserting object", "Sorry, the object was not saved: " + r.Error, this);
             }
         }
     }

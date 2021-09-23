@@ -8,6 +8,10 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using static BiblePayDLL.Shared;
 using static BiblePayCommon.DataTableExtensions;
+using static BiblePayCommon.Common;
+using static BiblePayCommonNET.StringExtension;
+using static BiblePayCommonNET.CommonNET;
+using static BiblePayCommonNET.DataTableExtensions;
 
 namespace Unchained
 {
@@ -17,108 +21,67 @@ namespace Unchained
         protected new void Page_Load(object sender, EventArgs e)
         {
             _paginator = (BiblePayPaginator.Paginator)this.Master.FindControl("MainContent").FindControl("paginator1");
+            int nPageNo = _paginator.PageNumber;
+
+            if (IsPostBack)
+            {
+                //_paginator.PageNumber = 0;
+                Session["search"] = txtSearch.Text;
+
+            }
+            else
+            {
+                txtSearch.Text = Session["search"].ToNonNullString();
+
+
+
+
+            }
         }
         protected void btnSearch_Click(object sender, EventArgs e)
         {
 
         }
 
-
         protected override void Event(BBPEvent e)
         {
             if (e.EventID == "Delete")
             {
-                    if (HasOwnership(IsTestNet(this), e.EventID, "video1", gUser(this).BiblePayAddress))
-                    {
-                        // Delete the object (logically)
-                         bool fDeleted = BiblePayDLL.Sidechain.DeleteObject(IsTestNet(this), "video1", e.EventValue, GetFundingAddress(IsTestNet(this)), GetFundingKey(IsTestNet(this)));
-                        if (fDeleted)
-                        {
+                  // Delete the object (logically)
+                  bool fDeleted = BiblePayDLL.Sidechain.DeleteObject(IsTestNet(this), "video1", e.EventValue, gUser(this));
+                  if (fDeleted)
+                  {
                             UICommon.RunScriptSM(this, UICommon.Toast("Deleted", "Your Object was Deleted!"));
-                        }
-                        else
-                        {
+                  }
+                  else
+                  {
                             UICommon.RunScriptSM(this, UICommon.Toast("Not Deleted", "FAILURE: The object was not deleted."));
-                        }
-                    }
-                    else
-                    {
-                        MsgBox("Error", "Sorry, you must have ownership of this object to delete it.", this);
-                    }
-
+                  }
             }
         }
 
-        private string GetInnerVideo(string sID, string sURL)
+        private string GetInnerVideoRetired(string sID, string sURL)
         {
             bool fPlayable = false;
             string sDims = "width='400px' height='250px'";
             string sAutoPlay = fPlayable ? "autostart autoplay controls playsinline" : "preload='metadata'";
             string sHTML = "<video id='vid" + sID + "' " + sDims + " class='connect-bg' " + " " 
-                + sAutoPlay + " style='background-color:black'>";
+                + sAutoPlay + " >";
             string sLoc = !fPlayable ? "#t=7" : "#t=7";
             sHTML += "<source src='" + sURL + sLoc + "' type='video/mp4'></video>";
             return sHTML;
         }
 
-        private string GetInnerPoster(string sFID, string sURL2)
-        {
-            if (sFID.Length < 10)
-                return "";
-
-            string sURL1 = (sURL2 == null || sURL2 == "") ? "/images/jc2.png" :  sURL2.Replace("/data", "/thumbnails/video.jpg");
-            
-            string HTML = "<img src='" + sURL1 + "' width=400px height=200px />";
-            return HTML;
-        }
-        private string CurateVideo(string sID, string sNickName, string sURL2, string SVID, string FID, string sAdded, string sSubject, string sTitle)
-        {
-            string sDiv = "<div style='min-height:200px;height:200px;max-height:200px;overflow:hidden'><a href=Media.aspx?id=" + sID + ">";
-            /*
-               BiblePayVideo.Video video1 = new BiblePayVideo.Video();
-               video1.SVID = SVID;
-               video1.Title = sSubject + " • " + sTitle;
-               video1.Width = 300;
-               video1.Height = 200;
-               video1.Playable = true;
-               //video1.Footer = video1.Title + " • Uploaded by " + sUserName;
-               string sVideo1 = UICommon.RenderControl(video1);
-
-               */
-            string sVideo1 = GetInnerPoster(FID, sURL2);
-
-            sDiv += sVideo1;
-
-            if (sNickName == "")
-                sNickName = "N/A";
-
-            if (sSubject.Length > 255)
-            {
-                sSubject = sSubject.Substring(0, 255) + "...";
-            }
-            if (sNickName == null)
-                sNickName = "N/A";
-
-            sDiv += "</a></div><div style='height:80px;min-height:80px;width:300px;max-width:300px;overflow:hidden;'><small>" + sSubject + " • " + sTitle + "<br>Uploaded by " + sNickName + "</small></span></div>";
-            if (System.Diagnostics.Debugger.IsAttached)
-            {
-                string sButton = "<button id='btnDelete' onclick=\""
-                 + "__doPostBack('Event_Delete_" + "_" + sID + "_', 'Delete_Click');return false;\">Delete</button> ";
-                sDiv += sButton;
-            }
-            return sDiv;
-        }
 
         public static string GetTrendingList(bool fTestNet)
         {
             try
             {
                 DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "vote1");
-                dt = dt.FilterDataTable("VoteValue=1 or votevalue=-1 or votevalue=0");
+                dt = dt.FilterDataTable("VoteValue in(0,1,-1)");
 
                 if (dt.Rows.Count < 1)
                     return "";
-
 
                 dt = dt.AsEnumerable()
                     .GroupBy(r => new { Col1 = r["ParentID"] })
@@ -132,7 +95,6 @@ namespace Unchained
 
                 dt = dt.FilterDataTable("VoteValue > 1");
 
-
                 if (dt.Rows.Count == 0)
                     return "";
                 string sList = "id in (";
@@ -144,7 +106,8 @@ namespace Unchained
                 sList = Mid(sList, 0, sList.Length - 1);
                 sList += ")";
                 return sList;
-            }catch(Exception ex)
+            }
+            catch(Exception ex)
             {
                 Log("Error in GetTrending List :: " + ex.Message);
                 return "";
@@ -189,21 +152,49 @@ namespace Unchained
 
         protected string GetVideoList()
         {
-            string sSearch = txtSearch.Text;
+            string sSearch = Session["Search"].ToNonNullString();
+
+
             string sType = Session["key_filetype"].ToNonNullString();
-            string sFilterByUser = String.Empty;
+            string sCategory = (Request.QueryString["category"]  ?? "").ToString();
+            string sTheirChannel = Request.QueryString["channelid"].ToNonNullString();
+
+            if (sCategory != "" || sTheirChannel != "")
+            {
+                sType = "video";
+            }
+
             if (sType == "")
             {
                 sType = "video";
             }
-            if (sType == "mychannel")
+            // Global filter (Federated vs. Private) etc.
+
+            BiblePayCommon.BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
+            
+            string sVideoFilter = Config("videofilter");
+            dt = dt.FilterBBPDataTable(sVideoFilter);
+            dt = dt.FilterBBPDataTable("isnull(attachment,0)=0");
+            dt = dt.FilterBBPDataTable("category not in (null,'')");
+
+            if (sTheirChannel != "")
             {
-                sFilterByUser = gUser(this).BiblePayAddress;
+                dt = dt.FilterBBPDataTable("userid='" + sTheirChannel + "'");
                 sType = "video";
             }
-            BiblePayCommon.BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
-            dt = dt.FilterBBPDataTable("isnull(deleted,0)=0");
-            if (sType == "following")
+            else if (sType == "mychannel")
+            {
+                dt = dt.FilterBBPDataTable("userid='" + gUser(this).id + "'");
+                sType = "video";
+            }
+            else if (sType == "myvideoeditingroom")
+            {
+                // User videos that have been uploaded as 'mass' or 'batch', and have not been categorized yet
+                dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
+                dt=                dt.FilterBBPDataTable("userid='" + gUser(this).id + "' and isnull(category,'')=''");
+                sType = "video";
+            }
+            else if (sType == "following")
             {
                 dt = dt.FilterBBPDataTable(GetFollowingList(IsTestNet(this), gUser(this).BiblePayAddress));
                 sType = "video";
@@ -216,8 +207,7 @@ namespace Unchained
             }
             else if (sType == "recentlyuploaded")
             {
-                dt = dt.FilterBBPDataTable("time > " + 
-                    (BiblePayCommon.Common.UnixTimestampUTC() - (11*86400)).ToString());
+                dt.DefaultView.Sort = "time desc";
                 sType = "video";
             }
             else if (sType == "hashtags")
@@ -227,15 +217,11 @@ namespace Unchained
             }
             if (sSearch != "")
             {
-                string sPage = this.Request.Url.AbsoluteUri;
-                _paginator.PageNumber = 0;
-                dt = dt.FilterBBPDataTable("body like '%" + sSearch + "%' or subject like '%" + sSearch + "%'");
+                //string sPage = this.Request.Url.AbsoluteUri;
+                dt = dt.FilterBBPDataTable("body like '%" + sSearch + "%' or title like '%" + sSearch + "%' or Transcript like '%" + sSearch + "%'", true);
+              
             }
-            if (sFilterByUser != "")
-            {
-                dt = dt.FilterBBPDataTable("isnull(userid,'')='" + sFilterByUser + "'");
-            }
-            // Filter by type.... to keep the paginator intact
+            // Filter by type starts here:
             if (sType == "video")
             {
                 dt = dt.FilterBBPDataTable("SVID <> ''");
@@ -253,75 +239,14 @@ namespace Unchained
                 dt=dt.FilterBBPDataTable("URL like '%.png%' or URL like '%.jpg%' or URL like '%.jpeg%' or URL like '%.gif%'");
             }
 
-            string html = "<table width=90%><tr>";
-            int iCol = 0;
-            if (dt.Rows.Count < 1)
-                return html;
-
-            _paginator.Rows = dt.Rows.Count;
-            _paginator.ColumnsPerRow = 3;
-            _paginator.RowsPerPage = 3;
-            for (int y = _paginator.StartRow; y <= _paginator.EndRow; y++)
+            if (sCategory != "")
             {
-                string sURL = dt.Rows[y]["URL"].ToNonNullString();
-                if (sURL != "")
-                {
-                    string sUserName = UICommon.GetUserRecord(IsTestNet(this), dt.GetColValue(y, "UserID")).UserName;
-
-                    if (sType == "video" && sURL.Contains(".mp4"))
-                    {
-                        string sVideo = CurateVideo(dt.Rows[y]["id"].ToNonNullString(), sUserName, dt.Rows[y]["URL2"].ToNonNullString(),
-                            dt.GetColValue(y, "SVID"), dt.GetColValue(y, "FID"), dt.Rows[y]["time"].ToNonNullString(),
-                            dt.Rows[y]["Subject"].ToNonNullString(), dt.Rows[y]["Title"].ToNonNullString());
-
-                        string sRow = "<td width='33%' style='padding-left:15px;'>" + sVideo + "</td>";
-            
-                        html += sRow;
-                        iCol++;
-                    }
-                    else if (sType == "pdf" && sURL.Contains(".pdf"))
-                    {
-                        string sAsset = "<a href='" + sURL + "'><img style='height:130px;width:130px;' src='https://foundation.biblepay.org/images/pdf_icon.png'></a>";
-                        string sDiv = "<div style='height: 290px; width:360px; overflow: hidden; '>" + sAsset;
-                        sDiv += "<br>" + dt.Rows[y]["Subject"].ToNonNullString() + " • Uploaded by " + sUserName + "</div>";
-                        string sRow = "<td width=25% style='padding-left:25px;'>" + sDiv + "</td>";
-                        html += sRow;
-                        iCol++;
-                    }
-                    else if (sType == "wiki" && sURL.Contains(".htm"))
-                    {
-                        string sAsset = "<a href='" + sURL + "'><iframe style='height:400px;width:400px;' src='" + sURL + "'></iframe></a>";
-                        string sDiv = "<div style='height: 400px; width:400px; overflow: hidden; '>" + sAsset;
-                        sDiv += "<br>" + dt.Rows[y]["Subject"].ToNonNullString() + " • Uploaded by " + sUserName + "</div>";
-                        
-                        string sEdit = "<input type='button' onclick=\"location.href='CreateNewDocument?file=" + sURL + "';\" id='w" + y.ToString() 
-                            + "' value='Edit' />";
-
-                        string sRow = "<td width=25% style='padding-left:25px;'>" + sDiv + "<br>" + sEdit + "</td>";
-                        html += sRow;
-                        iCol++;
-                    }
-                    else if (sType == "image")
-                    {
-                        if (sURL.Contains(".png") || sURL.Contains(".jpg") || sURL.Contains(".jpeg") || sURL.Contains(".bmp") || sURL.Contains(".gif"))
-                        {
-                            string sAsset = "<a href='" + sURL + "'><img style='height:130px;width:130px;' src='" + sURL + "'></a>";
-                            string sDiv = "<div style='height: 290px; width:360px; overflow: hidden; '>" + sAsset;
-                            sDiv += "<br>" + dt.Rows[y]["Subject"].ToNonNullString() + " • Uploaded by " + sUserName + "</div>";
-                            string sRow = "<td width=25% style='padding-left:25px;'>" + sDiv + "</td>";
-                            html += sRow;
-                            iCol++;
-                        }
-                    }
-                    if (iCol == _paginator.ColumnsPerRow)
-                    {
-                        html += "</tr>\r\n<tr>";
-                        iCol = 0;
-                    }
-                }
+                dt = dt.FilterBBPDataTable("subject like '%" + sCategory + "' or title like '%" + sCategory + "' or category like '%" + sCategory + "%'");
             }
-            html += "</table>";
+
+            string html = UICommon.GetGallery(this, dt, _paginator, sType, 33, 400, 300);
             return html;
+            
         }
     }
 }

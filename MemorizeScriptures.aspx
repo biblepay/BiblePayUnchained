@@ -29,13 +29,13 @@
         <tr>
             <td>        <asp:Label ID="lblScripture" runat="server" Text="Scripture:"></asp:Label></td>
 
-            <td>        <asp:TextBox ID="txtScripture" runat="server" TextMode="MultiLine"  Rows="10" style="width: 900px">        </asp:TextBox></td>
+            <td>        <asp:TextBox ID="txtScripture" runat="server" TextMode="MultiLine"  Rows="10" class='pc90'>        </asp:TextBox></td>
 
         </tr>
 
         <tr>
             <td>        <asp:Label ID="lblPractice" runat="server" Text="Practice Typing Scripture Here:"></asp:Label></td>
-            <td>        <asp:TextBox ID="txtPractice" runat="server" TextMode="MultiLine"  Rows="10" style="width: 900px">        </asp:TextBox>                </td>
+            <td>        <asp:TextBox ID="txtPractice" runat="server" TextMode="MultiLine"  Rows="10" class='pc90'>        </asp:TextBox>                </td>
 
         </tr>
         </table>

@@ -15,7 +15,7 @@ namespace Unchained
 {
     public partial class ProposalAdd : BBPPage
     {
-        protected new void Page_Load(object sender, EventArgs e)
+        protected void Page_Load(object sender, EventArgs e)
         {
             ddCharity.Items.Clear();
             ddCharity.Items.Add("Charity");

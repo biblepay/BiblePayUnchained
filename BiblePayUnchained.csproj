@@ -183,6 +183,22 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Admin1.aspx" />
+    <Content Include="Content\sidenav_black.css" />
+    <Content Include="Content\sidenav_blue.css" />
+    <Content Include="Content\sidenav_grey.css" />
+    <Content Include="Content\sidenav_maroon.css" />
+    <Content Include="Friends.aspx" />
+    <Content Include="GreetingCard.aspx" />
+    <Content Include="Images\dec-high-tech.jpg" />
+    <Content Include="FriendRequests.aspx" />
+    <Content Include="People.aspx" />
+    <Content Include="Person.aspx" />
+    <Content Include="Login.aspx" />
+    <Content Include="MediaList.aspx" />
+    <Content Include="NFTOrphans.aspx" />
+    <Content Include="NFTBrowse.aspx" />
+    <Content Include="NFTList.aspx" />
+    <Content Include="NFTAdd.aspx" />
     <Content Include="RPCConsole.aspx" />
     <Content Include="Content\bootstrap2.css" />
     <Content Include="Content\embed-player.min.js" />
@@ -232,9 +248,7 @@
     <Content Include="Content\themes\base\tooltip.css" />
     <Content Include="BibleViewer.aspx" />
     <Content Include="Chat.aspx" />
-    <Content Include="TownHallAdd.aspx" />
-    <Content Include="TownHallList.aspx" />
-    <Content Include="TownHallView.aspx" />
+    <Content Include="Scripts\core1.js" />
     <Content Include="ProposalAdd.aspx" />
     <Content Include="Leaderboard.aspx" />
     <Content Include="PortfolioBuilder.aspx" />
@@ -292,28 +306,6 @@
     <Content Include="JesusChrist\TheLordsPrayer.htm" />
     <Content Include="JesusChrist\TheSinnersPrayer.htm" />
     <Content Include="MemorizeScriptures.aspx" />
-    <Content Include="net_cs\bin\CuteWebUI.AjaxUploader.dll" />
-    <Content Include="net_cs\default.htm" />
-    <Content Include="net_cs\images\mac-bar.png" />
-    <Content Include="net_cs\images\win7-bar.png" />
-    <Content Include="net_cs\images\win7-bg.png" />
-    <Content Include="net_cs\installation.htm" />
-    <Content Include="net_cs\samples\Customize-Progress-Bar.aspx" />
-    <Content Include="net_cs\samples\default.aspx" />
-    <Content Include="net_cs\samples\demo.css" />
-    <Content Include="net_cs\samples\Drag-drop-file.aspx" />
-    <Content Include="net_cs\samples\Large-File-Upload.aspx" />
-    <Content Include="net_cs\samples\multiple-files-upload-control-file-number.aspx" />
-    <Content Include="net_cs\samples\multiple-files-upload.aspx" />
-    <Content Include="net_cs\samples\Persist-upload-file.aspx" />
-    <Content Include="net_cs\samples\selecting-multiple-files.aspx" />
-    <Content Include="net_cs\samples\simple-upload-UI.aspx" />
-    <Content Include="net_cs\samples\simple-upload-Validation.aspx" />
-    <Content Include="net_cs\samples\simple-upload.aspx" />
-    <Content Include="net_cs\samples\Simulate-File-Upload.aspx" />
-    <Content Include="net_cs\samples\Start-uploading-manually.aspx" />
-    <Content Include="net_cs\uploader.css" />
-    <Content Include="net_cs\uploadertheme.css" />
     <Content Include="PetShop.aspx" />
     <Content Include="ListView.aspx" />
     <Content Include="Scripts\jquery.contextMenu.js" />
@@ -457,7 +449,7 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
-    <Content Include="Content\Site.css" />
+    <Content Include="Content\Site0.css" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -470,8 +462,7 @@
     <Content Include="Content\bootstrap-theme.min.css.map" />
     <Content Include="Content\bootstrap-theme.css.map" />
     <Content Include="LICENSE" />
-    <Content Include="net_cs\bin\ajaxuploader4.lic" />
-    <Content Include="net_cs\Web.Config" />
+    <Content Include="Content\password.ttf" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <Content Include="README.md" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
@@ -511,6 +502,83 @@
   <ItemGroup>
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Friends.aspx.cs">
+      <DependentUpon>Friends.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Friends.aspx.designer.cs">
+      <DependentUpon>Friends.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="GreetingCard.aspx.cs">
+      <DependentUpon>GreetingCard.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="GreetingCard.aspx.designer.cs">
+      <DependentUpon>GreetingCard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="FriendRequests.aspx.cs">
+      <DependentUpon>FriendRequests.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="FriendRequests.aspx.designer.cs">
+      <DependentUpon>FriendRequests.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="People.aspx.cs">
+      <DependentUpon>People.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="People.aspx.designer.cs">
+      <DependentUpon>People.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Person.aspx.cs">
+      <DependentUpon>Person.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Person.aspx.designer.cs">
+      <DependentUpon>Person.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Login.aspx.cs">
+      <DependentUpon>Login.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Login.aspx.designer.cs">
+      <DependentUpon>Login.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="MediaList.aspx.cs">
+      <DependentUpon>MediaList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="MediaList.aspx.designer.cs">
+      <DependentUpon>MediaList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="NFTOrphans.aspx.cs">
+      <DependentUpon>NFTOrphans.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="NFTOrphans.aspx.designer.cs">
+      <DependentUpon>NFTOrphans.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="NFTBrowse.aspx.cs">
+      <DependentUpon>NFTBrowse.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="NFTBrowse.aspx.designer.cs">
+      <DependentUpon>NFTBrowse.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="NFTList.aspx.cs">
+      <DependentUpon>NFTList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="NFTList.aspx.designer.cs">
+      <DependentUpon>NFTList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="NFTAdd.aspx.cs">
+      <DependentUpon>NFTAdd.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="NFTAdd.aspx.designer.cs">
+      <DependentUpon>NFTAdd.aspx</DependentUpon>
+    </Compile>
     <Compile Include="RPCConsole.aspx.cs">
       <DependentUpon>RPCConsole.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -521,7 +589,7 @@
     <Compile Include="Code\FileSplitter.cs" />
     <Compile Include="Code\Service.cs" />
     <Compile Include="Code\UICommon.cs" />
-    <Compile Include="Code\Utilities.cs" />
+    <Compile Include="Code\BiblePay.cs" />
     <Compile Include="Code\BMS.cs" />
     <Compile Include="Code\ToDelete.cs" />
     <Compile Include="Admin1.aspx.cs">
@@ -545,27 +613,6 @@
     </Compile>
     <Compile Include="Chat.aspx.designer.cs">
       <DependentUpon>Chat.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TownHallAdd.aspx.cs">
-      <DependentUpon>TownHallAdd.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TownHallAdd.aspx.designer.cs">
-      <DependentUpon>TownHallAdd.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TownHallList.aspx.cs">
-      <DependentUpon>TownHallList.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TownHallList.aspx.designer.cs">
-      <DependentUpon>TownHallList.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TownHallView.aspx.cs">
-      <DependentUpon>TownHallView.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TownHallView.aspx.designer.cs">
-      <DependentUpon>TownHallView.aspx</DependentUpon>
     </Compile>
     <Compile Include="ProposalAdd.aspx.cs">
       <DependentUpon>ProposalAdd.aspx</DependentUpon>
@@ -753,7 +800,9 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Code\Common.cs" />
     <Compile Include="Code\Data.cs" />
-    <Compile Include="Code\StringExtensions.cs" />
+    <Compile Include="Code\BBPPage.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -779,7 +828,6 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Images\Gauge\" />
-    <Folder Include="net_cs\UploaderTemp\" />
     <Folder Include="Views\Media\" />
   </ItemGroup>
   <ItemGroup>
@@ -798,6 +846,10 @@
     <Analyzer Include="packages\AWSSDK.S3.3.5.0-beta\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BiblePayCommonNET\BiblePayCommonNET.csproj">
+      <Project>{28267366-6a2a-4dc7-8738-4b9bac6a9073}</Project>
+      <Name>BiblePayCommonNET</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BiblePayCommon\BiblePayCommon.csproj">
       <Project>{417014b8-4baf-4a14-8c30-d683a16eeaad}</Project>
       <Name>BiblePayCommon</Name>

@@ -10,6 +10,8 @@ using static BiblePayDLL.Shared;
 using static Unchained.DataOps;
 using static BiblePayCommon.Common;
 using static BiblePayCommon.DataTableExtensions;
+using static BiblePayCommonNET.UICommonNET;
+using BiblePayCommonNET;
 
 namespace Unchained
 {
@@ -36,7 +38,7 @@ namespace Unchained
 
 		protected TestingMemory _testingmemory = new Unchained.TestingMemory();
 		private BiblePayDLL.Bible _bible = new BiblePayDLL.Bible();
-		protected new void Page_Load(object sender, EventArgs e)
+		protected void Page_Load(object sender, EventArgs e)
         {
 			if (Session["testingmemory"] != null)
 			{
@@ -89,6 +91,9 @@ namespace Unchained
 					break;
 			}
 
+			if (iVerseStart == 0)
+				return;
+		
 
 			clear();
 
@@ -184,13 +189,13 @@ namespace Unchained
 			_testingmemory.nTestingScore = 0;
 
 			Session["testingmemory"] = _testingmemory;
-			UICommon.MsgModal(this, sTitle, sSummary, 500, 300);
+			MsgModal(this, sTitle, sSummary, 500, 300);
 		}
 
 		void UpdateDisplay()
 		{
 			string sMode = _testingmemory.TestMode==TestingMode.TRAIN ? "<font color=red>TRAINING MODE</font>" : "<font color=red>TESTING MODE</font>";
-			string sInfo = sMode + "<br><br>Welcome to the Scripture Memorizer, " + gUser(this).UserName + "!";
+			string sInfo = sMode + "<br><br>Welcome to the Scripture Memorizer, " + gUser(this).FullUserName() + "!";
 			lblInfo.Text = sInfo;
 			// Find the first verse to do the initial population.
 			PopulateNewVerse();

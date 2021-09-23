@@ -1,22 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Security.Authentication;
-using System.Text;
 using System.Web;
-using static Unchained.StringExtension;
-using static Unchained.Common;
-using System.Web.Services;
-using Newtonsoft.Json;
+using static BiblePayCommon.Common;
 
 namespace Unchained
 {
     /// <summary>
     /// Summary description for Web
     /// </summary>
-    public class Web : IHttpHandler
+    public class Web : IHttpHandler, System.Web.SessionState.IReadOnlySessionState
     {
 
         public static int nPerc = 0;
@@ -24,7 +15,25 @@ namespace Unchained
        
         public void ProcessRequest(HttpContext context)
         {
-        
+
+            if (context.Session != null && context.Session["ETA"] != null)
+            {
+                double nETA = GetDouble(context.Session["ETA"]);
+                nETA += UnixTimestampUTC() / 1000000000;
+                string sETA = Math.Round(nETA, 2).ToString();
+                if (context.Session["user"] != null)
+                {
+                    User u = (User)context.Session["user"];
+                    Log2("Uploading " + u.FullUserName() + " " + sETA);
+                }
+                context.Response.Write(sETA);
+
+            }
+            else
+            {
+                context.Response.Write("50");
+                Log2("Session empty...");
+            }
 
         }
 

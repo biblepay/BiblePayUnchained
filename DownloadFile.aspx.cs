@@ -6,7 +6,6 @@ using System.Web;
 using System.Web.Services;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using static Unchained.StringExtension;
 using static Unchained.Common;
 using System.IO;
 
@@ -27,9 +26,6 @@ namespace Unchained
             {
                 int length = (int)fs.Length;
                 byte[] buffer;
-
-                string r = _cancelurl;
-
                 using (BinaryReader br = new BinaryReader(fs))
                 {
                     buffer = br.ReadBytes(length);
@@ -45,7 +41,7 @@ namespace Unchained
 
         }
 
-        protected new void Page_Load(object sender, EventArgs e)
+        protected void Page_Load(object sender, EventArgs e)
         {
             string sURL = Request.QueryString["filename"] ?? "";
             System.Threading.Thread t = new System.Threading.Thread(DownloadFile1);

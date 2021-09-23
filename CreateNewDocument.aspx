@@ -40,7 +40,7 @@
 			<br />
 
 			Save As: <asp:TextBox ID="txtSaveAs" width="200px" runat="server"></asp:TextBox>
-		    <asp:Button ID="btnSave" runat="server" onclick="btnSave_Click" Text="Save" style="width:85px" />
+		    <asp:Button ID="btnSave" runat="server" onclick="btnSave_Click" Text="Save" />
 			
 			<br />
 			Load from URL: <input id="inpWiki" style='width:400px;'/><input type='button' onclick="var w = document.getElementById('inpWiki');populateWiki(w.value);" value="Load"></input>

@@ -10,18 +10,14 @@ using static BiblePayDLL.Shared;
 using static Unchained.DataOps;
 using static BiblePayCommon.Common;
 using System.Reflection;
+using static BiblePayCommonNET.StringExtension;
 using static BiblePayCommon.DataTableExtensions;
-
+using static BiblePayCommonNET.CommonNET;
 
 namespace Unchained
 {
     public partial class AddObject : BBPPage
     {
-        protected new void Page_Load(object sender, EventArgs e)
-        {
-            
-
-        }
 
         protected override void Event(BBPEvent e)
         {
@@ -50,7 +46,7 @@ namespace Unchained
                     }
                 }
                 // Permissions checked during Insert (User must have ownership to edit a record)
-                InsertIntoTable(IsTestNet(this), o);
+                InsertIntoTable(this, IsTestNet(this), o, gUser(this));
             }
         }
 
@@ -88,9 +84,8 @@ namespace Unchained
             }
             html += "</table>";
             // Submit an edit
-            string sButton = "<button id='btnSave' onclick=\""
-             + "__doPostBack('Event_Save_" + "_" + sID + "_', 'Save_Click');\">Save</button> ";
-
+            string sButton = UICommon.GetStandardButton(sID, "Save", "Save", "Save");
+          
             if (sMode == "edit")
             {
                 html += sButton;

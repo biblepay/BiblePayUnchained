@@ -11,7 +11,7 @@ namespace Unchained
 {
 
 
-    public partial class TownHallList
+    public partial class Person
     {
     }
 }

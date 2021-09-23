@@ -6,7 +6,6 @@ using System.Web;
 using System.Web.Services;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using static Unchained.StringExtension;
 using static Unchained.Common;
 
 namespace Unchained

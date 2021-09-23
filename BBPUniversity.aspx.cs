@@ -14,7 +14,7 @@ namespace Unchained
 {
     public partial class BBPUniversity : BBPPage
     {
-        protected new void Page_Load(object sender, EventArgs e)
+        protected void Page_Load(object sender, EventArgs e)
         {
             Session["exammemory"] = null;
             

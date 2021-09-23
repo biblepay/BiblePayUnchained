@@ -1,20 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web;
-using System.Web.Services;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using static Unchained.StringExtension;
+﻿using System.Collections.Generic;
 using static Unchained.Common;
-using BiblePayDLL;
 
 namespace Unchained
 {
     public partial class Status : BBPPage
     {
-
 
         protected string GetStatus()
         {
@@ -33,12 +23,18 @@ namespace Unchained
                     string sHash = BiblePayDLL.Sidechain.dictTables[s].BestBlockHash;
                     int nHeight = BiblePayDLL.Sidechain.dictTables[s].Rows.Count;
 
-
-                    string sRow = "<tr><td>" + s + "<td>" + sHash + "<td>" + nHeight.ToString() + "</tr>";
+                    string sAnchor = gUser(this).Administrator == 1 ? "<a href=ListView?includedeleted=0&objecttype=" + s + ">" + s + "</a>" : s;
+                    string sRow = "<tr><td>" + sAnchor + "<td>" + sHash + "<td>" + nHeight.ToString() + "</tr>";
                     sTable += sRow;
                 }
             }
             sTable += "</table>";
+            string sBurnAddress = BiblePayCommon.Encryption.GetBurnAddress(IsTestNet(this));
+            string sPubKey = IsTestNet(this) ? BiblePayCommon.Encryption._keyset.userTestNet.BiblePayAddress : BiblePayCommon.Encryption._keyset.userProd.BiblePayAddress;
+            BiblePayCommon.Entity.accountingobject oBalance = BiblePayDLL.Sidechain.GetAccountingBalance(IsTestNet(this), sBurnAddress, sPubKey);
+            string sBalance = "<br>Server Balance: " + oBalance.Balance.ToString();
+            sBalance += "<br>Current Invoice: <pre>" + oBalance.Data + "</pre>";
+            sTable += sBalance;
             return sTable;
         }
 

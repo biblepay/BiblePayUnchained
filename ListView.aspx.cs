@@ -1,46 +1,55 @@
-﻿using System;
+﻿using BiblePayCommon;
+using System;
 using System.Data;
 using static BiblePayCommon.DataTableExtensions;
 using static Unchained.Common;
+using static BiblePayCommonNET.DataTableExtensions;
 
 namespace Unchained
 {
     public partial class ListView : BBPPage
     {
-        protected new void Page_Load(object sender, EventArgs e)
-        {
 
-            
-        }
-
-        
         protected string GetList()
         {
             string sTable = Request.QueryString["objecttype"] ?? "";
-            string sFilterType = Request.QueryString["filterttype"] ?? "";
+            string sFilterType = Request.QueryString["filtertype"] ?? "";
+            bool fIncDeleted = (Request.QueryString["includedeleted"] ?? "") == "1";
 
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), sTable);
+            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), sTable, fIncDeleted);
+
             if (sFilterType == "mine" && sTable=="invoice1")
             {
                 // Billed to Me only
-                dt = dt.FilterDataTable("BillToAddress='" + gUser(this).BiblePayAddress + "'");
+                dt = dt.FilterBBPDataTable("BillToAddress='" + gUser(this).BiblePayAddress + "' and amount is not null");
+                dt = (BBPDataTable)dt.GetData.OrderBy("time desc");
+            }
+            else if (sFilterType == "myreceivables")
+            {
+                // Sent to me only
+                dt = dt.FilterBBPDataTable("BillFromAddress='" + gUser(this).BiblePayAddress + "' and amount is not null and BillToAddress <> '" + gUser(this).BiblePayAddress + "'");
+                dt = (BBPDataTable)dt.OrderBy("time desc");
+            }
+            else if (sFilterType == "analyzer")
+            {
+                // no filter
             }
             if (sTable == "invoice1")
             {
                 // Retail Only
-                dt = dt.FilterDataTable("InvoiceType in ('retail','Service_Provider')");
             }
-            string sObjectName = sTable; // Todo - get the human readable name from the static class property.
+            string sObjectName = sTable; // Todo - get the human readable name from the classes static property.
             // Table header
             string html = "<table class=saved><tr class='objheader'><th class='objheader'>"
-                + "<h3>" + sObjectName + "</h3><th class='objheader' colspan=19><div style='text-align:right;'>"
-                + "<a onclick=\"__doPostBack('Event','AddPrayer_Click');\"><i class='fa fa-plus'></i></a></div></th></tr>";
-            // Column headers
+                + "<h3>" + sObjectName + "</h3><th class='objheader' colspan=19><div class='objheader'>";
+            html += UICommon.GetStandardAnchor("ancPrayer1", "AddPrayer", "", "<i class='fa fa-plus'></i>", "pray1");
             string sRow = "<tr>";
 
             for (int i = 0; i < dt.Columns.Count; i++)
             {
-                sRow += "<th>" + dt.Columns[i].ColumnName + "</th>";
+                bool fRestricted = BiblePayCommon.EntityCommon.IsRestrictedColumn(dt.Columns[i].ColumnName);
+                if (!fRestricted || fIncDeleted)
+                         sRow += "<th>" + dt.Columns[i].ColumnName + "</th>";
             }
             sRow += "</tr>";
             html += sRow;
@@ -50,19 +59,26 @@ namespace Unchained
                 sRow = "<tr>";
                 for (int j = 0; j < dt.Columns.Count; j++)
                 {
-                    string sOrigValue = dt.GetColValue(y, dt.Columns[j].ColumnName);
-                    string sValue = Left(sOrigValue, 256);
-                    int iLen = sOrigValue.Length;
-                    if (iLen > 256)
-                        sValue += " ... ";
-                    string sID = dt.Rows[y]["id"].ToString();
-
-                    string sURL = "FormView?table=" + sTable + "&id=" + sID;
-
-                    string sAnchor = "<a href='" + sURL + "'>" + sValue + "</a>";
-
-                    sRow += "<td>" + sAnchor + "</td>";
-
+                    bool fRestricted = BiblePayCommon.EntityCommon.IsRestrictedColumn(dt.Columns[j].ColumnName);
+                    if (!fRestricted || fIncDeleted)
+                    {
+                        string sOrigValue = dt.GetColValue(y, dt.Columns[j].ColumnName);
+                        string sValue = BiblePayCommon.Common.Left(sOrigValue, 256);
+                        if (dt.Columns[j].ColumnName.ToLower()=="data")
+                        {
+                            string sNewValue = sValue.Replace("<col>", "[col]");
+                            sNewValue = sNewValue.Replace("<row>", "[row]");
+                            sNewValue = sNewValue.Replace("\r\n", "<br>");
+                            sValue = BiblePayCommon.Common.Mid(sNewValue, 0, 256);
+                        }
+                        int iLen = sOrigValue.Length;
+                        if (iLen > 256)
+                            sValue += " ... ";
+                        string sID = dt.Rows[y]["id"].ToString();
+                        string sURL = "FormView?table=" + sTable + "&id=" + sID;
+                        string sAnchor = "<a href='" + sURL + "'>" + sValue + "</a>";
+                        sRow += "<td>" + sAnchor + "</td>";
+                    }
                     
                 }
                 html += sRow;

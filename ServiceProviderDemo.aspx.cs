@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web;
-using System.Web.Services;
-using System.Web.UI;
 using System.Web.UI.WebControls;
-using static Unchained.StringExtension;
+using static BiblePayCommon.Common;
+using static BiblePayCommonNET.CommonNET;
+using static BiblePayCommonNET.StringExtension;
 using static Unchained.Common;
 
 namespace Unchained
@@ -14,15 +10,31 @@ namespace Unchained
     public partial class ServiceProviderDemo : BBPPage
     {
 
-
+        protected override void Event(BBPEvent e)
+        {
+            if (e.EventAction == "MakeServiceProviderPayment")
+            {
+                string sPin = BiblePayCommon.Encryption.Base64Decode((e.Extra.Output ?? "").ToString());
+                DACResult r30 = UICommon.BuySomething2(this, sPin);
+                string sError = e.Extra.Error;
+                string sSumm = sError.IsEmpty() ? "Paid" : "Error";
+                string sNarr = sError.IsEmpty() ? "You have successfully paid the service provider on TXID " + e.Extra.TXID + "!" : sError;
+                string sBillFromAddress = BiblePayCommon.Encryption.GetDSQLAddress(IsTestNet(this));
+                string sBillToAddress = gUser(this).BiblePayAddress;
+                string sID = (e.Extra.TXID ?? "").ToString();
+                if (!r30.fError())
+                {
+                    BiblePayDLL.Sidechain.AdjustServiceAccountBalance(IsTestNet(this), -1 * 500, sBillFromAddress, sBillToAddress, sID,
+                        "Service Provider Payment", "", e.Extra.TXID.ToNonNullString(), true, gUser(this));
+                }
+            }
+        }
         protected new void Page_Load(object sender, EventArgs e)
         {
             ddServiceProvider.Items.Add(new ListItem("Internet Provider", "bb1"));
             ddServiceProvider.Items.Add(new ListItem("Social Media Site", "bb2"));
             ddServiceProvider.Items.Add(new ListItem("Game Transaction", "bb3"));
         }
-
-
 
         protected void btnStart_Click(object sender, EventArgs e)
         {
@@ -39,23 +51,48 @@ namespace Unchained
                 string sLineItem1 = sServiceProvider + " item (" + i.ToString() + ") Amt " + nAmt.ToString() + " BBP";
 
                 string sID = i.ToString();
-                double nBalance = BiblePayDLL.Sidechain.AdjustServiceAccountBalance(IsTestNet(this), nAmt,
-                    GetFundingAddress(IsTestNet(this)), GetFundingKey(IsTestNet(this)), 
-                    sBillFromAddress, sBillToAddress, sID, sLineItem1, "", sServiceProvider, false);
-                string sRow = "<tr><td>" + sLineItem1 + "<td>" + nAmt.ToString() + "<td>" + nBalance.ToString() + "</tr>";
+                // In this case, the user is the signer, and their BillToAddress equals their BiblePayAddress
+                DACResult r1 = BiblePayDLL.Sidechain.AdjustServiceAccountBalance(IsTestNet(this), nAmt,
+                    sBillFromAddress, sBillToAddress, sID, sLineItem1, "", sServiceProvider, false, gUser(this));
+                string sRow = "<tr><td>" + sLineItem1 + "<td>" + nAmt.ToString() + "<td>" + r1.Amount.ToString() + "</tr>";
                 html += sRow;
+
+                if (r1.Amount > 200)
+                {
+                    // Credit limit exceeded;
+                    html += "<tr><td>ERROR<td>CREDIT LIMIT EXCEEDED</tr>";
+                    break;
+                }
             }
             // Generate invoice
-            double nFinal = BiblePayDLL.Sidechain.AdjustServiceAccountBalance(IsTestNet(this), 0,
-                   GetFundingAddress(IsTestNet(this)), GetFundingKey(IsTestNet(this)),
-                    sBillFromAddress, sBillToAddress, "", "", "", sServiceProvider, true);
-
+            DACResult r2 = BiblePayDLL.Sidechain.AdjustServiceAccountBalance(IsTestNet(this), 0,
+                    sBillFromAddress, sBillToAddress, "", "", "", sServiceProvider, true, gUser(this));
             html += "</table>";
- 
-
             Response.Write(html);
             Response.End();
+        }
 
+        protected void btnMakePayment_Click(object sender, EventArgs e)
+        {
+            // This pays the service provider, therefore you will have a credit balance (or an applied payment).
+            if (gUser(this).LoggedIn == false)
+            {
+                UICommon.MsgBox("Error", "Sorry, you must be logged in first", this);
+                return;
+            }
+            string sBillFromAddress = BiblePayCommon.Encryption.GetDSQLAddress(IsTestNet(this));
+            string sServiceProvider = ddServiceProvider.SelectedItem.Text;
+
+            BiblePayCommon.Entity.invoice1 i = new BiblePayCommon.Entity.invoice1();
+            i.BillFromAddress = sBillFromAddress;
+            i.BillToAddress = gUser(this).BiblePayAddress;
+            i.Amount = 500;
+            i.Data = "SERVICE PROVIDER PAYMENT " + sServiceProvider;
+            i.ProductID = "SERVICE PROVIDER PAYMENT";
+            i.ServiceName = sServiceProvider;
+            i.InvoiceType = "PAYMENT";
+            i.InvoiceDate = System.DateTime.Now.ToString();
+            UICommon.BuySomething(this, i, "MakeServiceProviderPayment");
         }
     }
 }

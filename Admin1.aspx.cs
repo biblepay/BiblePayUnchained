@@ -9,6 +9,8 @@ using static Unchained.Common;
 using RestSharp;
 using System.Net.Http;
 using static BiblePayCommon.DataTableExtensions;
+using System.Net.Mail;
+using static BiblePayCommonNET.StringExtension;
 
 namespace Unchained
 {
@@ -42,66 +44,64 @@ namespace Unchained
             return;
         }
 
-        protected void BatchJob1(bool fTestNet)
+
+        private void FixVideos(bool fTestNet)
         {
-            // rapture videos
-            string sql = "Select * from Rapture where filename like '%.mp4%'";
-            DataTable d11 = gData.GetDataTable(sql, false);
-            
-            for (int i = 0; i < d11.Rows.Count; i++)
+            DataTable dt5 = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
+            Data d = new Data(Data.SecurityType.REQ_SA);
+
+
+            for (int i = 0; i < dt5.Rows.Count; i++)
             {
-                        string sURL = d11.Rows[i]["url"].ToString();
-                        string sFN = d11.Rows[i]["FileName"].ToString();
-                        string sPath = "s:\\san\\Rapture2\\" + sFN;
-                        BiblePayCommon.Entity.video1 v = new BiblePayCommon.Entity.video1();
-                        v.Classification = "video";
-                        v.deleted = 0;
-                        string sTitle = "";
-                        string notes = "";
-                        GetNotesHTML(d11.GetColValue(i, "Notes"), out sTitle, out notes);
-                        v.Title = sTitle;
-                        v.Body = notes;
-                        v.Subject = d11.GetColValue(i, "Category");
-                        v.UserID = gUser(this).BiblePayAddress;
-                        v.time = UnixTimestampUTC();
-                        v.URL = d11.GetColValue(i, "URL");
+                BiblePayCommon.Entity.video1 v = (BiblePayCommon.Entity.video1)BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt5, "video1", i);
+                string sql = "Select Category from Rapture where title like '%" + Mid(v.Title, 0, 20) + "%'";
+                string sCat = d.GetScalarString(sql, "category");
+                if (v.Category == "" && sCat != "")
+                {
+                    v.Category = sCat;
+                    BiblePayDLL.Sidechain.InsertIntoDSQL(fTestNet, v, gUser(this));
 
-                        DACResult r3 = BiblePayDLL.Sidechain.InsertIntoDSQL(fTestNet, v, "video1", GetFundingAddress(fTestNet), GetFundingKey(fTestNet));
+                }
+                else if (v.Category == "" && !v.Title.ToLower().Contains("mass") && !v.Title.ToLower().Contains("batch"))
+                {
+                    v.Category = "Uncategorized";
+                    BiblePayDLL.Sidechain.InsertIntoDSQL(fTestNet, v, gUser(this));
 
-
+                }
             }
-        }
+            string sTest = "";
+            return;
 
+        }
 
 
         private void MigrateVideos(bool fTestNet)
         {
             DataTable dt1 = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
-
+            // clear the transcript field
             for (int i = 0; i < dt1.Rows.Count; i++)
             {
+
                 // if the UserID is blank.
                 string FID = dt1.GetColValue(i, "FID");
                 if (FID == "")
                 {
-                    
                     BiblePayCommon.Entity.video1 v = new BiblePayCommon.Entity.video1();
                     v.Body = dt1.GetColValue(i, "Body");
                     v.Classification = dt1.GetColValue(i, "Classification");
                     v.deleted = 0;
                     v.ParentID = dt1.GetColValue(i, "ParentID");
-                    v.Subject = dt1.GetColValue(i, "Subject");
+                    v.Title = dt1.GetColValue(i, "Title");
                     v.URL = dt1.GetColValue(i, "URL");
-                    v.UserID = gUser(this).BiblePayAddress;
+                    v.UserID = gUser(this).id;
                     //v.Size = (int)dt1.GetColDouble(i, "Size");
                     string sOrigFilename = "s:\\san\\rapture2\\"; // + UrlToFn(v.URL);
                     if (System.IO.File.Exists(sOrigFilename))
                     {
-                        DACResult r = BiblePayDLL.Sidechain.UploadFileTypeBlob(fTestNet, sOrigFilename, 
-                            GetFundingAddress(fTestNet), GetFundingKey(fTestNet));
+                        DACResult r = BiblePayDLL.Sidechain.UploadFileTypeBlob(fTestNet, sOrigFilename, gUser(this));
                         v.FID = r.TXID;
                         v.URL = r.Result;
-                        DataOps.InsertIntoTable(fTestNet, v);
+                        DataOps.InsertIntoTable(this, fTestNet, v, gUser(this));
                     }
 
                 }
@@ -113,8 +113,8 @@ namespace Unchained
         {
             BiblePayCommon.Entity.versememorizer1 n = new BiblePayCommon.Entity.versememorizer1();
 
-            DataOps.InsertIntoTable(true, n);
-            DataOps.InsertIntoTable(false, n);
+            DataOps.InsertIntoTable(this, true, n, gUser(this));
+            DataOps.InsertIntoTable(this, false, n, gUser(this));
 
         }
 
@@ -123,9 +123,15 @@ namespace Unchained
         protected void btnSave_Click(object sender, EventArgs e)
         {
 
-            BatchJob1(false);
+            //UICommon.ReskinCSS("darkblue", "blue", "#00004B", "blue");
+            //UICommon.ReskinCSS("maroon", "#c32148", "#400000", "maroon");
+            //UICommon.ReskinCSS("#696969", "#808080", "#393939", "grey");
+            //            UICommon.ReskinCSS("black", "#202020", "#393939", "black");
+            FixVideos(false);
 
-            // Mission Critical Todo:  Genesis block for VerseMemorizer
+            //            Bibl/ePayDLL.Sidechain.FixVidCat();
+
+            string sTest1 = "";
 
             return;
 

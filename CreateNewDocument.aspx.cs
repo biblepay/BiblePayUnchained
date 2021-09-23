@@ -6,7 +6,6 @@ using System.Web;
 using System.Web.Services;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using static Unchained.StringExtension;
 using static Unchained.Common;
 using System.IO;
 
@@ -14,8 +13,6 @@ namespace Unchained
 {
     public partial class CreateNewDocument : BBPPage
     {
-
-
         protected new void Page_Load(object sender, EventArgs e)
         {
             string sLoadFrom = Request.QueryString["file"] ?? "";
@@ -27,21 +24,20 @@ namespace Unchained
 
         protected string SaveDoc(string sPath, string sTitle)
         {
-            BiblePayCommon.Common.DACResult r = BiblePayDLL.Sidechain.UploadFileTypeBlob(IsTestNet(this), sPath, 
-                GetFundingAddress(IsTestNet(this)), GetFundingKey(IsTestNet(this)));
-            if (r.Error != "" && r.Error != null)
+            BiblePayCommon.Common.DACResult r = BiblePayDLL.Sidechain.UploadFileTypeBlob(IsTestNet(this), sPath, gUser(this));
+            if (r.fError())
             {
-                MsgBox("Error", "Unable to upload [06052021]=" + r.Error + ".", this);
+                UICommon.MsgBox("Error", "Unable to upload [06052021]=" + r.Error + ".", this);
             }
             string sURL = r.Result;
 
             BiblePayCommon.Entity.video1 o = new BiblePayCommon.Entity.video1();
-            o.Subject = sTitle;
+            o.Title = sTitle;
             o.Body = "wikipedia-article";
-            o.UserID = gUser(this).BiblePayAddress;
+            o.UserID = gUser(this).id;
             o.URL = sURL;
             o.Classification = "wiki";
-            r = DataOps.InsertIntoTable(IsTestNet(this), o);
+            r = DataOps.InsertIntoTable(this, IsTestNet(this), o, gUser(this));
             return sURL;
         }
 

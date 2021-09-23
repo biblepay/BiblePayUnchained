@@ -3,37 +3,40 @@ using System.Data;
 using System.Linq;
 using static Unchained.Common;
 using static BiblePayCommon.DataTableExtensions;
+using static BiblePayCommon.Common;
+using System.Collections.Generic;
+using static BiblePayCommon.EntityCommon;
+using static BiblePayCommonNET.CommonNET;
+using static BiblePayCommonNET.DataTableExtensions;
+
 
 namespace Unchained
 {
     public partial class PrayerBlog : BBPPage
     {
-        protected new void Page_Load(object sender, EventArgs e)
-        {
 
-        }
-
-        
         protected override void Event(BBPEvent e)
         {
-            if (e.EventAction == "AddPrayer_Click")
+            if (e.EventAction == "AddObject_Click")
             {
-                Response.Redirect("PrayerAdd");
+                Response.Redirect("PrayerAdd?entity=" + _EntityName);
             }
         }
+
+        protected new void Page_Load(object sender, EventArgs e)
+        {
+            this.Title = _CollectionName + " - List";
+        }
+
         protected string GetPrayerBlogs()
         {
-            // Harvest To Do:  Add Order by, PrayerRequest.Added desc (and inner join equiv for avatar display)
-            BiblePayCommon.BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "pray1");
-            dt = dt.FilterBBPDataTable("isnull(deleted,0) <> 1");
-
-            // Order by
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), _EntityName);
             dt = dt.OrderBy("time desc");
-            
-            string html = "<table class=saved><tr class='objheader'><th class='objheader'>"
-               + "<h3>Prayer Requests</h3><th class='objheader' colspan=2><div style='text-align:right;'>"
-               + "<a onclick=\"__doPostBack('Event','AddPrayer_Click');\"><i class='fa fa-plus'></i></a></div></th></tr>"
-               + "<tr><th width=20%>User</th><th width=20%>Added<th width=50%>Subject</tr>";
+
+            string html = "<table class=saved><tr class='objheader'><th class='objheader' colspan=3>"
+               + "<h3>" + _CollectionName + "</h3><th class='objheader' colspan=2><div style='text-align:right;'>";
+            string sAdd = UICommon.GetStandardAnchor("aAddObj", _EntityName, "", "<i class='fa fa-plus'></i>", "");
+            html += sAdd + "<tr><th width=20%>User</th><th width=20%>Added<th width=50%>Subject</tr>";
             for (int y = 0; y < dt.Rows.Count; y++)
             {
                 string sBody = dt.Rows[y]["body"].ToString();
@@ -41,8 +44,8 @@ namespace Unchained
                 {
                     string div = "<tr>" 
                         + "<td>" + UICommon.GetUserAvatarAndName(this, dt.GetColValue(y, "UserID"))
-                        + "<td>" + UnixTimeStampToDateTime(dt.GetColDouble(y, "Time"))
-                        + UICommon.GetTd(dt.Rows[y], "subject", "PrayerView") + "</tr>";
+                        + "<td>" + dt.GetColDateTime(y, "Time").ToString()
+                        + UICommon.GetTd(dt.Rows[y], "subject", "PrayerView", "&entity=" + _EntityName) + "</tr>";
                     html += div + "\r\n";
                 }
             }

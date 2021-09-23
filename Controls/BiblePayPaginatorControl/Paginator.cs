@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -47,11 +48,11 @@ namespace BiblePayPaginator
         {
             get
             {
-                return Convert.ToInt32(ViewState["PageNumber"]);
+                return Convert.ToInt32(this.Page.Session["PageNumber"]);
             }
             set
             {
-                ViewState["PageNumber"] = value;
+                this.Page.Session["PageNumber"] = value;
             }
         }
 
@@ -112,25 +113,28 @@ namespace BiblePayPaginator
         public Paginator(Page p)
         {
             this.Page = p;
-            //this.Page.ClientScript.RegisterStartupScript(this.Page.GetType(), "speed1", sJavascript, true);
         }
         public Paginator()
         {
             this.Load += new EventHandler(this.Page_Load);
-
-
         }
 
         protected void Page_Load(object sender, EventArgs e)
         {
 
-            string ea = this.Page.Request["__EVENTARGUMENT"] ?? "";
-            string et = this.Page.Request["__EVENTTARGET"] ?? "";
-            string[] vArgs = et.Split(new string[] { "<col>" }, StringSplitOptions.None);
-
-            if (et == "btnPaginate_Click")
+            string hfPostback = (this.Page.Request.Params["hfPostback"] ?? "").ToString();
+            if (hfPostback.Contains("},{"))
             {
-                PageNumber = (int)BiblePayCommon.Common.GetDouble(ea);
+                return;
+            }
+            dynamic oEventInfo = JsonConvert.DeserializeObject<dynamic>(BiblePayCommon.Encryption.Base64Decode(hfPostback));
+
+            if (oEventInfo == null)
+                return;
+
+            if (oEventInfo.Event == "btnPaginate_Click")
+            {
+                PageNumber = (int)BiblePayCommon.Common.GetDouble(oEventInfo.Value);
                 if (PageNumber < 1)
                     PageNumber = 1;
             }
@@ -141,7 +145,7 @@ namespace BiblePayPaginator
 
         private static string GenPagI1(string sValue, string sCustomHTML, string sClass)
         {
-            string a = "<a " + sClass + " href='javascript: void(0);' onclick=\"__doPostBack('btnPaginate_Click', " + sValue + ");\">" + sCustomHTML + "</a>";
+            string a = "<a " + sClass + " href='javascript: void(0);' onclick=\"var e={};e.Event='btnPaginate_Click';e.Value='" + sValue + "';BBPPostBack2(this,e);\">" + sCustomHTML + "</a>";
             return a;
         }
         private string GeneratePaginatorControl()
@@ -158,7 +162,10 @@ namespace BiblePayPaginator
                 nObjsPerPage = 1;
 
             
-            TotalPages = (int)Math.Ceiling((double)(Rows / nObjsPerPage));
+            decimal nPages = Math.Ceiling((decimal)Rows / nObjsPerPage);
+
+
+            TotalPages = (int)nPages;
             
             if (PageNumber > TotalPages)
             {
@@ -175,7 +182,7 @@ namespace BiblePayPaginator
             if (iNextPage >= TotalPages)
                 iNextPage = (int)TotalPages;
 
-            string pag = "<div class='pagination' style='margin:0 0;'><table width=100%><tr><td width=100%>";
+            string pag = "<div class='pagination'><table width='100%'><tr><td width='100%'>";
 
             pag += GenPagI1("0", "&laquo;", "");
 

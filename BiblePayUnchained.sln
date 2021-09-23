@@ -5,13 +5,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiblePayUnchained", "BiblePayUnchained.csproj", "{78F7F6BC-8DC9-40A7-827C-DE1795AC1B33}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AF71AE0F-07A3-4B0E-A945-43E1A9BFD386} = {AF71AE0F-07A3-4B0E-A945-43E1A9BFD386}
-		{4A749489-BBBF-4DEA-AB14-9E0791F015A8} = {4A749489-BBBF-4DEA-AB14-9E0791F015A8}
-		{42A6BCDC-148B-4A07-8441-58D864654B39} = {42A6BCDC-148B-4A07-8441-58D864654B39}
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NBitcoin", "..\NBitcoin\NBitcoin.csproj", "{42A6BCDC-148B-4A07-8441-58D864654B39}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiblePayTestHarness", "..\BiblePayTestHarness\BiblePayTestHarness.csproj", "{4A749489-BBBF-4DEA-AB14-9E0791F015A8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BiblePayCommon", "..\BiblePayCommon\BiblePayCommon.csproj", "{417014B8-4BAF-4A14-8C30-D683A16EEAAD}"
 EndProject
@@ -20,6 +14,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiblePayVideo", "Controls\BiblePayVideoControl\BiblePayVideo.csproj", "{1CFF26EF-9B2C-464C-A9FC-B532809F30DC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiblePayPaginator", "Controls\BiblePayPaginatorControl\BiblePayPaginator.csproj", "{A654C466-AFD4-4469-B00A-6DF3B55B4D01}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiblePayCommonNET", "..\BiblePayCommonNET\BiblePayCommonNET.csproj", "{28267366-6A2A-4DC7-8738-4B9BAC6A9073}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,22 +33,6 @@ Global
 		{78F7F6BC-8DC9-40A7-827C-DE1795AC1B33}.Release|Any CPU.Build.0 = Release|Any CPU
 		{78F7F6BC-8DC9-40A7-827C-DE1795AC1B33}.Release|x64.ActiveCfg = Release|x64
 		{78F7F6BC-8DC9-40A7-827C-DE1795AC1B33}.Release|x64.Build.0 = Release|x64
-		{42A6BCDC-148B-4A07-8441-58D864654B39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42A6BCDC-148B-4A07-8441-58D864654B39}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{42A6BCDC-148B-4A07-8441-58D864654B39}.Debug|x64.ActiveCfg = Debug|x64
-		{42A6BCDC-148B-4A07-8441-58D864654B39}.Debug|x64.Build.0 = Debug|x64
-		{42A6BCDC-148B-4A07-8441-58D864654B39}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42A6BCDC-148B-4A07-8441-58D864654B39}.Release|Any CPU.Build.0 = Release|Any CPU
-		{42A6BCDC-148B-4A07-8441-58D864654B39}.Release|x64.ActiveCfg = Release|x64
-		{42A6BCDC-148B-4A07-8441-58D864654B39}.Release|x64.Build.0 = Release|x64
-		{4A749489-BBBF-4DEA-AB14-9E0791F015A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A749489-BBBF-4DEA-AB14-9E0791F015A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A749489-BBBF-4DEA-AB14-9E0791F015A8}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{4A749489-BBBF-4DEA-AB14-9E0791F015A8}.Debug|x64.Build.0 = Debug|Any CPU
-		{4A749489-BBBF-4DEA-AB14-9E0791F015A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A749489-BBBF-4DEA-AB14-9E0791F015A8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4A749489-BBBF-4DEA-AB14-9E0791F015A8}.Release|x64.ActiveCfg = Release|Any CPU
-		{4A749489-BBBF-4DEA-AB14-9E0791F015A8}.Release|x64.Build.0 = Release|Any CPU
 		{417014B8-4BAF-4A14-8C30-D683A16EEAAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{417014B8-4BAF-4A14-8C30-D683A16EEAAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{417014B8-4BAF-4A14-8C30-D683A16EEAAD}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -85,6 +65,14 @@ Global
 		{A654C466-AFD4-4469-B00A-6DF3B55B4D01}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A654C466-AFD4-4469-B00A-6DF3B55B4D01}.Release|x64.ActiveCfg = Release|Any CPU
 		{A654C466-AFD4-4469-B00A-6DF3B55B4D01}.Release|x64.Build.0 = Release|Any CPU
+		{28267366-6A2A-4DC7-8738-4B9BAC6A9073}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28267366-6A2A-4DC7-8738-4B9BAC6A9073}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28267366-6A2A-4DC7-8738-4B9BAC6A9073}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{28267366-6A2A-4DC7-8738-4B9BAC6A9073}.Debug|x64.Build.0 = Debug|Any CPU
+		{28267366-6A2A-4DC7-8738-4B9BAC6A9073}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28267366-6A2A-4DC7-8738-4B9BAC6A9073}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28267366-6A2A-4DC7-8738-4B9BAC6A9073}.Release|x64.ActiveCfg = Release|Any CPU
+		{28267366-6A2A-4DC7-8738-4B9BAC6A9073}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

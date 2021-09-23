@@ -9,6 +9,8 @@ using System.Web.UI.WebControls;
 using static BiblePayDLL.Shared;
 using static Unchained.DataOps;
 using static BiblePayCommon.Common;
+using static BiblePayCommonNET.UICommonNET;
+using BiblePayCommonNET;
 
 namespace Unchained
 {
@@ -61,23 +63,23 @@ namespace Unchained
 			string sFinalExam = Request.QueryString["test"].ToNonNullString();
 			string sURL = "https://foundation.biblepay.org/Univ/" + sFinalExam + "_key.xml";
 			string sExam = BiblePayDLL.Sidechain.DownloadResourceAsString(sURL);
-			string sAnswerKey = Common.ExtractXML(sExam, "<KEY>", "</KEY>");
+			string sAnswerKey = ExtractXML(sExam, "<KEY>", "</KEY>");
 			if (sAnswerKey == "")
 			{
-				MsgBox("Error", "Answer key missing", this);
+				UICommon.MsgBox("Error", "Answer key missing", this);
 			}
 
 			_exammemory.vecAnswerKey = sAnswerKey.Split(",");
-			string sQ = Common.ExtractXML(sExam, "<QUESTIONS>", "</QUESTIONS>").ToString();
-			_exammemory.Course = "Final Exam: " + Common.ExtractXML(sExam, "<COURSE>", "</COURSE>");
+			string sQ = ExtractXML(sExam, "<QUESTIONS>", "</QUESTIONS>").ToString();
+			_exammemory.Course = "Final Exam: " + ExtractXML(sExam, "<COURSE>", "</COURSE>");
 			_exammemory.vecQ.Clear();
 			_exammemory.vecA.Clear();
 
 			string[] vQ = sQ.Split("<QUESTIONRECORD>");
 			for (int i = 0; i < (int)vQ.Count(); i++)
 			{
-				string sQ1 = Common.ExtractXML(vQ[i], "<Q>", "</Q>");
-				string sA1 = Common.ExtractXML(vQ[i], "<A>", "</A>");
+				string sQ1 = ExtractXML(vQ[i], "<Q>", "</Q>");
+				string sA1 = ExtractXML(vQ[i], "<A>", "</A>");
 				if (!sQ1.IsEmpty() && !sA1.IsEmpty())
 				{
 					_exammemory.vecQ.Add(sQ1);
@@ -112,6 +114,12 @@ namespace Unchained
 			}
 
 			lblTitle.Text = _exammemory.Course;
+
+			// Load initial values
+			string sMode = _exammemory.ExamMode == ExamMode.TRAIN ? "<font color=red>LEARNING MODE</font>" : "<font color=red>TESTING MODE</font>";
+			string sInfo = sMode + "<br><br>Welcome to your Final Exam, " + gUser(this).FullUserName() + "!";
+			lblInfo.Text = sInfo;
+
 
 		}
 
@@ -225,7 +233,7 @@ namespace Unchained
 		{
 			if (_exammemory.nCurrentQuestion > _exammemory.vecA.Count)
 			{
-				MsgBox("Error", "FinalExam::Error Size too small", this);
+				UICommon.MsgBox("Error", "FinalExam::Error Size too small", this);
 			}
 
 			string[] vAnswers = _exammemory.vecA[_exammemory.nCurrentQuestion].Split("|");
@@ -298,10 +306,6 @@ namespace Unchained
 			string sCaption = _exammemory.ExamMode == ExamMode.TRAIN ? "Switch to TEST Mode" : "Switch to REVIEW Mode";
 		 	btnSwitch.Text = sCaption;
 
-			// Load initial values
-			string sMode = _exammemory.ExamMode == ExamMode.TRAIN ? "<font color=red>LEARNING MODE</font>" : "<font color=red>TESTING MODE</font>";
-			string sInfo = sMode + "<br><br>Welcome to your Final Exam, " + gUser(this).UserName + "!";
-			lblInfo.Text = sInfo;
 		}
 
 		double CalculateScores()
@@ -343,7 +347,7 @@ namespace Unchained
 			_exammemory.nTestingScore = 0;
 			Session["exammemory"] = _exammemory;
 
-			UICommon.MsgModal(this, sTitle, sSummary, 500, 300);
+			MsgModal(this, sTitle, sSummary, 500, 300);
 		}
 
 		protected void btnGrade_Click(object sender, EventArgs e)
@@ -496,6 +500,8 @@ namespace Unchained
 
 			}
 			Session["exammemory"] = _exammemory;
+			Page_Load(this, null);
+
 		}
 
 	}

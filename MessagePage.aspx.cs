@@ -4,18 +4,12 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using static Unchained.StringExtension;
+using static BiblePayCommonNET.StringExtension;
 
 namespace Unchained
 {
     public partial class MessagePage : BBPPage
     {
-        protected new void Page_Load(object sender, EventArgs e)
-        {
-           
-
-        }
-
         public string GetMessagePage()
         {
             string sTitle = Request.QueryString["Title"] ?? "";

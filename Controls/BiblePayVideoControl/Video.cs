@@ -44,6 +44,18 @@ namespace BiblePayVideo
 
             }
         }
+        public bool AutoPlay
+        {
+            get
+            {
+                return Convert.ToBoolean(ViewState["AutoPlay"]);
+            }
+            set
+            {
+                ViewState["AutoPlay"] = value;
+
+            }
+        }
 
         public new int Width
         {
@@ -135,32 +147,34 @@ namespace BiblePayVideo
 
         private string GetInnerVideo()
         {
-            string sHTML = "<div class='videosize muse-video-player' data-autoplay='1' data-resume='1' data-video='" + SVID + "' data-height='" + Height.ToString() + "' data-width='" + Width.ToString() + "'></div>";
+            string sAutoPlay = AutoPlay ? "data-autoplay='1'" : "";
+            string sHTML = "<div id='player1' style='width:800px;height:600px;' name='player1' class='videoinner videosize muse-video-player' " + sAutoPlay + " data-resume='1' data-video='" 
+                + SVID + "' data-height='" + Height.ToString() + "' data-width='" + Width.ToString() + "'></div>";
+
+            if (URL.EndsWith("png") || URL.EndsWith("jpeg") || URL.EndsWith("jpg") || URL.EndsWith("bmp"))
+            {
+                sHTML = "<img width='" + (Width-100).ToString() + "px;' height='" + (Height-100).ToString() + "px;' src='" + URL.ToString() + "'/>";
+            }
+
+            //js
+            string js = "<script>const player = MusePlayer({   container: '#player1',  video: '" + SVID + "',  sizing: 'fill' });</script>";
+            sHTML += js;
+
             return sHTML;
         }
         public Video(Page p)
         {
             this.Page = p;
-            /*
-            string sJavascript = "function changePlaySpeed(factor)   {"
-                + "           var vid = document.getElementById('video1');"
-                + "vid.playbackRate = factor;  }  ";
-
-            
-            //this.Page.ClientScript.RegisterStartupScript(this.Page.GetType(), "speed1", sJavascript, true);
-            */
-
+         
         }
         public Video()
         {
             
-            
         }
-
 
         private string CurateVideo()
         {
-           string sDiv = "<div style='height:100%; width:100%; '>";
+           string sDiv = "<div id='vidcontainer" + this.ID + "'>";
 
             sDiv += GetInnerVideo();
             

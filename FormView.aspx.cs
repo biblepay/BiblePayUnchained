@@ -1,34 +1,23 @@
-﻿using static Unchained.Common;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using static BiblePayDLL.Shared;
-using static Unchained.DataOps;
+﻿using System.Data;
 using static BiblePayCommon.Common;
-using System.Reflection;
 using static BiblePayCommon.DataTableExtensions;
+using static BiblePayCommonNET.CommonNET;
+using static BiblePayCommonNET.StringExtension;
+using static Unchained.Common;
+using static Unchained.DataOps;
+
 
 namespace Unchained
 {
     public partial class FormView : BBPPage
     {
-        protected new void Page_Load(object sender, EventArgs e)
-        {
-            
-
-        }
-
         protected override void Event(BBPEvent e)
         {
             if (e.EventAction == "Save_Click" || e.EventAction == "Delete_Click")
             {
                 if (!gUser(this).LoggedIn)
                 {
-                    MsgBox("Error", "Sorry, you must be logged in with a biblepay address and nickname to save a record. ", this);
+                    UICommon.MsgBox("Error", "Sorry, you must be logged in first to save a record. ", this);
                 }
                 string sID = Request.QueryString["id"] ?? "";
                 string sMode = Request.QueryString["action"] ?? "";
@@ -49,46 +38,60 @@ namespace Unchained
                 BiblePayCommon.IBBPObject o = (BiblePayCommon.IBBPObject)BiblePayCommon.EntityCommon.GetInstance("BiblePayCommon.Entity+" + sTable);
                 for (int i = 0; i < dt.Columns.Count; i++)
                 {
-                        string sColName = dt.Columns[i].ColumnName;
-                        string sOrigValue = dt.GetColValue(0, dt.Columns[i].ColumnName);
-                        if (Request.Form["input_" + sColName] != null)
+                    string sColName = dt.Columns[i].ColumnName;
+                    string sOrigValue = dt.GetColValue(0, dt.Columns[i].ColumnName);
+                    // During save (of a generic form object), first if it is not a restricted or hidden field :
+                    if (Request.Form["input_" + sColName] != null)
+                    {
+                        string sNewValue = Request.Form["input_" + sColName].ToString();
+                        BiblePayCommon.EntityCommon.SetEntityValue(o, sColName, sNewValue);
+                    }
+                    // otherwise, we pull value from session (since it was restricted or hidden)
+                    else if (Request.Form["input_" + sColName] == null)
+                    {
+                        object oOrigValue = Session["input_" + sColName];
+                        if (oOrigValue != null)
                         {
-                            string sNewValue = Request.Form["input_" + sColName].ToString();
-                            BiblePayCommon.EntityCommon.SetEntityValue(o, sColName, sNewValue);
+                            BiblePayCommon.EntityCommon.SetEntityValue(o, sColName, oOrigValue);
                         }
+                    } 
                 }
 
 
                 if (e.EventAction == "Delete_Click")
                 {
                     BiblePayCommon.EntityCommon.SetEntityValue(o, "deleted", "1");
-
                 }
-                else
+              
+
+                DACResult r = InsertIntoTable(this, IsTestNet(this), o, gUser(this));
+
+                if (!r.fError())
                 {
-                    //SetEntityValue(o, "UserID", gUser(this).BiblePayAddress);
-                    //SetEntityValue(o, "deleted", "0");
+                    Session["stack"] = UICommon.Toast("Saved", "Your " + sTable + " has been " + sMode + "(ed)!");
                 }
-
-                InsertIntoTable(IsTestNet(this), o);
-
-                Session["stack"] = UICommon.Toast("Saved", "Your " + sTable + " has been " + sMode + "(ed)!");
-
             }
         }
 
-        bool IsRestricted(string sWord)
+        public string GetStandardDropDown(string sID, string sTable, string sColumn, string sSelectedValue)
         {
-            string sRestricted = "UserID,deleted,table,id,time,chain,lastblockhash,objecthash";
-            string[] vRestricted = sRestricted.Split(",");
-            for (int i = 0; i < vRestricted.Length; i++)
+            DataTable dtGroup = UICommon.GetGroup(IsTestNet(this), "video1", "url like '%mp4%'", "Category");
+            string sOptions = "";
+            for (int y = 0; y < dtGroup.Rows.Count; y++)
             {
-                if (vRestricted[i].ToLower() == sWord.ToLower())
-                    return true;
-            }
-            return false;
-        }
+                bool fSelected = sSelectedValue.ToLower() == dtGroup.Rows[y]["category"].ToString().ToLower();
+                string sSel = fSelected ? " SELECTED " : "";
 
+                string sRow = "<option " + sSel + "value='" + dtGroup.Rows[y]["category"].ToString() + "'>" 
+                    + dtGroup.Rows[y]["category"].ToString() + "</option>\r\n";
+                sOptions += sRow;
+            }
+            string sDD = "<select name='input_" + sID + "' id='input_" + sID + ">";
+            sDD += sOptions;
+            sDD += "</select>";
+            return sDD;
+        }
+       
         protected string GetFormView()
         {
             string sTable = Request.QueryString["table"] ?? "";
@@ -101,7 +104,7 @@ namespace Unchained
                 BiblePayCommon.Entity.news1 o = new BiblePayCommon.Entity.news1();
                 o.Title = "";
                 o.URL = "";
-                BiblePayDLL.Sidechain.InsertIntoDSQL(IsTestNet(this), o, "news1", GetFundingAddress(IsTestNet(this)), GetFundingKey(IsTestNet(this)));
+                BiblePayDLL.Sidechain.InsertIntoDSQL(IsTestNet(this), o, gUser(this));
 
             }
             if (sMode != "add")
@@ -111,40 +114,47 @@ namespace Unchained
             }
             string html = "<fieldset><legend>" + sTable + " - Object " + sID + " - " + sMode + ":</legend>";
             html += "<table width=90%>";
-            string sReadOnly = sMode == "view" ? "readonly" : "";
-
+            
             for (int i = 0; i < dt.Columns.Count; i++)
             {
                 string sColName = dt.Columns[i].ColumnName;
                 string sOrigValue = dt.GetColValue(0, dt.Columns[i].ColumnName);
+                object oOrigValue = dt.Rows[0][i];
                 if (sMode == "add")
                 {
                     sOrigValue = "";
                 }
-                string sValueControl = "<input name='input_" + sColName + "'" + sReadOnly + " style= 'width:90%;' value = '" + sOrigValue + "' />";
-                if (sOrigValue.Length > 255)
+                bool fRestricted = BiblePayCommon.EntityCommon.IsRestrictedColumn(sColName);
+                // if (System.Diagnostics.Debugger.IsAttached)
+                bool fHidden = BiblePayCommon.EntityCommon.IsHidden(sColName);
+                bool fReadonly = BiblePayCommon.EntityCommon.IsReadOnly(sColName);
+                string sReadOnly = (sMode == "view" || fReadonly) ? "readonly" : "";
+                string sValueControl = "<input name='input_" + sColName + "'" + sReadOnly + " class='pc90' value = '" + sOrigValue + "' />";
+                if (sOrigValue.Length > 255 || sColName.ToLower() == "body" || sColName.ToLower() == "transcript")
                 {
-                    sValueControl = "<textarea rows='10' cols='80'>" + sOrigValue + "</textarea>";
+                    sValueControl = "<textarea rows='10' cols='80' name='input_" + sColName + "' class='pc90' " + sReadOnly + ">" + sOrigValue + "</textarea>";
+                }
+                // If this is a dropdown...
+                if (sTable == "video1" && sColName.ToLower() == "category")
+                {
+                    sValueControl = GetStandardDropDown(sColName, "video1", sColName, sOrigValue);
                 }
                 
-                bool fRestricted = IsRestricted(sColName);
-                if (System.Diagnostics.Debugger.IsAttached)
-                {
-                    fRestricted = false;
-                }
-
-                    string sRow = "<tr><td width=25%><span>" + sColName + ":</span><td>" + sValueControl + "</tr>\r\n";
-                if (!fRestricted)
+                string sRow = "<tr><td width=25%><span>" + sColName + ":</span><td>" + sValueControl + "</tr>\r\n";
+                if (!fRestricted && !fHidden)
                    html += sRow;
+                if (fRestricted || fHidden)
+                {
+                    // Store in session
+                    Session["input_" + sColName] = oOrigValue;
+                }
             }
             html += "</table>";
             // Submit an edit
-            string sButton = "<button id='btnSave' onclick=\""
-             + "__doPostBack('Event_Save_" + "_" + sID + "_', 'Save_Click');\">Save</button> ";
+            string sButton = UICommon.GetStandardButton(sID, "Save", "Save", "Save");
             if (System.Diagnostics.Debugger.IsAttached)
             {
-                string sDeleteButton = "<button id='btnDelete' onclick=\""
-            + "__doPostBack('Event_Delete_" + "_" + sID + "_', 'Delete_Click');\">Delete</button> ";
+                string sDeleteButton = UICommon.GetStandardButton(sID, "Delete", "Delete", "Delete");
                 html += sDeleteButton;
             }
             if (sMode == "edit" || sMode == "add")

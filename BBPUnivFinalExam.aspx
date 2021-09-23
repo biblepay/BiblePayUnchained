@@ -16,27 +16,26 @@
          
         <tr>
             <td><asp:Label ID="lblQ" runat="server" Text="Question:"></asp:Label></td>
-            <td>        <asp:TextBox ID="txtQuestion" runat="server" TextMode="MultiLine"  Rows="10" style="width: 900px">        </asp:TextBox></td>
-  </tr>
+            <td>        <asp:TextBox ID="txtQuestion" runat="server" TextMode="MultiLine"  Rows="10" class='pc90'>        </asp:TextBox></td>
+        </tr>
 
-    <tr>
+        <tr>
         <td>        <asp:Label ID="lblA1" runat="server" Text="Your Answer:"></asp:Label></td>
         <td>  
-
-<div>
+        <div>
                      <input runat="server" type="radio" id="radioAnswerA" name="radioAnswer" value="A"><asp:Label ID="lblA" runat="server" Text=""></asp:Label>
-    <br />
+        <br />
 
                      <input runat="server" type="radio" id="radioAnswerB" name="radioAnswer"  value="B"><asp:Label ID="lblB" runat="server" Text=""></asp:Label>
-    <br />
+        <br />
 
                      <input runat="server" type="radio" id="radioAnswerC" name="radioAnswer"  value="C"><asp:Label ID="lblC" runat="server" Text=""></asp:Label>
-    <br />
+        <br />
 
                      <input runat="server" type="radio" id="radioAnswerD" name="radioAnswer"  value="D"><asp:Label ID="lblD" runat="server" Text=""></asp:Label>
                 <br />
                      <asp:Label ID="lblGrade" runat="server" Text=""></asp:Label>
-     </div>
+        </div>
             
         </td></tr>
 
@@ -44,7 +43,7 @@
         <tr>
             <td>        <asp:Label ID="lblComments" runat="server" Text="Comments/Answer:"></asp:Label></td>
 
-            <td>        <asp:TextBox ID="txtAnswer" runat="server" TextMode="MultiLine"  Rows="10" style="width: 900px">        </asp:TextBox></td>
+            <td>        <asp:TextBox ID="txtAnswer" runat="server" TextMode="MultiLine"  Rows="10" class='pc90'>        </asp:TextBox></td>
 
         </tr>
 
@@ -67,7 +66,7 @@
     runat="server">
     <ContentTemplate>
 
-        <table width="100%">
+    <table width="100%">
 
     <tr>
         <td width="70%"> 
@@ -84,11 +83,4 @@
         </asp:AsyncPostBackTrigger>
     </Triggers>
 </asp:UpdatePanel>
-
-
-
-
-
-
-
 </asp:Content>
