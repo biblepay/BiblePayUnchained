@@ -7,7 +7,7 @@
 
     <br />
 
-    <div id="bibleViewport" style="min-height:500px; max-height:500px;overflow-y:auto;">
+    <div id="bibleViewport" style="min-height:350px; max-height:440px;overflow-y:auto;">
 
         <table id="bibleviewport" style="">
             <tr><td>

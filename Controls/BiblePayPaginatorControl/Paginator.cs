@@ -192,7 +192,9 @@ namespace BiblePayPaginator
             int iStartPage = PageNumber - (1 / 2);
             if (iStartPage < 1) 
                 iStartPage = 1;
+            bool fMobile = BiblePayCommonNET.UICommonNET.fBrowserIsMobile(this.Page);
 
+            int iCutoff = fMobile ? 1 : 5;
             for (int i = iStartPage; i <= TotalPages; i++)
             {
                 string sActive = "";
@@ -202,10 +204,12 @@ namespace BiblePayPaginator
                 if (iPos > 2 && i < TotalPages)
                 {
                     sRow = GenPagI1(TotalPages.ToString(), TotalPages.ToString(), sActive);
+                    pag += sRow;
+                    break;
                 }
                 pag += sRow;
                 iPos++;
-                if (iPos > 3)
+                if (iPos >= iCutoff)
                     break;
             }
             //Next Page

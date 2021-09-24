@@ -64,23 +64,16 @@
         <asp:Button ID="btnSetTwoFactor"  runat="server" Text="Set Up 2FA" OnClick="btnSetTwoFactor_Click" />
         <asp:Button ID="btnCheckTwoFactor" runat="server" Text="Test 2FA" OnClientClick="return true;var pin=prompt('Enter PIN >');var e={};e.Event='Validate2FA_Click';e.Value=pin;BBPPostBack2(null,e);return true;" 
             OnClick="btnValidateTwoFactor_Click" />
-
         <asp:Button ID="btnRemoveTwoFactor"  runat="server" Text="Remove 2FA" OnClick="btnRemoveTwoFactor_Click" />
-
         &nbsp;<asp:Label ID="lblStatus" runat="server" Text="" style="color:red;"></asp:Label>                    
 
         <br />
-        <br />
-
-
-        <asp:Label ID="lblQR" runat="server" Text="">QR Code:</asp:Label>                    
-        <br />
-              <asp:Image ID="imgQrCode" runat="server" Width="220" Height="220" />
+        <asp:Label ID="lblQR" runat="server" Text="">QR Code:<br /></asp:Label>                    
+        <asp:Image ID="imgQrCode" runat="server" Width="220" Height="220" />
         
     </fieldset>
 
     <br />
-
 
     <fieldset>
         <legend>Wallet:</legend>
@@ -138,6 +131,7 @@
         <label class="offset" for="txtTLU">Telegram URL:</label><asp:TextBox width="700px" id="txtTelegramURL" runat="server"></asp:TextBox> 
         <br />
         <label class="offset" for="txtTLD">Telegram Description:</label><asp:TextBox width="700px" id="txtTelegramDescription" TextMode="MultiLine" Rows="5" runat="server"></asp:TextBox> 
+        <br />
         <asp:Button ID="btnUpdateTelegramFields" runat="server" Text="Update Telegram Profile" OnClick="btnUpdateTelegramProfile_Click"/>         
         
     </fieldset>

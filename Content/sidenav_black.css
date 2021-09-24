@@ -116,7 +116,7 @@ body.hold-transition .main-header .logo {
   background: transparent;
   margin-top: 0;
   margin-bottom: 0;
-  font-size: 12px;
+  font-size: 16px;
   padding: 7px 5px;
   position: absolute;
   top: 15px;
@@ -283,7 +283,7 @@ body.hold-transition .main-header .logo {
 }
 .sidebar-menu li.header {
   padding: 10px 25px 10px 15px;
-  font-size: 12px;
+  font-size: 16px;
 }
 .sidebar-menu li > a > .fa-angle-left,
 .sidebar-menu li > a > .pull-right-container > .fa-angle-left {
@@ -323,12 +323,12 @@ body.hold-transition .main-header .logo {
 .sidebar-menu .treeview-menu > li > a {
   padding: 5px;
   display: block;
-  font-size: 12px;
+  font-size: 14px;
 }
 .sidebar-menu .treeview-menu > li > a:hover {
 	#color: silver;
 	#second color:1;
-    #font-size:110%;
+    #font-size:150%;
 	background-color: #202020;
 }
 .sidebar-menu .treeview-menu > li > a > .fa,
@@ -415,6 +415,7 @@ body.hold-transition .main-header .logo {
   white-space: nowrap;
   overflow: hidden;
   color: #FFFFFF;
+  #font-size:20px;
 }
 .sidebar-menu:hover {
   overflow: visible;

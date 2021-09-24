@@ -7,15 +7,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiblePayUnchained", "BibleP
 		{AF71AE0F-07A3-4B0E-A945-43E1A9BFD386} = {AF71AE0F-07A3-4B0E-A945-43E1A9BFD386}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BiblePayCommon", "..\BiblePayCommon\BiblePayCommon.csproj", "{417014B8-4BAF-4A14-8C30-D683A16EEAAD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BiblePayCommon", "BiblePayCommon\BiblePayCommon.csproj", "{417014B8-4BAF-4A14-8C30-D683A16EEAAD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BiblePayDLL2", "..\BiblePayDLL2\BiblePayDLL2\BiblePayDLL2.csproj", "{AF71AE0F-07A3-4B0E-A945-43E1A9BFD386}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BiblePayDLL2", "BiblePayDLL2\BiblePayDLL2.csproj", "{AF71AE0F-07A3-4B0E-A945-43E1A9BFD386}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiblePayVideo", "Controls\BiblePayVideoControl\BiblePayVideo.csproj", "{1CFF26EF-9B2C-464C-A9FC-B532809F30DC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiblePayPaginator", "Controls\BiblePayPaginatorControl\BiblePayPaginator.csproj", "{A654C466-AFD4-4469-B00A-6DF3B55B4D01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiblePayCommonNET", "..\BiblePayCommonNET\BiblePayCommonNET.csproj", "{28267366-6A2A-4DC7-8738-4B9BAC6A9073}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiblePayCommonNET", "BiblePayCommonNET\BiblePayCommonNET.csproj", "{28267366-6A2A-4DC7-8738-4B9BAC6A9073}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

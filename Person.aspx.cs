@@ -2,12 +2,11 @@
 using System;
 using System.Data;
 using static BiblePayCommon.Common;
+using static BiblePayCommon.DataTableExtensions;
 using static BiblePayCommon.Entity;
 using static BiblePayCommonNET.CommonNET;
 using static BiblePayCommonNET.UICommonNET;
 using static Unchained.Common;
-using static BiblePayCommonNET.DataTableExtensions;
-using static BiblePayCommon.DataTableExtensions;
 
 namespace Unchained
 {
@@ -54,10 +53,10 @@ namespace Unchained
                     UICommon.MsgBox("Error", "Sorry, you cannot be friends with yourself. ", this);
                     return;
                 }
-                bool fExists = DataExists(IsTestNet(this), "FriendRequest", "userid='" + f.UserID + "' and requesterid='" + f.RequesterID + "'");
+                bool fExists = DataExists(IsTestNet(this), "FriendRequest", "userid='" + f.UserID + "' and requesterid='" + f.RequesterID + "' or userid='" + f.RequesterID + "' and requesterid='" + f.UserID + "'");
                 if (fExists)
                 {
-                    UICommon.MsgBox("Error", "Sorry, you already have a friends request in for this person. ", this);
+                    UICommon.MsgBox("Error", "Sorry, this person already has a friends requestion in to you, or you already have a friends request in for this person. ", this);
                     return;
                 }
 
@@ -157,7 +156,12 @@ namespace Unchained
             html += "<tr><td>Gender: " + u.Gender;
 
             html += "<tr><td>Telegram: <a href='" + u.TelegramLinkURL + "'>" + u.TelegramLinkName + "</a>";
+            
             html += "<tr><td>" + u.TelegramLinkDescription;
+            // Their video channel:
+            string sVideoAnchor = "<a href=VideoList?lastname=" + u.LastName + "&firstname=" + u.FirstName + ">My Video Channel</a>";
+
+            html += "<tr><td>" + sVideoAnchor;
 
             if (gUser(this).LoggedIn)
             {

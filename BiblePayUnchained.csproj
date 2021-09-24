@@ -449,7 +449,7 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
-    <Content Include="Content\Site0.css" />
+    <Content Include="Content\Site.css" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -846,15 +846,15 @@
     <Analyzer Include="packages\AWSSDK.S3.3.5.0-beta\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BiblePayCommonNET\BiblePayCommonNET.csproj">
+    <ProjectReference Include="BiblePayCommonNET\BiblePayCommonNET.csproj">
       <Project>{28267366-6a2a-4dc7-8738-4b9bac6a9073}</Project>
       <Name>BiblePayCommonNET</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BiblePayCommon\BiblePayCommon.csproj">
+    <ProjectReference Include="BiblePayCommon\BiblePayCommon.csproj">
       <Project>{417014b8-4baf-4a14-8c30-d683a16eeaad}</Project>
       <Name>BiblePayCommon</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BiblePayDLL2\BiblePayDLL2\BiblePayDLL2.csproj">
+    <ProjectReference Include="BiblePayDLL2\BiblePayDLL2.csproj">
       <Project>{af71ae0f-07a3-4b0e-a945-43e1a9bfd386}</Project>
       <Name>BiblePayDLL2</Name>
     </ProjectReference>

@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using static BiblePayCommon.Common;
@@ -16,6 +17,8 @@ namespace Unchained
 {
     public static class UICommon
     {
+        
+
         public static string GetCurrentThemeName(Page p)
         {
             string sTheme = gUser(p).ThemeName;
@@ -81,16 +84,19 @@ namespace Unchained
 
             string[] vURLs = URLs.Split(";");
             string[] vLinkNames = LinkNames.Split(";");
-            
+           
             var js2 = "   var xp = parseFloat(localStorage.getItem('bbpdd" + item.ToString() + "')); "
              + "   var xe = xp==0?1:0; localStorage.setItem('bbpdd" + item.ToString() + "', xe); var disp = xp == 0 ? 'none' : 'block';";
 
             var js3 = "   var xp = parseFloat(localStorage.getItem('bbpdd" + item.ToString() + "')); "
              + "   var xe = xp==0?1:0; var disp = xe == 0 ? 'none' : 'block';";
 
+            //string sOldJs = "myfunc();";
+
             string menu = "<li id ='button_" + MenuName + "' class='dropdown'>"
-             + "	<a class='dropdown-toggle' href='#' data-toggle='dropdown' onclick=\"" + js2 + " $('#bbpdd" + item.ToString() + "').attr('expanded', xe); "
-             + "     $('#bbpdd" + item.ToString() + "').css('display',disp);\" >"
+             + "	<a class='dropdown-toggle' href='#' data-toggle='dropdown' onclick=\" myfunc(" + item.ToString() + "); " 
+             + js2 + " $('#bbpdd" + item.ToString() + "').attr('expanded', xe); "
+             + "    $('#bbpdd" + item.ToString() + "').css('display',disp);\" >"
              + "	<i class='fa " + sIcon + "'></i>&nbsp;<span>" + MenuName + "</span>"
              + "	<span class='pull-right-container'><i class='fa fa-angle-left pull-right'></i></span></a>"
              + "	<ul class='treeview-menu' id='bbpdd" + item.ToString() + "'><script>" + js3 + "$('#bbpdd" + item.ToString() + "').css('display',disp);</script>";
@@ -343,6 +349,9 @@ namespace Unchained
               + "</div><ul class='sidebar-menu'>";
             html += AddMenuOptions(gUser(p).LoggedIn);
             html += "</section></aside>";
+            string sFunction = "<script>function myfunc(iActive) { $('#bbpdd' + iActive.toString()).attr('expanded',0);  for (var i = 0; i < 50; i++) {   "
+                + "$('#bbpdd' + i.toString() ).attr('xexpanded', 0); $('#bbpdd' + i.toString()).css('display','none'); localStorage.setItem('bbpdd' + i.toString() , 1);   } localStorage.setItem('bbpdd' + iActive.toString() , 1);      }</script>";
+            html += sFunction;
             return html;
         }
 
@@ -449,8 +458,12 @@ namespace Unchained
                 return html;
             }
 
+            bool fMobile = BiblePayCommonNET.UICommonNET.fBrowserIsMobile(p);
+
+            int nColsPerRow = fMobile ? 1 : 3;
+
             pag.Rows = dt.Rows.Count;
-            pag.ColumnsPerRow = 3;
+            pag.ColumnsPerRow = nColsPerRow;
             pag.RowsPerPage = 3;
 
             //int nPage = _paginator.PageNumber;
@@ -568,9 +581,9 @@ namespace Unchained
                 html += "</table>";
                 return html;
             }
-
+            bool fMobile = BiblePayCommonNET.UICommonNET.fBrowserIsMobile(p);
+            pag.ColumnsPerRow = fMobile ? 1 : 3;
             pag.Rows = dt.Rows.Count;
-            pag.ColumnsPerRow = 3;
             pag.RowsPerPage = 3;
             double nWidthPct = 33;
             for (int y = pag.StartRow; y <= pag.EndRow; y++)

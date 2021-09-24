@@ -158,6 +158,8 @@ namespace Unchained
             string sType = Session["key_filetype"].ToNonNullString();
             string sCategory = (Request.QueryString["category"]  ?? "").ToString();
             string sTheirChannel = Request.QueryString["channelid"].ToNonNullString();
+            string sLastName = Request.QueryString["LastName"].ToNonNullString();
+            string sFirstName = Request.QueryString["FirstName"].ToNonNullString();
 
             if (sCategory != "" || sTheirChannel != "")
             {
@@ -176,8 +178,14 @@ namespace Unchained
             dt = dt.FilterBBPDataTable(sVideoFilter);
             dt = dt.FilterBBPDataTable("isnull(attachment,0)=0");
             dt = dt.FilterBBPDataTable("category not in (null,'')");
-
-            if (sTheirChannel != "")
+            if (sFirstName != "")
+            {
+                dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
+                User u1 = gUser(this, sFirstName, sLastName);
+                dt = dt.FilterBBPDataTable("userid='" + u1.id + "'");
+                sType = "video";
+            }
+            else if (sTheirChannel != "")
             {
                 dt = dt.FilterBBPDataTable("userid='" + sTheirChannel + "'");
                 sType = "video";
@@ -191,7 +199,7 @@ namespace Unchained
             {
                 // User videos that have been uploaded as 'mass' or 'batch', and have not been categorized yet
                 dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
-                dt=                dt.FilterBBPDataTable("userid='" + gUser(this).id + "' and isnull(category,'')=''");
+                dt= dt.FilterBBPDataTable("userid='" + gUser(this).id + "' and isnull(category,'')=''");
                 sType = "video";
             }
             else if (sType == "following")
@@ -207,7 +215,13 @@ namespace Unchained
             }
             else if (sType == "recentlyuploaded")
             {
-                dt.DefaultView.Sort = "time desc";
+                try
+                {
+                    dt.DefaultView.Sort = "time desc";
+                }catch(Exception ex)
+                {
+
+                }
                 sType = "video";
             }
             else if (sType == "hashtags")

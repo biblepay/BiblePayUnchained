@@ -12,6 +12,8 @@ using static BiblePayCommon.Common;
 using static BiblePayCommon.DataTableExtensions;
 using static BiblePayCommonNET.UICommonNET;
 using static BiblePayCommonNET.StringExtension;
+using static BiblePayCommonNET.DataTableExtensions;
+
 
 namespace Unchained
 {
