@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -7,7 +7,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>x86</PlatformTarget>
-    <OutputPath>B:\BiblePay\BiblePayUnchained\bin\</OutputPath>
+    <OutputPath>..\bin\</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -28,10 +28,10 @@
 
   <ItemGroup>
     <Reference Include="BiblePayTestHarness">
-      <HintPath>..\..\BiblePayUnchained\Dependencies\BiblePayTestHarness.dll</HintPath>
+      <HintPath>..\Dependencies\BiblePayTestHarness.dll</HintPath>
     </Reference>
     <Reference Include="NBitcoin">
-      <HintPath>..\..\BiblePayUnchained\Dependencies\NBitcoin.dll</HintPath>
+      <HintPath>..\Dependencies\NBitcoin.dll</HintPath>
     </Reference>
   </ItemGroup>
 
