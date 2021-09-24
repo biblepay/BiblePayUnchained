@@ -64,7 +64,7 @@ namespace Unchained
             if (Request.Path.Contains("session1"))
             {
                 //string s1 = Request.Headers["headeraction"].ToNonNullString();
-                //BiblePayWallet.WalletControl w = (BiblePayWallet.WalletControl)this.Master.FindControl("w");
+                //et.WalletControl w = (et.WalletControl)this.Master.FindControl("w");
                 //w.DeserializeLocalStorage(s1);
                 //Log("Session1::" + s1);
             }

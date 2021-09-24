@@ -1,5 +1,4 @@
 ﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="Unchained.SiteMaster" %>
-<%@ Register TagPrefix="BBP" Namespace="BiblePayWallet"  Assembly="BiblePayWallet"%>
 
 <!DOCTYPE html>
 

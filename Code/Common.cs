@@ -170,7 +170,6 @@ namespace Unchained
             return string.Empty;
         }
 
-
         public static string GetFundingAddress(bool fTestNet)
         {
             string suffix = fTestNet ? "testnet" : "mainnet";

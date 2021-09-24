@@ -1,7 +1,5 @@
 ﻿<%@ Page Title="Account Settings" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="RegisterMe.aspx.cs" Inherits="Unchained.RegisterMe" %>
 
-<%@ Register TagPrefix="BBP" Namespace="BiblePayWallet"  Assembly="BiblePayWallet"%>
-
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
 
