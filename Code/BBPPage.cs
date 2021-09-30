@@ -38,6 +38,23 @@ namespace Unchained
                      UICommon.MsgBox("Error", "Sorry, the object could not be deleted. ", this);
                 }
             }
+            else if (_bbpevent.EventName == "LogOut_Click")
+            {
+                this.Page.Session[Common.GetChain0(Common.IsTestNet(this)) + "user"] = null;
+                this.Page.Session["stack"] = UICommon.Toast("Logging Off", "You are now logged off.");
+                Response.Redirect("Login");
+            }
+            else if (_bbpevent.EventName == "LogIn_Click")
+            {
+                // top banner
+
+                Response.Redirect("LogIn.aspx");
+            }
+            else if (_bbpevent.EventName == "SignUp_Click")
+            {
+                // top banner
+                Response.Redirect("RegisterMe.aspx");
+            }
             else if (_bbpevent.EventName == "SaveComments_Click")
             {
                 string id = Request.QueryString["id"] ?? "";

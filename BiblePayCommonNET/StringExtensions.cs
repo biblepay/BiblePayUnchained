@@ -33,6 +33,19 @@ namespace BiblePayCommonNET
                 return table;
             }
         }
+
+        public static DataTable SortBy(this DataTable table, string sSortBy)
+        {
+            try
+            {
+                table.DefaultView.Sort = sSortBy;
+                return table;
+            }
+            catch(Exception ex)
+            {
+                return table;
+            }
+        }
     }
     public static class StringExtension
     {

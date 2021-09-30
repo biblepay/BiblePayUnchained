@@ -96,6 +96,15 @@ namespace Unchained
             if (txtAddress.Text == "")
                 sError = "Address must be chosen.";
 
+            if (sTicker.ToLower()=="bbp" && !BiblePayDLL.Sidechain.ValidateAddress(IsTestNet(this), txtAddress.Text))
+            {
+                sError = "Sorry, Invalid BBP address.  Wrong Chain?";
+            }
+            if (!BiblePayDLL.Sidechain.ValidateAddress(IsTestNet(this), gUser(this).BiblePayAddress))
+            {
+                sError = "Sorry, you must have a valid Receive Address.";
+            }
+
             if (!BiblePayCommonNET.BiblePay.ValidateAddress3(sTicker, txtAddress.Text) || txtAddress.Text.Length > 128)
             {
                 sError = "Invalid Address.";
@@ -109,16 +118,20 @@ namespace Unchained
             o.UserID = gUser(this).id;
             o.Address = txtAddress.Text;
             o.Ticker = sTicker;
+            o.OwnerAddress = gUser(this).BiblePayAddress;
+
             o.Tithe = 0; // Todo - add a tithe checkbox and process the tithes...
             o.Amount = 0;
+            o.id = Guid.NewGuid().ToString();
 
-            bool fExists = UICommon.RecordExists(IsTestNet(this), "utxostake1", "address='" + o.Address + "'");
+            bool fExists = UICommon.RecordExists(IsTestNet(this), "utxostake1", "address='" + o.Address + "' and OwnerAddress='" + gUser(this).BiblePayAddress + "'");
+
             if (fExists)
             {
                 UICommon.MsgBox("Duplicate Address", "Sorry, this address already exists as a portfolio builder position.", this);
             }
             BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), o, gUser(this));
-            if (r.fError())
+            if (!r.fError())
             {
                 Session["stack"] = UICommon.Toast("Saved", "Your Portfolio Builder Position has been Saved!  Thank you for using BiblePay Retirement Accounts!");
                 Response.Redirect("PortfolioBuilder");

@@ -11,7 +11,7 @@ namespace Unchained
 {
 
 
-    public partial class LandingPage
+    public partial class LP
     {
     }
 }

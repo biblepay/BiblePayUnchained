@@ -42,7 +42,7 @@ namespace Unchained
             // Table header
             string html = "<table class=saved><tr class='objheader'><th class='objheader'>"
                 + "<h3>" + sObjectName + "</h3><th class='objheader' colspan=19><div class='objheader'>";
-            html += UICommon.GetStandardAnchor("ancPrayer1", "AddPrayer", "", "<i class='fa fa-plus'></i>", "pray1");
+            html += UICommon.GetStandardAnchor("ancPrayer1", "AddPrayer", "", "<i class='fa fa-plus'></i>", "Add Prayer", "pray1");
             string sRow = "<tr>";
 
             for (int i = 0; i < dt.Columns.Count; i++)

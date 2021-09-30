@@ -13,6 +13,52 @@
 
         //CORE
 
+        // Control Keys
+$(document).ready(function () {
+    var ctrlDown = false,
+        ctrlKey = 17,
+        cmdKey = 91,
+        vKey = 86,
+        cKey = 67;
+     // 112=f1, 123=f12, 27=esc, w=87
+
+    $(document).keydown(function (e) {
+        if (e.keyCode === ctrlKey || e.keyCode === cmdKey) ctrlDown = true;
+    }).keyup(function (e) {
+        if (e.keyCode === ctrlKey || e.keyCode === cmdKey) ctrlDown = false;
+        // F1-F20
+        if (e.keyCode === 113) {
+            window.location = "VideoList";
+        }
+        else if (e.keyCode === 115) {
+            window.location = "Status";
+        }
+    });
+
+    $(".no-copy-paste").keydown(function (e) {
+        // if (ctrlDown && (e.keyCode === vKey || e.keyCode === cKey)) return false;
+        
+    });
+   
+    
+    // Document Ctrl + C/V 
+    $(document).keydown(function (e) {
+
+        if (ctrlDown && (e.keyCode === 68)) {
+            // ctrl d:
+            //window.location = "VideoList";
+        }
+
+        if (ctrlDown && (e.keyCode === cKey)) {
+          //  console.log("Document catch Ctrl+C");
+        }
+        if (ctrlDown && (e.keyCode === vKey)) {
+            //console.log("Document catch Ctrl+V");
+        }
+    });
+});
+   
+
 
         function showModalDialog(title, body, width, height)
         {
@@ -29,7 +75,6 @@
             var e = document.getElementById("spandialog");
             e.innerHTML = body;
         }
-
 
         function transmit(id,action,affectedID,affectedID2)
         {
@@ -95,7 +140,7 @@
         function setRemoteValue(actionname, data1, elementToUpdate, elementToUpdate2) {
             $.ajax({
                 type: "POST",
-                url: "LandingPage.aspx/" + actionname,
+                url: "LP.aspx/" + actionname,
                 data: { mydata: data1 },
                 headers: { headeraction: data1 },
                 success: function (response) {
@@ -155,7 +200,6 @@
                 getRemoteValue(1);
                 setTimeout(UpdateSpinner, 1000);
             }
-
         }
 
 
@@ -173,9 +217,7 @@
                 $(".footer_wrapper").removeClass("hidden");
             }
             */
-
         }
-
 
         function closeNav() {
             $("#mySidenav").css("transform", "translate(-240px,0)");

@@ -99,7 +99,9 @@ namespace Unchained
                 {
                     Log("Error in Executor::" + ex.Message);
                 }
-                System.Threading.Thread.Sleep(60000 * 5);
+                
+                System.Threading.Thread.Sleep(60000 * 1);
+
             }
         }
     }

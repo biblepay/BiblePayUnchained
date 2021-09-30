@@ -62,6 +62,10 @@ namespace Unchained
                 {
                     BiblePayCommon.EntityCommon.SetEntityValue(o, "deleted", "1");
                 }
+                if (sMode == "add")
+                {
+                    o.id = null;  //New ID
+                }
               
 
                 DACResult r = InsertIntoTable(this, IsTestNet(this), o, gUser(this));
@@ -73,25 +77,6 @@ namespace Unchained
             }
         }
 
-        public string GetStandardDropDown(string sID, string sTable, string sColumn, string sSelectedValue)
-        {
-            DataTable dtGroup = UICommon.GetGroup(IsTestNet(this), "video1", "url like '%mp4%'", "Category");
-            string sOptions = "";
-            for (int y = 0; y < dtGroup.Rows.Count; y++)
-            {
-                bool fSelected = sSelectedValue.ToLower() == dtGroup.Rows[y]["category"].ToString().ToLower();
-                string sSel = fSelected ? " SELECTED " : "";
-
-                string sRow = "<option " + sSel + "value='" + dtGroup.Rows[y]["category"].ToString() + "'>" 
-                    + dtGroup.Rows[y]["category"].ToString() + "</option>\r\n";
-                sOptions += sRow;
-            }
-            string sDD = "<select name='input_" + sID + "' id='input_" + sID + ">";
-            sDD += sOptions;
-            sDD += "</select>";
-            return sDD;
-        }
-       
         protected string GetFormView()
         {
             string sTable = Request.QueryString["table"] ?? "";
@@ -129,7 +114,11 @@ namespace Unchained
                 bool fHidden = BiblePayCommon.EntityCommon.IsHidden(sColName);
                 bool fReadonly = BiblePayCommon.EntityCommon.IsReadOnly(sColName);
                 string sReadOnly = (sMode == "view" || fReadonly) ? "readonly" : "";
+                if (sTable == "news1" && sColName == "URL")
+                    sReadOnly = "";
+
                 string sValueControl = "<input name='input_" + sColName + "'" + sReadOnly + " class='pc90' value = '" + sOrigValue + "' />";
+
                 if (sOrigValue.Length > 255 || sColName.ToLower() == "body" || sColName.ToLower() == "transcript")
                 {
                     sValueControl = "<textarea rows='10' cols='80' name='input_" + sColName + "' class='pc90' " + sReadOnly + ">" + sOrigValue + "</textarea>";
@@ -137,7 +126,7 @@ namespace Unchained
                 // If this is a dropdown...
                 if (sTable == "video1" && sColName.ToLower() == "category")
                 {
-                    sValueControl = GetStandardDropDown(sColName, "video1", sColName, sOrigValue);
+                    sValueControl = UICommon.GetVideoCategories("category", sOrigValue);
                 }
                 
                 string sRow = "<tr><td width=25%><span>" + sColName + ":</span><td>" + sValueControl + "</tr>\r\n";

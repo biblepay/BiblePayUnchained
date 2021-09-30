@@ -40,21 +40,16 @@ namespace Unchained
             }
             if (!IsPostBack)
             {
-                ddCategory.Items.Clear();
-
-                DataTable dtGroup = UICommon.GetGroup(IsTestNet(this), "video1", "url like '%mp4%'", "Category");
-                for (int y = 0; y < dtGroup.Rows.Count; y++)
-                {
-                    ddCategory.Items.Add(dtGroup.Rows[y]["category"].ToString());
-                }
+               
             }
         }
 
         protected string OffchainUpload(BiblePayCommon.Entity.object1 o1, int iFileNo)
         {
+            string sCat = Request.Form["input_ddCategory"].ToNonNullString();
             if (iFileNo == 1)
             {
-                o1.Category = ddCategory.SelectedValue.ToString();
+                o1.Category = sCat;
             }
             BiblePayDLL.Sidechain.UploadIntoDSQL_Background(IsTestNet(this), ref o1, gUser(this));
             return o1.URL;

@@ -13,7 +13,7 @@ using static BiblePayCommon.DataTableExtensions;
 using static BiblePayCommonNET.UICommonNET;
 using static BiblePayCommonNET.StringExtension;
 using static BiblePayCommonNET.DataTableExtensions;
-
+using System.Dynamic;
 
 namespace Unchained
 {
@@ -214,25 +214,6 @@ namespace Unchained
             return !fProd;
         }
 
-        /*
-        public static string GetBBPAddressCookieName(Page p)
-        {
-            string sName = IsTestNet(p) ? "bbpaddress_testnet" : "bbpaddress_prod";
-            return sName;
-        }
-        public static string GetBBPAddressPKCookieName(Page p)
-        {
-            string sName = IsTestNet(p) ? "bbpprivkey_testnet" : "bbpprivkey_prod";
-            return sName;
-        }
-
-        public static string GetBBPEncFlagCookieName(Page p)
-        {
-            string sName = IsTestNet(p) ? "bbpencflag_testnet" : "bbpencflag_prod";
-            return sName;
-        }
-        */
-
         public static string GetChain0(bool fTestNet)
         {
             string sPrefix = fTestNet ? "test" : "main";
@@ -241,43 +222,16 @@ namespace Unchained
 
         public static User RetrieveUser(Page p, string sFilter)
         {
-            User u = new User();
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "user1");
             dt = dt.FilterDataTable(sFilter);
+            Object o = new User();
             if (dt.Rows.Count < 1)
-                return u;
-
-            u.UserName = dt.Rows[0]["UserName"].ToString();
-            u.FirstName = dt.GetColValue("FirstName");
-            u.LastName = dt.GetColValue("LastName");
-            u.PasswordHash = dt.GetColValue("PasswordHash");
-            u.EmailAddress = dt.GetColValue("EmailAddress");
-            u.Verified = dt.GetColInt("Verified");
-            u.Testimony = dt.GetColValue("Testimony");
-            u.Slogan = dt.GetColValue("Slogan");
-            u.AvatarURL = dt.GetColValue("AvatarURL");
-            u.ThemeName = dt.GetColValue("ThemeName");
-            u.Shared2FA = dt.GetColValue("Shared2FA");
-            u.id = dt.GetColValue("id");
-            u.FA2Verified = dt.GetColInt("FA2Verified");
-            u.EmailVerified = dt.GetColInt("EmailVerified");
-            u.HashTags = dt.GetColValue("HashTags");
-            u.RSAKey = dt.GetColValue("RSAKey");
-            u.BiblePayAddress = dt.GetColValue("BiblePayAddress");
-            u.UserGuid = dt.GetColValue("UserGuid");
-            u.PublicText = dt.GetColValue("PublicText");
-            u.ProfessionalText = dt.GetColValue("ProfessionalText");
-            u.PrivateText = dt.GetColValue("PrivateText");
-            u.ReligiousText = dt.GetColValue("ReligiousText");
-            u.Gender = dt.GetColValue("Gender");
-            u.BirthDate = dt.GetColInt("BirthDate");
-            u.TelegramLinkName = dt.GetColValue("TelegramLinkName");
-            u.TelegramLinkDescription = dt.GetColValue("TelegramLinkDescription");
-            u.TelegramLinkURL = dt.GetColValue("TelegramLinkURL");
-            u.Administrator = dt.GetColInt("Administrator");
-
-            return u;
+                return (User)o;
+            ExpandoObject oExpandoUser = CastDataTableRowToExpando(dt.Rows[0], "user1");
+            BiblePayCommon.EntityCommon.CastExpandoToBiblePayObject(oExpandoUser, ref o);
+            return (User)o;
         }
+
 
         public static User gUser(Page p)
         {
@@ -358,7 +312,7 @@ namespace Unchained
                 + GetVoteCount(fTestNet, sID, 1).ToString() + "</span>";
             // Add on the delete button
             bool fOwns = HasOwnership(fTestNet, sID, sTable, u.id);
-            string sDeleteAnchor = UICommon.GetStandardAnchor(u.id, "DeleteObject", sID, "<i class='fa fa-trash'></i>", sTable);
+            string sDeleteAnchor = UICommon.GetStandardAnchor(u.id, "DeleteObject", sID, "<i class='fa fa-trash'></i>", "Delete this object", sTable);
             if (fOwns)
                       sHTML += "&nbsp;" + sDeleteAnchor;
             return sHTML;
@@ -407,37 +361,18 @@ namespace Unchained
             return v;
         }
        
+        public static BiblePayCommon.Entity.user1 ConvertUserToUserEntity(User u)
+        {
+            ExpandoObject oExpando = BiblePayCommon.EntityCommon.CastObjectToExpando(u);
+            BiblePayCommon.Entity.user1 u10 = (BiblePayCommon.Entity.user1)BiblePayCommon.EntityCommon.ExpandoToStronglyCastObject(oExpando, "user1");
+            return u10;
+        }
+
         // Save User Record
         public static bool SaveUserRecord(bool fTestNet, User u, Page p)
         {
-            BiblePayCommon.Entity.user1 o = new BiblePayCommon.Entity.user1();
-            o.FirstName = u.FirstName;
-            o.LastName = u.LastName;
-            o.EmailAddress = u.EmailAddress.Trim();
-            o.BiblePayAddress = u.BiblePayAddress;
-            o.Verified = u.Verified;
-            o.AvatarURL = u.AvatarURL;
-            o.HashTags = u.HashTags;
-            o.Testimony = u.Testimony;
-            o.Slogan = u.Slogan;
-            o.ThemeName = u.ThemeName;
-            o.Shared2FA = u.Shared2FA;
-            o.FA2Verified = u.FA2Verified;
-            o.EmailVerified = u.EmailVerified;
-            o.RSAKey = u.RSAKey;
-            o.PasswordHash = u.PasswordHash;
-            o.UserGuid = u.UserGuid;
-            o.PrivateText = u.PrivateText;
-            o.PublicText = u.PublicText;
-            o.ProfessionalText = u.ProfessionalText;
-            o.ReligiousText = u.ReligiousText;
-            o.Gender = u.Gender;
-            o.BirthDate = u.BirthDate;
-            o.TelegramLinkDescription = u.TelegramLinkDescription;
-            o.TelegramLinkName = u.TelegramLinkName;
-            o.TelegramLinkURL = u.TelegramLinkURL;
-
-
+            BiblePayCommon.Entity.user1 o = ConvertUserToUserEntity(u);
+            
             if (!IsEmailValid(o.EmailAddress))
             {
                 MsgModal(p, "Error", "Sorry, the e-mail address is invalid.", 400, 200, true);
@@ -475,6 +410,23 @@ namespace Unchained
                 }
             }
 
+            if (u.LoggedIn && u.EmailAddress != gUser(p).EmailAddress)
+            {
+                // User wants to change email address
+
+                User uEmailUser = gUser(p, u.EmailAddress);
+                if (uEmailUser.id == null)
+                {
+                    o.EmailVerified = 0;
+
+                }
+                else
+                {
+                    MsgModal(p, "Error", "Sorry, this new e-mail address is already taken.", 500, 250, true);
+                    return false;
+                }
+            }
+
             if (u.PasswordHash.ToNonNullString().Length != 64)
             {
                 MsgModal(p, "Error", "Sorry, your password did not meet the minimum complexity guidelines [8 characters+,1 Uppercase Letter+,1 Number+].", 400, 200, true);
@@ -485,6 +437,7 @@ namespace Unchained
             if (r.fError())
             {
                 MsgModal(p, "Error", r.Error, 500, 250, true);
+                return false;
             }
             else
             {

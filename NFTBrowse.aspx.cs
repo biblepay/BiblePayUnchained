@@ -1,4 +1,5 @@
 ﻿using BiblePayCommon;
+using BiblePayCommonNET;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -67,6 +68,7 @@ namespace Unchained
             }
             return 0;
         }
+
 
         public static List<BiblePayCommon.Entity.NFT> GetListOfNFTs(Page p, string sTypes)
         {
@@ -239,7 +241,7 @@ namespace Unchained
                     UICommon.MsgBox("Error", "Sorry, this NFT cannot be found!", this);
                     return;
                 }
-                DACResult d = BiblePayUtilities.BuyNFT1(this, gUser(this).BiblePayAddress, e.EventValue, myNFT.BuyItNowAmount, false, IsTestNet(this));
+                DACResult d = BiblePayUtilities.BuyNFT1(this, gUser(this).id, e.EventValue, myNFT.BuyItNowAmount, false, IsTestNet(this));
 
             }
             else if (e.EventAction == "BoughtNFT")
@@ -266,7 +268,7 @@ namespace Unchained
                     return;
                 }
 
-                DACResult d = BiblePayUtilities.BuyNFT1(this, gUser(this).BiblePayAddress, e.EventValue, GetDouble(e.Extra.Amount), true, IsTestNet(this));
+                DACResult d = BiblePayUtilities.BuyNFT1(this, gUser(this).id, e.EventValue, GetDouble(e.Extra.Amount), true, IsTestNet(this));
                 if (d.fError())
                 {
                     MsgModal(this, "NFT Bid Error", d.Error, 450, 200, false);

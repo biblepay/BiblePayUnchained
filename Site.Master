@@ -71,10 +71,16 @@
 
         <!--Above div height is used to calculate the whole page size (so the footer knows the page height)-->
         <div class="navbar navbar-inverse navbar-fixed-top" style="z-index:256;">
-            <div class="container" style="padding-left:20%;">
-                <div style="max-height:83px;overflow:hidden;">
-                 <span style="color:lime;font-size:22px;">BETA &nbsp;&nbsp;&nbsp;&nbsp;  <img src="<%=Unchained.UICommon.GetHeaderImage(this.Page) %>" height="83px" /> </span>
-                    <span style="font-family:candara;color:antiquewhite;font-size:22px;">&nbsp;<%=Unchained.UICommon.GetHeaderBanner(this.Page) %></span><div id='rightmenubutton' style='float:right;' class="close-sidebar hidden-lg hidden-sm">
+            <div class="container" style="padding-left:1%;">
+                <div style="max-height:63px;overflow:hidden;">
+                 <span style="padding-left:115px;"><img src="<%=Unchained.UICommon.GetHeaderImage(this.Page) %>" height="63px" /> </span>
+                    <span style="font-family:candara;color:antiquewhite;font-size:22px;">&nbsp;<%=Unchained.UICommon.GetHeaderBanner(this.Page) %></span>
+                    <span style="color:lime;font-size:22px;">&nbsp;BETA</span>
+                    <div style="float:right;">&nbsp;
+                        <%=Unchained.UICommon.GetBannerControls(this.Page) %>
+                        </div>
+
+                    <div id='rightmenubutton' style='float:right;' class="close-sidebar hidden-lg hidden-sm">
                         <a href="#" onclick="openNav();" class="sidebar-toggle" data-toggle="offcanvas" role="button">
                             <i class="fa fa-navicon">
                             </i>

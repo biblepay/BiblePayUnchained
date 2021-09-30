@@ -38,10 +38,9 @@
          <br />
          <asp:Label runat="server" ID="Label1">Category:</asp:Label>
          <br />
-         <asp:dropdownlist runat="server" id="ddCategory"></asp:dropdownlist>   
+         <%=Unchained.UICommon.GetVideoCategories("ddCategory", "") %>
          <br />
 
-        
          <!-- <asp:FileUpload ID="FileUpload1" onchange="UploadFile(this);" runat="server"  MultipleFileSelection="Automatic" for multiple files />-->
          <div class="attachment-container">
             <telerik:RadAsyncUpload RenderMode="Lightweight" runat="server" CssClass="async-attachment" ID="AsyncUpload1"

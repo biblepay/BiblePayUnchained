@@ -153,20 +153,14 @@ namespace Unchained
         protected string GetVideoList()
         {
             string sSearch = Session["Search"].ToNonNullString();
-
-
-            string sType = Session["key_filetype"].ToNonNullString();
+            string sType = Request.QueryString["type"].ToNonNullString();
             string sCategory = (Request.QueryString["category"]  ?? "").ToString();
             string sTheirChannel = Request.QueryString["channelid"].ToNonNullString();
             string sLastName = Request.QueryString["LastName"].ToNonNullString();
             string sFirstName = Request.QueryString["FirstName"].ToNonNullString();
+            string sAction = Request.QueryString["a"].ToNonNullString();
 
-            if (sCategory != "" || sTheirChannel != "")
-            {
-                sType = "video";
-            }
-
-            if (sType == "")
+            if (sCategory != "" || sTheirChannel != "" || sType == "")
             {
                 sType = "video";
             }
@@ -178,6 +172,7 @@ namespace Unchained
             dt = dt.FilterBBPDataTable(sVideoFilter);
             dt = dt.FilterBBPDataTable("isnull(attachment,0)=0");
             dt = dt.FilterBBPDataTable("category not in (null,'')");
+
             if (sFirstName != "")
             {
                 dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
@@ -190,50 +185,44 @@ namespace Unchained
                 dt = dt.FilterBBPDataTable("userid='" + sTheirChannel + "'");
                 sType = "video";
             }
-            else if (sType == "mychannel")
+            else if (sAction == "mychannel")
             {
                 dt = dt.FilterBBPDataTable("userid='" + gUser(this).id + "'");
                 sType = "video";
             }
-            else if (sType == "myvideoeditingroom")
+            else if (sAction == "myeditingroom")
             {
                 // User videos that have been uploaded as 'mass' or 'batch', and have not been categorized yet
                 dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
                 dt= dt.FilterBBPDataTable("userid='" + gUser(this).id + "' and isnull(category,'')=''");
                 sType = "video";
             }
-            else if (sType == "following")
+            else if (sAction == "following")
             {
-                dt = dt.FilterBBPDataTable(GetFollowingList(IsTestNet(this), gUser(this).BiblePayAddress));
+                dt = dt.FilterBBPDataTable(GetFollowingList(IsTestNet(this), gUser(this).id));
                 sType = "video";
             }
-            else if (sType == "trending")
+            else if (sAction == "trending")
             {
                 // highest rated videos in last 90 days or something
                 dt = dt.FilterBBPDataTable(GetTrendingList(IsTestNet(this)));
                 sType = "video";
             }
-            else if (sType == "recentlyuploaded")
+            else if (sAction == "recentlyuploaded")
             {
-                try
-                {
-                    dt.DefaultView.Sort = "time desc";
-                }catch(Exception ex)
-                {
-
-                }
+                dt.SortBy("time desc");
                 sType = "video";
             }
-            else if (sType == "hashtags")
+            else if (sAction == "hashtags")
             {
                 dt = dt.FilterBBPDataTable(GetHashTagList(gUser(this)));
                 sType = "video";
             }
+
             if (sSearch != "")
             {
                 //string sPage = this.Request.Url.AbsoluteUri;
                 dt = dt.FilterBBPDataTable("body like '%" + sSearch + "%' or title like '%" + sSearch + "%' or Transcript like '%" + sSearch + "%'", true);
-              
             }
             // Filter by type starts here:
             if (sType == "video")
@@ -242,15 +231,15 @@ namespace Unchained
             }
             else if (sType == "pdf")
             {
-                dt=dt.FilterBBPDataTable("URL like '%.pdf%'");
+                dt = dt.FilterBBPDataTable("URL like '%.pdf%'");
             }
             else if (sType == "wiki")
             {
-                dt=dt.FilterBBPDataTable("URL like '%.htm%'");
+                dt = dt.FilterBBPDataTable("URL like '%.htm%'");
             }
             else if (sType == "image")
             {
-                dt=dt.FilterBBPDataTable("URL like '%.png%' or URL like '%.jpg%' or URL like '%.jpeg%' or URL like '%.gif%'");
+                dt = dt.FilterBBPDataTable("URL like '%.png%' or URL like '%.jpg%' or URL like '%.jpeg%' or URL like '%.gif%'");
             }
 
             if (sCategory != "")

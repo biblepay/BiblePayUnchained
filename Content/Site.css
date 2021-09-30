@@ -1,7 +1,35 @@
 ﻿/* Overridden mobile menu */
 
+.buttondark {
+    background-color: #2f2f2f;
+    border: none;
+    color: white;
+    padding: 5px 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+}
 
+.user-panel {
+    height: 65px;
+}
 
+divsidebar {
+    xoverflow-y: scroll;
+    xheight: 99%;
+}
+
+.main-sidebar, left-side {
+    overflow-y: scroll;
+    height: 99%;
+    scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+    width: 3px;
+    xheight: 11px;
+}
 
 @media (max-width: 768px) {
     .sidebar-menu .treeview-menu > li > a {
@@ -90,7 +118,15 @@
     }
 
     td.comments {
-        border: 1px solid lightgrey;
+        border: 1px solid #e0e0e0;
+        border-radius:25px;
+    }
+    
+    textarea.comments {
+       -webkit-border-radius: 15px;
+       -moz-border-radius: 15px;
+       border-radius: 15px;
+       border:1px solid #e0e0e0;
     }
     /* Video List - Gallery (Both Person.aspx && VidoList.aspx */
     table.gallery td {

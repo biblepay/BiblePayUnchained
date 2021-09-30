@@ -2,7 +2,7 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
-    <h2>Portfolio Builder Leaderboard:</h2>
+    <h2>Portfolio Builder Leaderboard: <small>v1.1</small></h2>
      <asp:Button ID="btnSummary" runat="server" onclick="btnSummary_Click"  Text="Summary" />
      <asp:Button ID="btnDetail" runat="server" onclick="btnDetail_Click"  Text="Details" />
      <asp:Label ID="lblMode" runat="server" style="color:red;" Text=""></asp:Label></td>

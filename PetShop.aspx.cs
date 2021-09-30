@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Web;
 using static BiblePayCommon.Common;
 using static BiblePayCommonNET.CommonNET;
 using static BiblePayCommonNET.StringExtension;
@@ -13,7 +14,7 @@ namespace Unchained
         {
             if (e.EventAction == "BoughtPet")
             {
-                string sPin = BiblePayCommon.Encryption.Base64Decode(e.Extra.Output.ToString());
+                string sPin = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(e.Extra.Output.ToString()));
                 DACResult r30 = UICommon.BuySomething2(this, sPin);
             }
             else if (e.EventAction == "Buy_Click")

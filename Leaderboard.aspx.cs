@@ -34,7 +34,7 @@ namespace Unchained
 
             string html = "<table class=saved>";
             // Column headers
-            string sRow = "<tr><th>UserID<th width=10%>Nick Name<th>Currency<th>Total BBP<th>Total Foreign<th>USD Value BBP<th>USD Value Foreign<th>Assessed USD<th>Coverage<th>Earnings<th>Strength</tr>";
+            string sRow = "<tr><th>Address<th width=10%>Nick Name<th>Currency<th>Total BBP<th>Total Foreign<th>USD Value BBP<th>USD Value Foreign<th>Assessed USD<th>Coverage<th>Earnings<th>Strength</tr>";
             html += sRow;
             Dictionary<string, PortfolioParticipant> u = GenerateUTXOReport(IsTestNet(this));
             foreach (KeyValuePair<string, PortfolioParticipant> pp in u)
@@ -42,7 +42,7 @@ namespace Unchained
                 double nEarnings = nSuperblockLimit * pp.Value.Strength;
                 if (pp.Value.Strength > 0)
                 {
-                    sRow = "<tr><td>" + pp.Value.UserID
+                    sRow = "<tr><td>" + pp.Value.RewardAddress
                         + "<td>" + pp.Value.NickName
                         + "<td>Various"
                         + "<td>" + pp.Value.AmountBBP.ToString()

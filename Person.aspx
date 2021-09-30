@@ -29,6 +29,4 @@
 
     <%=GetPerson()%>
 
-
-
 </asp:Content>

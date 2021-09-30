@@ -37,7 +37,7 @@ namespace Unchained
             BiblePayCommon.IBBPObject o = (BiblePayCommon.IBBPObject)BiblePayCommon.EntityCommon.GetInstance("BiblePayCommon.Entity+" + _EntityName);
             BiblePayCommon.EntityCommon.SetEntityValue(o, "Subject", txtSubject.Text);
             BiblePayCommon.EntityCommon.SetEntityValue(o, "Body", txtBody.Text);
-            BiblePayCommon.EntityCommon.SetEntityValue(o, "UserID", gUser(this).BiblePayAddress.ToString());
+            BiblePayCommon.EntityCommon.SetEntityValue(o, "UserID", gUser(this).id);
             BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), o, gUser(this));
             if (!r.fError())
             {

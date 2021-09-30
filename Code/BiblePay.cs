@@ -124,6 +124,8 @@ namespace Unchained
         public static Dictionary<string, PortfolioParticipant> GenerateUTXOReport(bool fTestNet)
         {
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "utxostake1");
+            dt = dt.FilterDataTable("owneraddress is not null");
+
             Dictionary<string, PortfolioParticipant> dictParticipants = new Dictionary<string, PortfolioParticipant>();
 
             for (int i = 0; i < dt.Rows.Count; i++)
@@ -137,20 +139,24 @@ namespace Unchained
                 }
 
                 Portfolios p = new Portfolios();
+                User u = UICommon.GetUserRecord(fTestNet, dt.Rows[i]["UserID"].ToString());
+
+                
+
                 try
                 {
-                    p = QueryUTXOList(fTestNet, dt.Rows[i]["UserID"].ToString(), dt.Rows[i]["Ticker"].ToString().ToUpper(), dt.Rows[i]["Address"].ToString(), 0);
+                    p = QueryUTXOList(fTestNet, dt.Rows[i]["OwnerAddress"].ToString(), dt.Rows[i]["Ticker"].ToString().ToUpper(), dt.Rows[i]["Address"].ToString(), 0);
                 }
                 catch (Exception)
                 {
 
                 }
-                User u = UICommon.GetUserRecord(fTestNet, dt.Rows[i]["UserID"].ToString());
 
                 pp.NickName = u.FullUserName();
 
                 pp.UserID = dt.Rows[i]["UserID"].ToString();
-                pp.RewardAddress = pp.UserID;
+                pp.RewardAddress = dt.Rows[i]["OwnerAddress"].ToString();
+
 
                 Portfolios pTotal = new Portfolios();
                 try
@@ -171,7 +177,7 @@ namespace Unchained
                 {
                     if (BiblePayDLL.Sidechain.ValidateAddress(fTestNet, p.Address))
                     {
-                        pp.RewardAddress = p.Address;
+                       // pp.RewardAddress = p.Address;
                     }
                 }
                 pp.lPortfolios.Add(p);
@@ -504,6 +510,19 @@ namespace Unchained
             }
         }
 
+        public static double GetNextTicketNumber(Page p)
+        {
+            try
+            {
+                BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "Ticket");
+                object nAmt = dt.Compute("max([TicketNumber])", "");
+                return GetDouble(nAmt) + 1;
+            }
+            catch (Exception ex)
+            {
+                return 1;
+            }
+        }
 
         public static DACResult BuyNFT1(Page p, string sUserID, string sID, double nOfferPrice, bool fBidOnly, bool fTestNet)
         {

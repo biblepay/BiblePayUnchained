@@ -182,6 +182,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Admin.aspx" />
     <Content Include="Admin1.aspx" />
     <Content Include="Content\sidenav_black.css" />
     <Content Include="Content\sidenav_blue.css" />
@@ -191,6 +192,11 @@
     <Content Include="GreetingCard.aspx" />
     <Content Include="Images\dec-high-tech.jpg" />
     <Content Include="FriendRequests.aspx" />
+    <Content Include="TicketAdd.aspx" />
+    <Content Include="TicketList.aspx" />
+    <Content Include="TicketView.aspx" />
+    <Content Include="Profile.aspx" />
+    <Content Include="Wallet.aspx" />
     <Content Include="People.aspx" />
     <Content Include="Person.aspx" />
     <Content Include="Login.aspx" />
@@ -314,7 +320,7 @@
     <Content Include="NewsList.aspx" />
     <Content Include="Status.aspx" />
     <Content Include="Media.aspx" />
-    <Content Include="LandingPage.aspx" />
+    <Content Include="LP.aspx" />
     <Content Include="richtexteditor\lang\rte-lang-af.js" />
     <Content Include="richtexteditor\lang\rte-lang-ar.js" />
     <Content Include="richtexteditor\lang\rte-lang-bg.js" />
@@ -500,6 +506,13 @@
     <Content Include="Bundle.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Admin.aspx.cs">
+      <DependentUpon>Admin.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin.aspx.designer.cs">
+      <DependentUpon>Admin.aspx</DependentUpon>
+    </Compile>
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Friends.aspx.cs">
@@ -522,6 +535,41 @@
     </Compile>
     <Compile Include="FriendRequests.aspx.designer.cs">
       <DependentUpon>FriendRequests.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="TicketAdd.aspx.cs">
+      <DependentUpon>TicketAdd.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TicketAdd.aspx.designer.cs">
+      <DependentUpon>TicketAdd.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="TicketList.aspx.cs">
+      <DependentUpon>TicketList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TicketList.aspx.designer.cs">
+      <DependentUpon>TicketList.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="TicketView.aspx.cs">
+      <DependentUpon>TicketView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TicketView.aspx.designer.cs">
+      <DependentUpon>TicketView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Profile.aspx.cs">
+      <DependentUpon>Profile.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Profile.aspx.designer.cs">
+      <DependentUpon>Profile.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Wallet.aspx.cs">
+      <DependentUpon>Wallet.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Wallet.aspx.designer.cs">
+      <DependentUpon>Wallet.aspx</DependentUpon>
     </Compile>
     <Compile Include="People.aspx.cs">
       <DependentUpon>People.aspx</DependentUpon>
@@ -747,12 +795,12 @@
     <Compile Include="Media.aspx.designer.cs">
       <DependentUpon>Media.aspx</DependentUpon>
     </Compile>
-    <Compile Include="LandingPage.aspx.cs">
-      <DependentUpon>LandingPage.aspx</DependentUpon>
+    <Compile Include="LP.aspx.cs">
+      <DependentUpon>LP.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="LandingPage.aspx.designer.cs">
-      <DependentUpon>LandingPage.aspx</DependentUpon>
+    <Compile Include="LP.aspx.designer.cs">
+      <DependentUpon>LP.aspx</DependentUpon>
     </Compile>
     <Compile Include="VideoList.aspx.cs">
       <DependentUpon>VideoList.aspx</DependentUpon>

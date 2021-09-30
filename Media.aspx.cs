@@ -11,6 +11,7 @@ using System.IO;
 using static BiblePayCommonNET.UICommonNET;
 using static BiblePayCommonNET.StringExtension;
 using static BiblePayCommonNET.CommonNET;
+using System.Web;
 
 namespace Unchained
 {
@@ -61,7 +62,7 @@ namespace Unchained
             else if (e.EventName == "Tipping_Click")
             {
                 string sPub = gUser(this).BiblePayAddress;
-                double nAmt = BiblePayCommon.Common.GetDouble(BiblePayCommon.Encryption.Base64Decode(e.Extra.Output.ToString()));
+                double nAmt = BiblePayCommon.Common.GetDouble(HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(e.Extra.Output.ToString())));
                 string sTipTo = (Session["tipto"] ?? "").ToString();
                 User uTip = UICommon.GetUserRecord(IsTestNet(this), sTipTo);
                 string sChannelName = uTip.FullUserName();
@@ -90,7 +91,7 @@ namespace Unchained
             }
             else if (e.EventName=="Tipped_Click")
             {
-                string sPin = BiblePayCommon.Encryption.Base64Decode(e.Extra.Output.ToString());
+                string sPin = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(e.Extra.Output.ToString()));
 
                 DACResult r30 = UICommon.BuySomething2(this, sPin);
                 if (r30.fError())
@@ -164,7 +165,7 @@ namespace Unchained
             video1.Footer = "Uploaded by <a href='" + sTheirChannel + "'>"
                 + UICommon.GetUserAvatarAndName(this, dt.GetColValue("userid"), true)
                 + "</a> • " + GetObjectRating(IsTestNet(this), sID, "video1", gUser(this)) + " • "
-                + UICommon.GetFollowControl(IsTestNet(this), dt.GetColValue("userid"), gUser(this).BiblePayAddress)
+                + UICommon.GetFollowControl(IsTestNet(this), dt.GetColValue("userid"), gUser(this).id)
                 + " • " + UICommon.GetTipControl(IsTestNet(this), dt.GetColValue("id"), dt.GetColValue("userid"))
                 + "<br>" + UICommon.GetWatchSum(IsTestNet(this), sID) + " view(s) • "
                 + dt.GetColDateTime(0, "time").ToString()

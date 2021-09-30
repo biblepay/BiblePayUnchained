@@ -140,13 +140,45 @@ namespace BiblePayCommon
                 }
                 propertyInfo.SetValue(o, Convert.ChangeType(oNewValue, propertyInfo.PropertyType), null);
             }
+            string t1 = "";
+
+        }
+        public static dynamic CastObjectToExpando(object o)
+        {
+            dynamic expando = new System.Dynamic.ExpandoObject();
+            var dictionary = (IDictionary<string, object>)expando;
+            foreach (var property in o.GetType().GetProperties())
+            {
+                dictionary.Add(property.Name, property.GetValue(o));
+            }
+            return expando;
         }
 
+        public static void CastExpandoToBiblePayObject(ExpandoObject oExpandoObject, ref object oBiblePayObject)
+        {
+            try
+            {
+                foreach (var attribute in oExpandoObject)
+                {
+                    string sColName1 = attribute.Key;
+                    dynamic oValue = attribute.Value;
+                    if (sColName1 == "_id")
+                    {
+                        sColName1 = "id";
+                    }
+                    SetEntityValue(oBiblePayObject, sColName1, oValue);
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Log2("CastExpandoToBiblePayObject " + ex.Message);
+            }
+        }
 
         public static BiblePayCommon.IBBPObject ExpandoToStronglyCastObject(ExpandoObject oDSQL, string sTable)
         {
             BiblePayCommon.IBBPObject o = (BiblePayCommon.IBBPObject)BiblePayCommon.EntityCommon.GetInstance("BiblePayCommon.Entity+" + sTable);
-
             try
             {
                 foreach (var attribute in oDSQL)
@@ -408,6 +440,7 @@ namespace BiblePayCommon
             public int EmailVerified { get; set; }
             public string AvatarURL { get; set; }
             public int Administrator { get; set; }
+            public int Tickets { get; set; }
             public string HashTags { get; set; }
             public string Testimony { get; set; }
             public string ThemeName { get; set; }
@@ -428,6 +461,41 @@ namespace BiblePayCommon
             {
                 return UserGuid;
             }
+        }
+
+
+        public class TicketHistory: BaseEntity, IBBPObject
+        {
+            public static string CollectionName = "Ticket History";
+            public static string ObjectName = "TicketHistory";
+
+            public string Body { get; set; }
+            public string AssignedTo { get; set; }
+            public string Disposition { get; set; }
+
+            public override string GetHash()
+            {
+                return GetSha256HashI(id);
+            }
+
+        }
+
+        public class Ticket : BaseEntity, IBBPObject
+        {
+            public static string CollectionName = "Ticket";
+            public static string ObjectName = "Ticket";
+
+            public string Title { get; set; }
+            public int TicketNumber { get; set; }
+            public string Disposition { get; set; }
+            public string AssignedTo { get; set; }
+            public string Body { get; set; }
+
+            public override string GetHash()
+            {
+                return GetSha256HashI(ParentID + UserID + TicketNumber);
+            }
+
         }
 
         public class object1 : BaseEntity, IBBPObject
@@ -577,6 +645,7 @@ namespace BiblePayCommon
             public double Amount { get; set; }
             public double USDAmount { get; set; }
             public double Coverage { get; set; }
+            public string OwnerAddress { get; set; }
 
             public override string GetHash()
             {

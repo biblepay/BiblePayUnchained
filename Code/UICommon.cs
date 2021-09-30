@@ -1,4 +1,5 @@
 ﻿using BiblePayCommon;
+using BiblePayCommonNET;
 using System;
 using System.Data;
 using System.Data.SqlClient;
@@ -17,12 +18,12 @@ namespace Unchained
 {
     public static class UICommon
     {
-        
+
 
         public static string GetCurrentThemeName(Page p)
         {
             string sTheme = gUser(p).ThemeName;
-            if (sTheme == null || sTheme=="")
+            if (sTheme == null || sTheme == "")
                 sTheme = "black";
             return sTheme;
         }
@@ -84,7 +85,7 @@ namespace Unchained
 
             string[] vURLs = URLs.Split(";");
             string[] vLinkNames = LinkNames.Split(";");
-           
+
             var js2 = "   var xp = parseFloat(localStorage.getItem('bbpdd" + item.ToString() + "')); "
              + "   var xe = xp==0?1:0; localStorage.setItem('bbpdd" + item.ToString() + "', xe); var disp = xp == 0 ? 'none' : 'block';";
 
@@ -94,7 +95,7 @@ namespace Unchained
             //string sOldJs = "myfunc();";
 
             string menu = "<li id ='button_" + MenuName + "' class='dropdown'>"
-             + "	<a class='dropdown-toggle' href='#' data-toggle='dropdown' onclick=\" myfunc(" + item.ToString() + "); " 
+             + "	<a class='dropdown-toggle' href='#' data-toggle='dropdown' onclick=\" myfunc(" + item.ToString() + "); "
              + js2 + " $('#bbpdd" + item.ToString() + "').attr('expanded', xe); "
              + "    $('#bbpdd" + item.ToString() + "').css('display',disp);\" >"
              + "	<i class='fa " + sIcon + "'></i>&nbsp;<span>" + MenuName + "</span>"
@@ -128,14 +129,15 @@ namespace Unchained
             if (nAdded == 0)
                 return "";
             else
-            return menu;
+                return menu;
         }
 
         public enum InputType
         {
             password,
             text,
-            number
+            number,
+            multiline
         };
 
         public static void MsgInput(Page p, string sCallBackEvent, string sTitle, string sNarrative,
@@ -144,13 +146,26 @@ namespace Unchained
             string sType = eInputType.ToString();
             if (fInputHidden)
                 sType = "hidden";
+            string sInputControl = "";
+            string sGrabber = "";
+
+            if (eInputType == InputType.multiline)
+            {
+                sInputControl = "<textarea autocomplete=\"nope\" id=\"q1\" class=\"comments\" name=\"q1\" rows=\"6\" cols=\"10\" />";
+                sGrabber = "var v=$(\"textarea#q1\").val();";
+            }
+            else
+            {
+                sInputControl = "<input autocomplete=\"nope\" type=\"" + sType + "\" class=\"trump\" id=\"q1\" name=\"q1\" />";
+                sGrabber = "var v=$(\"#q1\").val();";
+            }
 
             string sJavascript = "$('<form id=\"wform1\" method=\"POST\">" + sNarrative
-                + "<br><input type=\"" + sType + "\" class=\"trump\"  name=\"q1\"><br></form>').dialog({"
+                + "<br>" + sInputControl + "<br></form>').dialog({"
                 + "  modal: true, width: " + nWidth.ToString() + ", title: '" + sTitle + "', buttons: {    'OK': function() {"
-                + "  var name = $('input[name=\"q1\"]').val(); "
+                + "  " + sGrabber
                 + "  var Extra={};Extra.Value='" + sEventValue + "';Extra.Address='" + sAddress + "';Extra.Amount='" + sAmt + "';"
-                + "Extra.Output=window.btoa(name);Extra.Event='" + sCallBackEvent + "';BBPPostBack2(this, Extra);"
+                + "Extra.Output=window.btoa(escape(v));Extra.Event='" + sCallBackEvent + "';BBPPostBack2(this, Extra);"
                 + "$(this).dialog('close');"
                 + "  },     'Cancel': function() {       $(this).dialog('close');                 }            }        });";
             p.ClientScript.RegisterStartupScript(p.GetType(), "msginput1", sJavascript, true);
@@ -210,7 +225,7 @@ namespace Unchained
         }
         public static string GetHeaderImage(Page p)
         {
-            string sImg = "Images/"+ Config("logo");
+            string sImg = "Images/" + Config("logo");
             return sImg;
         }
 
@@ -225,7 +240,7 @@ namespace Unchained
 
         public static string GetTd(DataRow dr, string colname, string sDestination, string sExtra = "")
         {
-            string sAnchor = "<a href='"+ sDestination + ".aspx?id=" + dr["id"].ToString() + sExtra + "'>";
+            string sAnchor = "<a href='" + sDestination + ".aspx?id=" + dr["id"].ToString() + sExtra + "'>";
             string val = dr[colname].ToString();
             string td = "<td>" + sAnchor + val + "</a></td>";
             return td;
@@ -276,7 +291,7 @@ namespace Unchained
             }
             // Determine whether encrypted:
             p.Session["PENDING_PURCHASE"] = i;
-            MsgInput(p, sEvent, "Pending Purchase", sNarr, 700, "", "", InputType.number, !(gUser(p).FA2Verified==1));
+            MsgInput(p, sEvent, "Pending Purchase", sNarr, 700, "", "", InputType.number, !(gUser(p).FA2Verified == 1));
         }
 
         public static DACResult BuySomething2(Page p, string sPin)
@@ -294,8 +309,8 @@ namespace Unchained
             {
                 p.Session["balance"] = null;
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(p, IsTestNet(p), i, gUser(p));
-                BiblePayCommonNET.UICommonNET.MsgModal(p, "Success", "You have successfully paid this invoice [" 
-                    + i.ProductID.ToNonNullString()+ "] for " + i.Amount.ToNonNullString() + " BBP.", 600, 300, true);
+                BiblePayCommonNET.UICommonNET.MsgModal(p, "Success", "You have successfully paid this invoice ["
+                    + i.ProductID.ToNonNullString() + "] on TXID " + s9.TXID + " for " + i.Amount.ToNonNullString() + " BBP.", 500, 250, true);
                 return s9;
             }
             else
@@ -332,25 +347,27 @@ namespace Unchained
         public static string GetSideBar(Page p)
         {
             item = 0;
-            string sWallet = "<a class='wallet' href='RegisterMe'><i class='fa fa-wallet'></i>&nbsp;"
+            string sWallet = "<a class='wallet' href='Wallet'><i class='fa fa-wallet'></i>&nbsp;"
                 + GetAvatarBalance(p) + "</a>";
+            //              + "<div class='pull-left info'><p>" + gUser(p).FirstName.ToNonNullString() + "</p>" + "</div><div class='myicons'><ul>" + sKeys + "</ul></div>"
 
             string sChain = IsTestNet(p) ? "TESTNET" : "MAINNET";
             string sDecoratedChain = IsTestNet(p) ? "<font color=lime>TESTNET</font>" : "<font color=gold>MAINNET</font>";
-            string sChainAnchor = GetStandardAnchor("ancChain","btnChangeChain",sChain,sDecoratedChain);
+            string sChainAnchor = GetStandardAnchor("ancChain", "btnChangeChain", sChain, sDecoratedChain, "Change your Chain");
             string sKeys = gUser(p).FirstName.ToNonNullString().Length > 0 ? sWallet + " • " + sChainAnchor : "";
-            string html = "<aside class='main-sidebar' id='mySidenav'>";
+            string html = "<aside class='main-sidebar divsidebar' id='mySidenav'>";
             html += "<section class='sidebar'><div class='user-panel' class='trump'>"
               + "<a onclick='closeNav();' href = '#' class='sidebar-toggle' data-toggle='offcanvas' role='button'>"
               + "<i class='fa fa-close'></i></a>"
               + "<div class='pull-left myavatar'>" + gUser(p).GetAvatarImage() + "</div>"
-              + "<div class='pull-left info'><p>" + gUser(p).FirstName.ToNonNullString() + "</p>" + "</div><div class='myicons'><ul>" 
-              + sKeys + "</ul></div>"
-              + "</div><ul class='sidebar-menu'>";
+              + "<div class='pull-left info'><p><small>" + gUser(p).FirstName.ToNonNullString() + "</small></p><small><p>" + sKeys + "</p></small>" + "</div>"
+              + "</div><div id='divsidebar-menu' class='divsidebar'><ul class='sidebar-menu'>";
             html += AddMenuOptions(gUser(p).LoggedIn);
-            html += "</section></aside>";
+            html += "</div></section></aside>";
             string sFunction = "<script>function myfunc(iActive) { $('#bbpdd' + iActive.toString()).attr('expanded',0);  for (var i = 0; i < 50; i++) {   "
                 + "$('#bbpdd' + i.toString() ).attr('xexpanded', 0); $('#bbpdd' + i.toString()).css('display','none'); localStorage.setItem('bbpdd' + i.toString() , 1);   } localStorage.setItem('bbpdd' + iActive.toString() , 1);      }</script>";
+            sFunction = "<script>function myfunc(iActive) { }</script>";
+
             html += sFunction;
             return html;
         }
@@ -369,8 +386,13 @@ namespace Unchained
             DataTable dtUsers = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "user1");
             dtUsers = dtUsers.FilterDataTable("BiblePayAddress='" + id + "' or id='" + id + "'");
             User u = new User();
-            if (dtUsers.Rows.Count < 1)
+
+            if (dtUsers.Rows.Count < 1 || id == null || id=="")
+            {
+                u.AvatarURL = EmptyAvatar();
+                u.FirstName = "Guest";
                 return u;
+            }
 
             u.BiblePayAddress = dtUsers.GetColValue("BiblePayAddress");
             u.AvatarURL = dtUsers.GetColValue("AvatarURL");
@@ -394,7 +416,7 @@ namespace Unchained
 
             return u;
         }
-       
+
         private static string GetInnerPoster(string sFID, string sURL2, int nWidth)
         {
             if (sFID.Length < 10)
@@ -404,7 +426,7 @@ namespace Unchained
             return HTML;
         }
 
-        private static string CurateVideo(Page p, int nWidth, string sID, User u, string sURL2, string SVID, 
+        private static string CurateVideo(Page p, int nWidth, string sID, User u, string sURL2, string SVID,
             string FID, int nAdded, string sTitle, string sBody)
         {
             string sDiv = "<div class='gallery'><a href=Media.aspx?id=" + sID + ">";
@@ -414,13 +436,13 @@ namespace Unchained
             {
                 sBody = sBody.Substring(0, 255) + "...";
             }
-            sDiv += "</a></div><div class='gallery-description'><small>" 
+            sDiv += "</a></div><div class='gallery-description'><small>"
                 + sTitle + " • " + sBody + "<br>Uploaded by " + u.FullUserName() + " "
                 + BiblePayCommon.Common.ConvertFromUnixTimestamp(nAdded).ToShortDateString() + "</small></span>";
 
             if (HasOwnership(IsTestNet(p), sID, "video1", gUser(p).id))
             {
-                string sTrashAnchor = GetStandardAnchor("ancDelete", "DeleteObject", sID, "<i class='fa fa-trash'></i>", "video1");
+                string sTrashAnchor = GetStandardAnchor("ancDelete", "DeleteObject", sID, "<i class='fa fa-trash'></i>", "Delete Video Object", "video1");
                 sDiv += sTrashAnchor;
             }
             sDiv += "</div>";
@@ -436,12 +458,12 @@ namespace Unchained
             {
                 sBody = sBody.Substring(0, 255) + "...";
             }
-            sDiv += "</a></div><div class='gallery-description'><small>" 
+            sDiv += "</a></div><div class='gallery-description'><small>"
                 + sTitle + " • " + sBody + "<br>Uploaded by " + u.FullUserName() + " "
                 + BiblePayCommon.Common.ConvertFromUnixTimestamp(nAdded).ToShortDateString() + "</small></span>";
             if (HasOwnership(IsTestNet(p), sID, "video1", gUser(p).id))
             {
-                string sTrashAnchor = GetStandardAnchor(sID, "DeleteObject", sID, "<i class='fa fa-trash'></i>", "video1");
+                string sTrashAnchor = GetStandardAnchor(sID, "DeleteObject", sID, "<i class='fa fa-trash'></i>", "Delete Video Object", "video1");
                 sDiv += sTrashAnchor;
             }
             sDiv += "</div>";
@@ -467,7 +489,7 @@ namespace Unchained
             pag.RowsPerPage = 3;
 
             //int nPage = _paginator.PageNumber;
-            
+
             for (int y = pag.StartRow; y <= pag.EndRow; y++)
             {
                 string sURL = dt.Rows[y]["URL"].ToNonNullString();
@@ -476,10 +498,10 @@ namespace Unchained
                     User u = UICommon.GetUserRecord(IsTestNet(p), dt.GetColValue(y, "UserID"));
                     string sUserName = u.FullUserName();
                     string sElement = "";
-                    if ((sViewType == "video" || sViewType=="any") && sURL.Contains(".mp4"))
+                    if ((sViewType == "video" || sViewType == "any") && sURL.Contains(".mp4"))
                     {
                         sElement = CurateVideo(p, nWidth, dt.Rows[y]["id"].ToNonNullString(), u, dt.Rows[y]["URL2"].ToNonNullString(),
-                            dt.GetColValue(y, "SVID"), dt.GetColValue(y, "FID"), (int)dt.GetColDouble(y,"time"),
+                            dt.GetColValue(y, "SVID"), dt.GetColValue(y, "FID"), (int)dt.GetColDouble(y, "time"),
                             dt.Rows[y]["Title"].ToNonNullString(), dt.Rows[y]["Body"].ToNonNullString());
 
                     }
@@ -496,7 +518,7 @@ namespace Unchained
                     {
                         string sAsset = "<a href='" + sURL + "'><iframe class='gallery' src='" + sURL + "'></iframe></a>";
                         string sDiv = "<div class='gallery'>" + sAsset;
-                        sDiv += "<br>" + dt.Rows[y]["Subject"].ToNonNullString() + " • Uploaded by " 
+                        sDiv += "<br>" + dt.Rows[y]["Subject"].ToNonNullString() + " • Uploaded by "
                             + sUserName + "</div>";
                         string sEdit = "<input type='button' onclick=\"location.href='CreateNewDocument?file=" + sURL + "';\" id='w" + y.ToString() + "' value='Edit' />";
                         sElement = sDiv;
@@ -506,7 +528,7 @@ namespace Unchained
                         if (sURL.Contains(".png") || sURL.Contains(".jpg") || sURL.Contains(".jpeg") || sURL.Contains(".bmp") || sURL.Contains(".gif"))
                         {
                             sElement = CurateImage(p, nWidth, dt.Rows[y]["id"].ToNonNullString(), u, dt.Rows[y]["URL"].ToNonNullString(),
-                                 (int)dt.GetColDouble(y, "time"), dt.Rows[y]["Title"].ToNonNullString(), 
+                                 (int)dt.GetColDouble(y, "time"), dt.Rows[y]["Title"].ToNonNullString(),
                                  dt.Rows[y]["Body"].ToNonNullString());
                         }
                     }
@@ -525,47 +547,77 @@ namespace Unchained
             html += "</table>";
             return html;
         }
+
+        public static string GetTopOneByTime(Page p, string table, string sFilter, string sColName)
+        {
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), table);
+            dt = dt.FilterDataTable(sFilter);
+
+            dt = dt.OrderBy("time desc");
+            if (dt.Rows.Count < 1)
+                return "";
+            string sVal = dt.Rows[0][sColName].ToString();
+            return sVal;
+        }
+
+
         public static BiblePayCommon.BBPDataTable GetGroup(bool fTestNet, string table, string sFilter, string groupbycolumn)
         {
             // SQL Equivalent of : Select id,max(maxcolumn) group by groupbycolumn
             BiblePayCommon.BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, table);
             dt = dt.FilterBBPDataTable(sFilter);
-            var query = from row in dt.AsEnumerable()
-                        group row by row.Field<string>(groupbycolumn) into grp
-                        select new
-                        {
-                            Key = grp.Key,
-                            Id = grp.First().Field<string>("id")
-                        };
-            BiblePayCommon.BBPDataTable dtOut = new BiblePayCommon.BBPDataTable();
-            dtOut.Columns.Add("id");
-            dtOut.Columns.Add(groupbycolumn);
-            foreach (var grp in query)
-            {
-                DataRow _newrow = dtOut.NewRow();
-                _newrow["id"] = grp.Id;
-                _newrow[groupbycolumn] = grp.Key;
 
-                //Console.WriteLine(String.Format("The Max of '{0}' is {1}& {2}", grp.Id, grp.nftid, grp.max1));
-                dtOut.Rows.Add(_newrow);
+            try
+            {
+                var query = from row in dt.AsEnumerable()
+                            group row by row.Field<string>(groupbycolumn) into grp
+                            select new
+                            {
+                                Key = grp.Key,
+                                Id = grp.First().Field<string>("id")
+                            };
+                BiblePayCommon.BBPDataTable dtOut = new BiblePayCommon.BBPDataTable();
+                dtOut.Columns.Add("id");
+                dtOut.Columns.Add(groupbycolumn);
+                foreach (var grp in query)
+                {
+                    DataRow _newrow = dtOut.NewRow();
+                    _newrow["id"] = grp.Id;
+                    _newrow[groupbycolumn] = grp.Key;
+
+                    //Console.WriteLine(String.Format("The Max of '{0}' is {1}& {2}", grp.Id, grp.nftid, grp.max1));
+                    dtOut.Rows.Add(_newrow);
+                }
+                return dtOut;
+            } catch (Exception ex)
+            {
+                Log("GetGroup " + ex.Message);
+                return dt;
             }
-            return dtOut;
         }
 
-        public static string GetStandardButton(string sID, string sCaption, string sEvent, string sAltText, string sOptJS="")
+        public static string GetStandardButton(string sID, string sCaption, string sEvent, string sAltText, string sOptJS = "", string sOptClass = "")
         {
-            string sButton = "<button id='btn" + sID + "' onclick=\""
-                   + "var e={};" + sOptJS + "e.Event='" + sEvent + "_Click';e.Value='"
+            string sButton = "<button class='" + sOptClass + "' id='btn" + sID + "' onclick=\""
+                   + "var e={};" + sOptJS + "e.Event='" + sEvent + "_Click';if (e.Event=='_Click') return false;e.Value='"
                    + sID + "';BBPPostBack2(null, e);\" title='" + sAltText + "'>"
                    + sCaption + "</button>";
             return sButton;
         }
 
+        public static string GetStandardAnchor(string sID, string sEvent, string sValue, string sCaption, string sAltText, string sOptTable = "")
+        {
+            string sAnchor = "<a id='" + sID + "' onclick=\"var e={};e.Event='" + sEvent + "_Click';e.Value='" + sValue + "';e.Table='"
+                + sOptTable + "';BBPPostBack2(this, e);\" title='" + sAltText + "'>" + sCaption + "</a>";
+            return sAnchor;
+        }
+
+
         public static string GetStandardButtonWithConfirm(string sID, string sCaption, string sEvent, string sAltText, string sConfirmCaption)
         {
             string sConfirm = "var fConfirm=confirm('" + sConfirmCaption + "'); if (!fConfirm) { return false; } ";
 
-            string sButton = "<button id='attach" + sID + "' onclick=\"" + sConfirm 
+            string sButton = "<button id='attach" + sID + "' onclick=\"" + sConfirm
                    + "var e={};e.Event='" + sEvent + "_Click';e.Value='"
                    + sID + "';BBPPostBack2(null, e);\" title='" + sAltText + "'>"
                    + sCaption + "</button>";
@@ -598,7 +650,7 @@ namespace Unchained
                     + "<img class='gallerypdf' src='" + sAvatar + "'</a>";
 
                 string sDiv = "<div class='gallery'>" + sAnchor + "</div>";
-                sDiv += "<div class='gallery-description'>" + u.FullUserName() + " • Since " 
+                sDiv += "<div class='gallery-description'>" + u.FullUserName() + " • Since "
                     + dt.GetColDateTime(y, "time").ToShortDateString()
                     + "<br>" + dt.Rows[y]["domain"].ToNonNullString() + "";
 
@@ -616,18 +668,12 @@ namespace Unchained
 
                 if (iCol == pag.ColumnsPerRow)
                 {
-                        html += "</tr>\r\n<tr>";
-                        iCol = 0;
+                    html += "</tr>\r\n<tr>";
+                    iCol = 0;
                 }
             }
             html += "</table>";
             return html;
-        }
-        public static string GetStandardAnchor(string sID, string sEvent, string sValue, string sCaption, string sOptTable = "")
-        {
-            string sAnchor = "<a id='" + sID + "' onclick=\"var e={};e.Event='" + sEvent + "_Click';e.Value='" + sValue + "';e.Table='"
-                + sOptTable + "';BBPPostBack2(this, e);\">" + sCaption + "</a>";
-            return sAnchor;
         }
 
         public static string GetComments(bool fTestNet, string id, Page z, bool fMaskIfNone = false)
@@ -665,7 +711,7 @@ namespace Unchained
                 sHTML += "<br>";
                 return sHTML;
             }
-            
+
             sHTML += "<table class='comments'><tr><th colspan=2><h3>Add a Comment:</h3></th></tr>";
 
             if (!gUser(z).LoggedIn)
@@ -673,13 +719,179 @@ namespace Unchained
                 sHTML += "<tr><td><font color=red>Sorry, you must be logged in to add a comment.</td></tr></table>";
                 return sHTML;
             }
-            
+
             string sSaveArea = "<tr><td width=10%>Comment:</td><td><textarea id='txtComment' class='comments' name='txtComment' rows=10 cols=10></textarea><br><br></td></tr></table>";
             sHTML += sSaveArea;
             sHTML += BiblePayCommonNET.UICommonNET.GetButtonTypeSubmit("btnSaveComments1", "SaveComments_Click", "Save Comments");
 
             return sHTML;
         }
+
+        public static string GetUserName(DataTable dt, int nRow)
+        {
+            string sLastName = dt.GetColValue(nRow,"lastname");
+            string sFirstName = dt.GetColValue(nRow, "firstname");
+            if (sLastName != "" && sFirstName != "")
+            {
+                return sLastName + ", " + sFirstName;
+            }
+            else if (sLastName != "" && sFirstName == "")
+            {
+                return sLastName;
+            }
+            else
+            {
+                return sFirstName;
+            }
+        }
+        public static string GetAssignees(Page p, string sHTMLID, string sSelectedValue)
+        {
+            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "user1");
+            dt=dt.OrderBy0("lastname,firstname desc");
+            
+            string sOptions = "";
+            sOptions += "<option></option>";
+
+            for (int y = 0; y < dt.Rows.Count; y++)
+            {
+                string sFullName = GetUserName(dt, y);
+                bool fSelected = sSelectedValue == dt.GetColValue(y, "id");
+                string sSel = fSelected ? " SELECTED " : "";
+                string sRow = "<option " + sSel + "value='" + dt.Rows[y]["id"].ToString() + "'>"
+                    + sFullName + "</option>\r\n";
+                sOptions += sRow;
+            }
+            string sDD = "<select name='input_" + sHTMLID + "' id='input_" + sHTMLID + "'>";
+            sDD += sOptions;
+            sDD += "</select>";
+            return sDD;
+        }
+
+        public static string GetDropDownFromDataTable(DataTable dt, string sColName, string sHTMLID, string sSelectedValue)
+        {
+            string sOptions = "";
+            for (int y = 0; y < dt.Rows.Count; y++)
+            {
+                string sColValue = dt.Rows[y][sColName].ToString(); // + " " + dt.Rows[y]["lastname"];
+                bool fSelected = sSelectedValue.ToLower() == sColValue.ToLower();
+                string sSel = fSelected ? " SELECTED " : "";
+                string sRow = "<option " + sSel + "value='" + dt.Rows[y]["id"].ToString() + "'>"
+                    + sColValue + "</option>\r\n";
+                sOptions += sRow;
+            }
+            string sDD = "<select name='input_" + sHTMLID + "' id='input_" + sHTMLID + "'>";
+            sDD += sOptions;
+            sDD += "</select>";
+            return sDD;
+        }
+
+        public static string GetDispositions(string HTMLID, string sSelectedValue)
+        {
+            string sDispositions = "Change Approval;Customer Acceptance;Code Review;Closed;Customer Service;Programming;Research;Release to Test;Release to Production;Test";
+            DataTable dt = BiblePayDLL.Sidechain.StringToDataTable(sDispositions);
+            string sDisp = GetDropDownFromDataTable(dt, "column1", "ddDispositions", sSelectedValue);
+            return sDisp;
+        }
+
+        public static string VideoCategories = ";Autos & Vehicles;Finance & Cryptocurrency;Comedy/Entertainment;Computers;Education;Film/Animation;Gaming;How-To/Style;Interview/Documentary;Music;"
+            + "News & Politics;Nonprofits & Activism;Pets & Animals;People & Blogs;Sports;"
+            + "Science/Technology;Religion;Travel & Events";
+
+        public static string GetVideoCategories(string HTMLID, string sSelectedValue)
+        {
+            DataTable dt = BiblePayDLL.Sidechain.StringToDataTable(VideoCategories);
+            string sDisp = GetDropDownFromDataTable(dt, "column1", HTMLID, sSelectedValue);
+            return sDisp;
+        }
+
+
+
+        public static string GetStandardDropDown(Page p, string sID, string sTable, string sColumn, string sSelectedValue)
+        {
+            DataTable dtGroup = UICommon.GetGroup(IsTestNet(p), "video1", "url like '%mp4%'", "Category");
+            string sOptions = "";
+            for (int y = 0; y < dtGroup.Rows.Count; y++)
+            {
+                bool fSelected = sSelectedValue.ToLower() == dtGroup.Rows[y]["category"].ToString().ToLower();
+                string sSel = fSelected ? " SELECTED " : "";
+
+                string sRow = "<option " + sSel + "value='" + dtGroup.Rows[y]["category"].ToString() + "'>"
+                    + dtGroup.Rows[y]["category"].ToString() + "</option>\r\n";
+                sOptions += sRow;
+            }
+            string sDD = "<select name='input_" + sID + "' id='input_" + sID + "'>";
+            sDD += sOptions;
+            sDD += "</select>";
+            return sDD;
+        }
+
+        /*
+        public static string GetTicketHistory(bool fTestNet, string id, Page z, bool fMaskIfNone = false)
+        {
+            // Shows the comments section for the object.  Also shows the replies to the comments.
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "TickHistory");
+            dt = dt.FilterDataTable("parentid='" + id + "'");
+            string sHTML = "";
+
+            if (!fMaskIfNone)
+            {
+                sHTML += "<h3>History:</h3><br>";
+            }
+
+            sHTML += "<table class='saved2'>"
+                + "<tr><th width=4%><th width=14%>User</th><th width=10%>Added</th><th width=64%>Comment</th></tr>";
+
+            if (dt.Rows.Count == 0 && fMaskIfNone)
+            {
+                return "";
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                string sBody = ReplaceURLs(dt.Rows[i]["Body"].ToString());
+                string div = "<tr><td><td>" + UICommon.GetUserAvatarAndName(z, dt.GetColValue(i, "UserID"))
+                    + "</td><td>" + dt.GetColDateTime(i, "time").ToString()
+                    + "</td><td class='comments'><br>" + sBody + "</td></tr>";
+                sHTML += div;
+
+            }
+            sHTML += "</table>";
+            if (fMaskIfNone == true)
+            {
+                sHTML += "<br>";
+                return sHTML;
+            }
+
+            sHTML += "<table class='comments'><tr><th colspan=2><h3>Reply and Assign ticket:</h3></th></tr>";
+
+            if (!gUser(z).LoggedIn)
+            {
+                sHTML += "<tr><td><font color=red>Sorry, you must be logged in to reply.</td></tr></table>";
+                return sHTML;
+            }
+            string sDropDown = "<dropdown>Admin;me;you;</dropdown>";
+
+            sHTML += "<tr><td>Assign To:</td><td>" + sDropDown + "</td></tr>";
+
+            sHTML += "<tr><td width=10%>Comment:</td><td><textarea id='txtComment' class='comments' name='txtComment' rows=10 cols=10></textarea><br><br></td></tr>";
+            sHTML += "</table>";
+
+            sHTML += BiblePayCommonNET.UICommonNET.GetButtonTypeSubmit("btnSaveTicket", "EditTicket_Click", "Reply and Assign");
+
+            return sHTML;
+        }
+        */
+
+
+        public static string GetBannerControls(Page p)
+        {
+            string s1 = GetStandardButton("btnLogIn", gUser(p).LoggedIn ? "Log Out" : "Log In", gUser(p).LoggedIn ? "LogOut" : "LogIn", 
+                gUser(p).LoggedIn ? "Log Out of the system" : "Log into the system", "" , "buttondark");
+            string s2 = GetStandardButton("btnLogIn", gUser(p).LoggedIn ? "My Account" : "Sign Up", 
+                "SignUp", gUser(p).LoggedIn ? "Edit my user record" : "Join our community!", "", "buttondark");
+            string sOut = s1 + "&nbsp;" +  s2;
+            return sOut;
+        }
+        
         public static string GetHeaderBanner(Page p)
         {
             return Config("sitename");
@@ -711,9 +923,10 @@ namespace Unchained
         public static string GetUserAvatarAndName(Page p, string sUserID, bool fHorizontal = false)
         {
             User u = GetUserRecord(IsTestNet(p), sUserID);
-            string s = u.GetAvatarImage() + "<br>" + u.FullUserName();
+            string sProfileAnchor = "<a href='Person?lastname=" + u.LastName + "&firstname=" + u.FirstName + "'>";
+            string s = sProfileAnchor + u.GetAvatarImage() + "<br>" + u.FullUserName() + "</a>";
             if (fHorizontal)
-                s = u.GetAvatarImage() + " • " + u.FullUserName();
+                s = sProfileAnchor + u.GetAvatarImage() + " • " + u.FullUserName() + "</a>";
             return s;
         }
 

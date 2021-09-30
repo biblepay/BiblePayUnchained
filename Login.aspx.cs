@@ -78,6 +78,14 @@ namespace Unchained
                 return;
             }
 
+            double nReplay = BiblePayCommon.Common.GetDouble(BiblePayCommon.HalfordDatabase.GetKVWithExpiration("LockedOut" + g.id));
+            if (nReplay == 1)
+            {
+                MsgModal(this, "Error", "Sorry, you must wait at least 30 minutes before sending a new locked out e-mail.  Please check your junk folder. ", 400, 200, true);
+                return;
+            }
+            BiblePayCommon.HalfordDatabase.SetKV("1", "LockedOut" + g.id, 60 * 30);
+
             MailMessage m = new MailMessage();
             string sDomainName = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
             string sURL = sDomainName + "/RegisterMe?action=resetpassword&id=" + g.id.ToString() + "&RSAKey=" + g.RSAKey.ToString();

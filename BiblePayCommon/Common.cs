@@ -139,38 +139,47 @@ namespace BiblePayCommon
 
         public struct User
         {
-            public string UserName;
-            public string FirstName;
-            public string PasswordHash;
-            public string LastName;
-            public string UserGuid;
-            public string AvatarURL;
+            // User Record Specific
             public bool LoggedIn;
-            public string BiblePayAddress;
-            public string EmailAddress;
-            public int Verified;
-            public string HashTags;
-            public string Slogan;
-            public string Testimony;
             public string Signature;
-            public string ThemeName;
-            public string Domain;
-            public string RSAKey;
-            public string Shared2FA;
-            public int FA2Verified;
-            public int EmailVerified;
-            public string id;
             public int SignatureTimestamp;
-            public int Administrator;
-            public string PublicText;
-            public string ProfessionalText;
-            public string PrivateText;
-            public string ReligiousText;
-            public int BirthDate;
-            public string Gender;
-            public string TelegramLinkName;
-            public string TelegramLinkURL;
-            public string TelegramLinkDescription;
+
+            // User Record + Entity Overlapping fields:
+
+            public string UserName { get; set; }
+            public string FirstName { get; set; }
+            public string PasswordHash { get; set; }
+            public string LastName { get; set; }
+            public string UserGuid { get; set; }
+            public string AvatarURL { get; set; }
+            public string BiblePayAddress { get; set; }
+            public string EmailAddress { get; set; }
+            public int Verified { get; set; }
+            public string HashTags { get; set; }
+            public string Slogan { get; set; }
+            public string Testimony { get; set; }
+
+            public string ThemeName {get;set;}
+            public string Domain { get; set; }
+            public string RSAKey { get; set; }
+            public string Shared2FA { get; set; }
+            public int FA2Verified { get; set; }
+
+            public int EmailVerified { get; set; }
+            public string id { get; set; }
+            public string PublicText { get; set; }
+            public string ProfessionalText { get; set; }
+            public string PrivateText { get; set; }
+            public string ReligiousText { get; set; }
+            public int BirthDate { get; set; }
+            public string Gender { get; set; }
+            public string TelegramLinkName { get; set; }
+            public string TelegramLinkURL { get; set; }
+            public string TelegramLinkDescription { get; set; }
+
+            public int Tickets { get; set; }
+            public int Administrator { get; set; }
+
 
             public string FullUserName()
             {
@@ -502,6 +511,8 @@ namespace BiblePayCommon
         {
             public string Result;
             public string Error;
+            public string Event;
+            public string Alt;
             public bool fError()
             {
                 bool fHasError = (Error != null && Error != "" && Error.Length > 0);
@@ -516,6 +527,8 @@ namespace BiblePayCommon
             public dynamic ExpandoObject;
             public object Invoice;
             public double Amount;
+            public double UTXOBalance;
+            public double AccountingBalance;
             public DACResult()
             {
                 Error = "";

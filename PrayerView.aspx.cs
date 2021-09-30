@@ -32,7 +32,7 @@ namespace Unchained
 
             string div = "<table class='comments'>"
                 + "<tr><th class='objheader' colspan=3><h3>" + _ObjectName + " - View</h3><th class='objheader' colspan=3><div class='prayer'>"
-                + UICommon.GetStandardAnchor(id, "DeleteObject", id, "<i class='fa fa-trash'></i>", _EntityName ) 
+                + UICommon.GetStandardAnchor(id, "DeleteObject", id, "<i class='fa fa-trash'></i>","View " + _EntityName, _EntityName ) 
                 + "</div></th></tr>"
                 + "<tr><td width=10%>User:<td>" + UICommon.GetUserAvatarAndName(this, dt.GetColValue("UserID")) 
                 + "<tr><td>Added:<td>" + dt.GetColDateTime(0, "time").ToString() + "</td></tr>"

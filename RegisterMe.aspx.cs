@@ -65,20 +65,7 @@ namespace Unchained
                   txtLastName.Text = _user.LastName;
                   txtEmailAddress.Text = _user.EmailAddress;
                   lblVerified.Text = _user.Verified == 1 ? "Verified" : "Not Verified";
-                  txtBiblePayAddress.Text = _user.BiblePayAddress;
-                  txtPublicText.Text = _user.PublicText;
-                  txtPrivateText.Text = _user.PrivateText;
-                  txtReligiousText.Text = _user.ReligiousText;
-                  txtProfessionalText.Text = _user.ProfessionalText;
-                  txtTelegramLinkName.Text = _user.TelegramLinkName;
-                  txtTelegramDescription.Text = _user.TelegramLinkDescription;
-                  txtTelegramURL.Text = _user.TelegramLinkURL;
-                  ddGender.Items.Clear();
-                  ddGender.Items.Add("Male");
-                  ddGender.Items.Add("Female");
-                  ddGender.SelectedValue = _user.Gender;
-                  txtBirthDate.Text = BiblePayCommon.Common.ConvertFromUnixTimestamp(_user.BirthDate).ToShortDateString();
-
+                  
                   ddTheme.Items.Clear();
                   ddTheme.Items.Add("Black");
                   ddTheme.Items.Add("Maroon");
@@ -90,8 +77,7 @@ namespace Unchained
                   lblQR.Visible = false;
                   txtTwoFactorEnabled.Text = _user.FA2Verified == 1 ? "2FA Enabled" : "Not Enabled";
                   lblEmailVerified.Text = _user.EmailVerified == 1 ? "Verified" : "Not Verified";
-
-                 
+ 
             }
 
 
@@ -143,18 +129,11 @@ namespace Unchained
             }
 
 
-
-
         }
 
         protected override void Event(BBPEvent e)
         {
-             if (e.EventName == "SentMoney")
-            {
-                string sPin = BiblePayCommon.Encryption.Base64Decode((e.Extra.Output ?? "").ToString());
-                DACResult r30 = UICommon.BuySomething2(this, sPin);
-            }
-            else if (e.EventName=="ValidateTwoFactor_Click")
+            if (e.EventName=="ValidateTwoFactor_Click")
             {
                 string sPin = BiblePayCommon.Encryption.Base64Decode((e.Extra.Output ?? "").ToString());
                 if (sPin == "")
@@ -208,13 +187,21 @@ namespace Unchained
                 return;
             }
 
+            // 9-24-2021 (Replay attack)
+            double nReplay = BiblePayCommon.Common.GetDouble(BiblePayCommon.HalfordDatabase.GetKVWithExpiration("VerifyEmail" + u.id));
+            if (nReplay == 1)
+            {
+                MsgModal(this, "Error", "Sorry, you must wait at least 30 minutes before sending a new verification e-mail.  Please check your junk folder. ", 400, 200, true);
+                return;
+            }
+            BiblePayCommon.HalfordDatabase.SetKV("1", "VerifyEmail" + u.id, 60 * 30);
             MailMessage m = new MailMessage();
             string sDomainName = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
             string sURL = sDomainName + "/RegisterMe?action=verifyemail&id=" + sID;
-            string sURLA = "<a href='" + sURL + "'>confirm your user record field that you requested</a>";
-            string sNarr = "Dear " + u.FirstName + ",<br><br>Please " + sURLA + " to unlock your account privileges"
+            string sURLA = "<a href='" + sURL + "'>confirm your user record e-mail address that you requested</a>";
+            string sNarr = "Dear " + u.FirstName + ",<br><br>Please " + sURLA + " to update your e-mail verification flag to VERIFIED and this will elevate your account privileges"
                 +".<br><br>Thank you.<br>The Crypto Team<br>";
-            m.Subject = "[Transactional Message] Please confirm the user record field that you requested.";
+            m.Subject = "[Transactional Message] Please confirm the address on your account that you initiated.";
             m.Body = sNarr;
             m.IsBodyHtml = true;
             m.To.Add(new MailAddress(u.EmailAddress, u.FirstName));
@@ -242,20 +229,7 @@ namespace Unchained
             Response.Redirect("RegisterMe");
         }
 
-        protected void btnSendBBP_Click(object sender, EventArgs e)
-        {
-            BiblePayCommon.Entity.invoice1 invoice = new BiblePayCommon.Entity.invoice1();
-            invoice.Amount = GetDouble(txtAmount.Text.ToString());
-            invoice.BillToAddress = txtBiblePayAddress.Text;
-            invoice.BillFromAddress = txtRecipientAddress.Text;
-            invoice.ProductID = "User->User";
-            if (!BiblePayDLL.Sidechain.ValidateAddress(IsTestNet(this), invoice.BillFromAddress))
-            {
-                MsgModal(this, "Error", "Sorry, invalid destination address", 400, 200, true);
-                return;
-            }
-            UICommon.BuySomething(this, invoice, "SentMoney");
-        }
+        
         protected void btnSetTwoFactor_Click(object sender, EventArgs e)
         {
             TwoFactorAuthenticator tfa = new TwoFactorAuthenticator();
@@ -287,7 +261,6 @@ namespace Unchained
             lblQR.Visible = true;
             MsgModal(this, "Set Up 2FA", "To set up 2FA, scan the QR code using your 2FA app, by opening it and click Add New Site.  Then capture the QR code image, and ensure it is added.  Then click the Test 2FA button on this page to verify it works.", 400, 300, true);
         }
-        
        
         protected void btnValidateTwoFactor_Click(object sender, EventArgs e)
         {
@@ -296,18 +269,11 @@ namespace Unchained
 
         }
 
-
         protected User PrepareUserRecord()
         {
             User u = gUser(this);
             u.FirstName = txtFirstName.Text;
-            u.ProfessionalText = txtProfessionalText.Text;
-            u.PublicText = txtPublicText.Text;
-            u.ReligiousText = txtReligiousText.Text;
-            u.PrivateText = txtPrivateText.Text;
-
             u.LastName = txtLastName.Text;
-            u.BiblePayAddress = txtBiblePayAddress.Text;
             u.EmailAddress = txtEmailAddress.Text;
             bool fPWMatches = txtPRIVLOGONINFORMATIONConfirm.Text == txtPRIVLOGONINFORMATION.Text;
             if (fPWMatches && txtPRIVLOGONINFORMATION.Text.Length > 0)
@@ -323,32 +289,7 @@ namespace Unchained
             }
             
             u.ThemeName = ddTheme.SelectedValue.ToString();
-            u.Gender = ddGender.SelectedValue.ToString();
-            u.TelegramLinkName = txtTelegramLinkName.Text;
-            u.TelegramLinkURL = txtTelegramURL.Text;
-            u.TelegramLinkDescription = txtTelegramDescription.Text;
-
-            try
-            {
-                u.BirthDate = (int)DateTimeToUnixTimestamp(Convert.ToDateTime(txtBirthDate.Text));
-            }
-            catch(Exception)
-            {
-
-            }
-
             return u;
-        }
-
-        protected void btnUpdateSocialMediaProfile_Click(object sender, EventArgs e)
-        {
-            BiblePayDLL.Sidechain.dictTables.Remove("video1");
-            btnRegister_Click(sender, e);
-        }
-
-        protected void btnUpdateTelegramProfile_Click(object sender, EventArgs e)
-        {
-            btnRegister_Click(sender, e);
         }
 
 
@@ -382,14 +323,20 @@ namespace Unchained
         {
             Response.Redirect("UnchainedUpload?action=setavatar&parentid=" + gUser(this).id);
         }
+        protected string GetRegistrationBanner()
+        {
+            string sNarr = !gUser(this).LoggedIn ? "Register:" : "Welcome to Your User Record";
+            return sNarr;
+        }
 
         protected void btnSendSMSCode_Click(object sender, EventArgs e)
+
         {
             if (gUser(this).Verified == 1)
             {
                 UICommon.MsgBox("Error", "Sorry, you are already verified.", this);
             }
-            if (gUser(this).BiblePayAddress == null || gUser(this).BiblePayAddress == "")
+            if (!gUser(this).LoggedIn)
             {
                 MsgModal(this, "Error", "Sorry, you must save your user record first.", 450, 200);
             }
@@ -430,4 +377,3 @@ namespace Unchained
         }
       }
     }
-

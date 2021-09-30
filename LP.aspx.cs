@@ -1,18 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web;
 using System.Web.Services;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using static Unchained.Common;
-using static BiblePayCommonNET.StringExtension;
 using static BiblePayCommon.Common;
+using static BiblePayCommonNET.StringExtension;
+using static Unchained.Common;
 
 namespace Unchained
 {
-    public partial class LandingPage : BBPPage
+    public partial class LP : BBPPage
     {
 
         protected bool StoreVote(string parentID, string sVoteType)
@@ -61,14 +55,6 @@ namespace Unchained
 
         protected new void Page_Load(object sender, EventArgs e)
         {
-            if (Request.Path.Contains("session1"))
-            {
-                //string s1 = Request.Headers["headeraction"].ToNonNullString();
-                //et.WalletControl w = (et.WalletControl)this.Master.FindControl("w");
-                //w.DeserializeLocalStorage(s1);
-                //Log("Session1::" + s1);
-            }
-
             if (Request.Path.Contains("voting"))
             {
                 string s1 = Request.Headers["headeraction"].ToNonNullString();
@@ -97,14 +83,14 @@ namespace Unchained
                 else if (sAct1 == "follow")
                 {
                     UpdateFollowStatus(sID, true);
-                    string sStatus = UICommon.GetFollowStatus(IsTestNet(this), sID, gUser(this).BiblePayAddress);
+                    string sStatus = UICommon.GetFollowStatus(IsTestNet(this), sID, gUser(this).id);
                     Response.Write(sStatus + "|");
                     Response.End();
                 }
                 else if (sAct1 == "unfollow")
                 {
                     UpdateFollowStatus(sID, false);
-                    string sStatus = UICommon.GetFollowStatus(IsTestNet(this), sID, gUser(this).BiblePayAddress);
+                    string sStatus = UICommon.GetFollowStatus(IsTestNet(this), sID, gUser(this).id);
                     Response.Write(sStatus + "|");
                     Response.End();
                 }
@@ -143,7 +129,6 @@ namespace Unchained
             }
            
 
-
             string sAction = Request.QueryString["action"].ToNonNullString();
             string sValue = Request.QueryString["value"].ToNonNullString();
             if (sAction == "session")
@@ -152,10 +137,9 @@ namespace Unchained
                 string sNewPage = Request.QueryString["newpage"].ToNonNullString();
                 Session["key_" + sKey] = sValue;
                 Session["PageNumber"] = 0;
-                this.Page.Session["PageNumber"] = 0;
                 var uri = new Uri(this.Request.Url.AbsoluteUri);
                 string sURL = uri.GetLeftPart(UriPartial.Path);
-                sURL = sURL.Replace("LandingPage", sNewPage);
+                sURL = sURL.Replace("LP", sNewPage);
                 Session["pag_" + sURL] = "0";
                 Response.Redirect(sNewPage);
             }

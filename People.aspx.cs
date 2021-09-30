@@ -27,8 +27,15 @@ namespace Unchained
                 dt = dt.FilterBBPDataTable("FirstName like '%" + txtSearch.Text
                     + "%' or LastName like '%" + txtSearch.Text + "%' or TelegramLinkName like '%"
                     + txtSearch.Text + "' or TelegramLinkURL like '%" + txtSearch.Text + "%' or TelegramLinkDescription like '%" + txtSearch.Text + "%'");
-            }
+
+                         }
             dt = dt.FilterBBPDataTable("PublicText is not null");
+
+            double dFilter = BiblePayCommon.Common.GetDouble(Config("hideuserswithoutavatar"));
+            if (dFilter == 1)
+            {
+                dt = dt.FilterBBPDataTable("isnull(AvatarURL,'') <> ''");
+            }
             string html = UICommon.GetUserGallery(this, dt, paginator1, 3);
             return html;
 

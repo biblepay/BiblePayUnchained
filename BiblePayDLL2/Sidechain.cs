@@ -362,7 +362,24 @@ namespace BiblePayDLL
             }
             return fInclude;
         }
-       
+
+        public static DataTable StringToDataTable(string sData)
+        {
+            string[] vdata = sData.Split(";");
+            BBPDataTable dt = new BBPDataTable { TableName = "table1" };
+            dt.Columns.Add("column1");
+            dt.Columns.Add("id");
+
+            for (int i = 0; i < vdata.Length; i++)
+            {
+                string sEle = vdata[i];
+                DataRow _newrow = dt.NewRow();
+                _newrow["column1"] = sEle;
+                _newrow["id"] = sEle;
+                dt.Rows.Add(_newrow);
+            }
+            return dt;
+        }
         public static DataRow ExpandoToDataRow(DataTable dt, System.Dynamic.ExpandoObject oDSQL)
         {
             DataRow _newrow = dt.NewRow();
@@ -374,7 +391,7 @@ namespace BiblePayDLL
                     dynamic oValue = attribute.Value;
                     if (!dt.Columns.Contains(sColName1))
                     {
-                        if (sColName1 == "time" || sColName1 == "updated")
+                        if (sColName1 == "time" || sColName1 == "updated" || sColName1=="TicketNumber")
                         {
                             dt.Columns.Add(sColName1, Type.GetType("System.Int32"));
                         }
