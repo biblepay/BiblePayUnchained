@@ -91,7 +91,9 @@ namespace Unchained
         public void GetEventTarget()
         {
             _bbpevent = new BBPEvent();
-            
+            bool fPostback = IsPostBack;
+            string sViewState = Request["__VIEWSTATE"] ?? "";
+
             string hfPostback = (Request.Params["hfPostback"] ?? "").ToString();
             if (hfPostback != "")
             {
@@ -103,7 +105,10 @@ namespace Unchained
                 dynamic oEventInfo1 = JsonConvert.DeserializeObject<dynamic>(BiblePayCommon.Encryption.Base64Decode(hfPostback));
 
                 _bbpevent.Iteration = oEventInfo1["Iteration"];
-                if (GetDouble(this.Page.Session["LastPostbackIteration2"]) == _bbpevent.Iteration)
+                double nLastPBIteration = GetDouble(this.Page.Session["LastPostbackIteration2"]);
+                // double nLPI = GetDouble(BiblePayCommon.HalfordCache.Read("lpi_" + _bbpevent.Iteration.ToString()));
+
+                if (nLastPBIteration == _bbpevent.Iteration)
                 {
                     return;
                 }
@@ -113,6 +118,8 @@ namespace Unchained
                 _bbpevent.EventValue = (oEventInfo1["Value"] ?? "").ToString();
                 _bbpevent.SourceControl = (oEventInfo1["SourceControl"] ?? "").ToString();
                 _bbpevent.Extra = oEventInfo1;//["ExtraObjectValues"];
+                //BiblePayCommon.HalfordCache.Write("lpi_" + _bbpevent.Iteration.ToString(), 1, 60 * 10);
+
                 this.Page.Session["LastPostbackIteration2"] = _bbpevent.Iteration;
                 return;
             }

@@ -48,11 +48,11 @@ namespace BiblePayPaginator
         {
             get
             {
-                return Convert.ToInt32(this.Page.Session["PageNumber"]);
+                return Convert.ToInt32(this.Page.Session[this.ClientID + "PageNumber"]);
             }
             set
             {
-                this.Page.Session["PageNumber"] = value;
+                this.Page.Session[this.ClientID + "PageNumber"] = value;
             }
         }
 

@@ -120,7 +120,17 @@ namespace Unchained
 
             for (int i = 0; i < th.Rows.Count; i++)
             {
-                string sRow = "<tr><td colspan=10><hr></tr><tr><td width=10%>Assigned To:</td><td>" + UICommon.GetUserAvatarAndName(this, th.GetColValue(i,"AssignedTo")) + "</td>";
+                string sAssignedFromControl = "<td><td>";
+                if (i < th.Rows.Count-1)
+                {
+                    string sAssignedFrom = th.GetColValue(i + 1, "AssignedTo");
+                    sAssignedFromControl = "<td width=10%>Worked By:</td><td>" + UICommon.GetUserAvatarAndName(this, sAssignedFrom) + "</td>";
+                }
+                else
+                {
+                    sAssignedFromControl = "<td width=10%>Initiated By:</td><td>" + UICommon.GetUserAvatarAndName(this, dt.GetColValue("UserID")) + "</td>";
+                }
+                string sRow = "<tr><td colspan=10><hr></tr><tr>" + sAssignedFromControl;
                 string sBody = th.Rows[i]["Body"].ToString();
 
                 sRow += "<td>" + th.Rows[i]["Disposition"].ToString() + "</td>";

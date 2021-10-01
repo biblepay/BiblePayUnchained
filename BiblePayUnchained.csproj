@@ -255,7 +255,7 @@
     <Content Include="Content\themes\base\tooltip.css" />
     <Content Include="BibleViewer.aspx" />
     <Content Include="Chat.aspx" />
-    <Content Include="Scripts\core1.js" />
+    <Content Include="Scripts\core0.js" />
     <Content Include="ProposalAdd.aspx" />
     <Content Include="Leaderboard.aspx" />
     <Content Include="PortfolioBuilder.aspx" />

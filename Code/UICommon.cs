@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using static BiblePayCommon.Common;
@@ -610,7 +611,7 @@ namespace Unchained
         {
             string sButton = "<button class='" + sOptClass + "' id='btn" + sID + "' onclick=\""
                    + "var e={};" + sOptJS + "e.Event='" + sEvent + "_Click';if (e.Event=='_Click') return false;e.Value='"
-                   + sID + "';BBPPostBack2(null, e);\" title='" + sAltText + "'>"
+                   + sID + "';BBPPostBack2(null, e);return false;\" title='" + sAltText + "'>"
                    + sCaption + "</button>";
             return sButton;
         }
@@ -636,6 +637,7 @@ namespace Unchained
 
         public static string GetUserGallery(Page p, DataTable dt, BiblePayPaginator.Paginator pag, int nCols)
         {
+            
             string html = "<table width='100%'><tr>";
             int iCol = 0;
             if (dt.Rows.Count < 1)
@@ -643,47 +645,60 @@ namespace Unchained
                 html += "</table>";
                 return html;
             }
-            bool fMobile = BiblePayCommonNET.UICommonNET.fBrowserIsMobile(p);
-            pag.ColumnsPerRow = fMobile ? 1 : 3;
-            pag.Rows = dt.Rows.Count;
-            pag.RowsPerPage = 3;
-            double nWidthPct = 33;
-            for (int y = pag.StartRow; y <= pag.EndRow; y++)
+            try
             {
-                User u = UICommon.GetUserRecord(IsTestNet(p), dt.GetColValue(y, "id"));
-                string sURL = "Person?firstname=" + dt.Rows[y]["firstname"].ToNonNullString() + "&lastname=" + dt.Rows[y]["lastname"].ToNonNullString();
-                string sUserName = u.FullUserName();
-                string sAvatar = u.AvatarURL;
-                sAvatar = sAvatar.Replace("<img src='images/emptyavatar.png' width=50 height=50>", "images/emptyavatar.png");
+                bool fMobile = BiblePayCommonNET.UICommonNET.fBrowserIsMobile(p);
+                pag.ColumnsPerRow = fMobile ? 1 : 3;
+                
+                pag.Rows = dt.Rows.Count;
+                pag.RowsPerPage = 3;
 
-                string sAnchor = "<a href='" + sURL + "'>"
-                    + "<img class='gallerypdf' src='" + sAvatar + "'</a>";
+                double nWidthPct = 33;
+                //10-1-2021
 
-                string sDiv = "<div class='gallery'>" + sAnchor + "</div>";
-                sDiv += "<div class='gallery-description'>" + u.FullUserName() + " • Since "
-                    + dt.GetColDateTime(y, "time").ToShortDateString()
-                    + "<br>" + dt.Rows[y]["domain"].ToNonNullString() + "";
-
-                string sTelegram = " • <a href='" + u.TelegramLinkURL.ToNonNullString() + "'>" + u.TelegramLinkName.ToNonNullString() + "</a>"
-                    + "<br>" + u.TelegramLinkDescription.ToNonNullString();
-
-                if (u.TelegramLinkURL.ToNonNullString().Length > 1)
+                for (int y = pag.StartRow; y <= pag.EndRow; y++)
                 {
-                    sDiv += sTelegram;
-                }
-                sDiv += "</div>";
-                string sRow = "<td width='" + nWidthPct.ToString() + "%' class='gallery'>" + sDiv + "</td>";
-                html += sRow;
-                iCol++;
+                    User u = UICommon.GetUserRecord(IsTestNet(p), dt.GetColValue(y, "id"));
+                    string sURL = "Person?id=" + u.id;
 
-                if (iCol == pag.ColumnsPerRow)
-                {
-                    html += "</tr>\r\n<tr>";
-                    iCol = 0;
+                    string sUserName = u.FullUserName();
+                    string sAvatar = u.AvatarURL;
+                    sAvatar = sAvatar.Replace("<img src='images/emptyavatar.png' width=50 height=50>", "images/emptyavatar.png");
+
+                    string sAnchor = "<a href='" + sURL + "'>"
+                        + "<img class='gallerypdf' src='" + sAvatar + "'</a>";
+
+                    string sDiv = "<div class='gallery'>" + sAnchor + "</div>";
+                    sDiv += "<div class='gallery-description'>" + u.FullUserName() + " • Since "
+                        + dt.GetColDateTime(y, "time").ToShortDateString()
+                        + "<br>" + dt.Rows[y]["domain"].ToNonNullString() + "";
+
+                    string sTelegram = " • <a href='" + u.TelegramLinkURL.ToNonNullString() + "'>" + u.TelegramLinkName.ToNonNullString() + "</a>"
+                        + "<br>" + u.TelegramLinkDescription.ToNonNullString();
+
+                    if (u.TelegramLinkURL.ToNonNullString().Length > 1)
+                    {
+                        sDiv += sTelegram;
+                    }
+                    sDiv += "</div>";
+                    string sRow = "<td width='" + nWidthPct.ToString() + "%' class='gallery'>" + sDiv + "</td>";
+                    html += sRow;
+                    iCol++;
+
+                    if (iCol == pag.ColumnsPerRow)
+                    {
+                        html += "</tr>\r\n<tr>";
+                        iCol = 0;
+                    }
                 }
+                html += "</table>";
+                return html;
+            }catch(Exception ex)
+            {
+                Log("GetUserGallery: " + ex.Message);
+                return "";
+
             }
-            html += "</table>";
-            return html;
         }
 
         public static string GetComments(bool fTestNet, string id, Page z, bool fMaskIfNone = false)
@@ -933,7 +948,8 @@ namespace Unchained
         public static string GetUserAvatarAndName(Page p, string sUserID, bool fHorizontal = false)
         {
             User u = GetUserRecord(IsTestNet(p), sUserID);
-            string sProfileAnchor = "<a href='Person?lastname=" + u.LastName + "&firstname=" + u.FirstName + "'>";
+            string sURL = "Person?id=" + u.id;
+            string sProfileAnchor = "<a href='" + sURL + "'>";
             string s = sProfileAnchor + u.GetAvatarImage() + "<br>" + u.FullUserName() + "</a>";
             if (fHorizontal)
                 s = sProfileAnchor + u.GetAvatarImage() + " • " + u.FullUserName() + "</a>";

@@ -234,6 +234,8 @@ $(document).ready(function () {
         }
 
 
+var oLastHF = null;
+
 function BBPPostBack2(oParent, ExtraObjectValues) {
     ExtraObjectValues.Iteration = getRandomInt(99999);
     
@@ -263,7 +265,10 @@ function BBPPostBack2(oParent, ExtraObjectValues) {
         oButton = document.getElementById("hfButton");
     }
     oButton.click();
+    // Mission Critical : Set the hfPostback back to null, or many strange things will happen in the UI...
+    
 }
+
 
 function ModPow(baseNum, exponent, modulus)
 {

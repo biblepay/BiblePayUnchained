@@ -20,7 +20,7 @@ namespace Unchained
         BiblePayPaginator.Paginator _paginator = null;
         protected new void Page_Load(object sender, EventArgs e)
         {
-            _paginator = (BiblePayPaginator.Paginator)this.Master.FindControl("MainContent").FindControl("paginator1");
+            _paginator = (BiblePayPaginator.Paginator)this.Master.FindControl("MainContent").FindControl("paginator2");
             int nPageNo = _paginator.PageNumber;
 
             if (IsPostBack)
@@ -32,9 +32,6 @@ namespace Unchained
             else
             {
                 txtSearch.Text = Session["search"].ToNonNullString();
-
-
-
 
             }
         }
@@ -159,6 +156,7 @@ namespace Unchained
             string sLastName = Request.QueryString["LastName"].ToNonNullString();
             string sFirstName = Request.QueryString["FirstName"].ToNonNullString();
             string sAction = Request.QueryString["a"].ToNonNullString();
+            string sUserID = Request.QueryString["userid"].ToNonNullString();
 
             if (sCategory != "" || sTheirChannel != "" || sType == "")
             {
@@ -178,6 +176,11 @@ namespace Unchained
                 dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
                 User u1 = gUser(this, sFirstName, sLastName);
                 dt = dt.FilterBBPDataTable("userid='" + u1.id + "'");
+                sType = "video";
+            }
+            else if (sUserID != "")
+            {
+                dt = dt.FilterBBPDataTable("userid='" + sUserID + "'");
                 sType = "video";
             }
             else if (sTheirChannel != "")

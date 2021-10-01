@@ -42,12 +42,12 @@ namespace Unchained
         protected global::System.Web.UI.WebControls.Button btnSearch;
 
         /// <summary>
-        /// paginator1 control.
+        /// paginator2 control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::BiblePayPaginator.Paginator paginator1;
+        protected global::BiblePayPaginator.Paginator paginator2;
     }
 }

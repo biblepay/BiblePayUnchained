@@ -259,14 +259,16 @@ namespace Unchained
             string sFirstName = Request.QueryString["firstname"].ToNonNullString();
             string sLastName = Request.QueryString["lastname"].ToNonNullString();
             bool fHomogenized = Request.QueryString["homogenized"].ToNonNullString() == "1";
+            string sUserID = Request.QueryString["id"].ToNonNullString();
 
-            if (sFirstName == "")
+            if (sUserID == "")
             {
                 sFirstName = gUser(this).FirstName;
                 sLastName = gUser(this).LastName;
+                sUserID = gUser(this).id;
             }
             // For each timeline entry, pull in attachments (mp4, mp3, video, pdf) - Sort timeline desc:
-            User u = gUser(this, sFirstName, sLastName);
+            User u = gUserById(this, sUserID);
             bool fMe = (u.id == gUser(this).id);
             string html = "<div id='user" + u.id + "'>";
 
@@ -304,7 +306,8 @@ namespace Unchained
             
             html += "<tr><td>" + u.TelegramLinkDescription;
             // Their video channel:
-            string sVideoAnchor = "<a href=VideoList?lastname=" + u.LastName + "&firstname=" + u.FirstName + ">My Video Channel</a>";
+            string sVURL = "VideoList?userid=" + u.id;
+            string sVideoAnchor = "<a href='" + sVURL + "'>My Video Channel</a>";
             string sModifyProfile = UICommon.GetStandardButton("btnModifyProfile", "Modify my Profile", "EditUserProfile", "Modify my Profile");
 
             html += "<tr><td>" + sVideoAnchor;

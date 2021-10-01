@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Web;
 using static BiblePayCommon.Common;
 using static BiblePayCommon.DataTableExtensions;
 using static BiblePayCommon.Entity;
@@ -70,7 +71,9 @@ namespace Unchained
             {
                 User requestor = gUserById(this, dtFriends.Rows[i]["RequesterID"].ToString());
                 string sApproveButton = UICommon.GetStandardButton(dtFriends.Rows[i]["id"].ToString(), "<i class='fa fa-heart'></i>", "ApproveFriendRequest", "Approve Friend Request");
-                string sUserAnchor = "<a href='Person?lastname=" + requestor.LastName + "&firstname=" + requestor.FirstName + "'>" + requestor.FullUserName() + "</a>";
+                
+                string sVURL = "Person?id=" + requestor.id + "'";
+                string sUserAnchor = "<a href='" + sVURL + "'>" + requestor.FullUserName() + "</a>";
                 string sID = dtFriends.Rows[i]["id"].ToString();
 
                 sRow = "<tr><td>" + sUserAnchor

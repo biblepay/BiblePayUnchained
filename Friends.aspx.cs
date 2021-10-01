@@ -77,8 +77,8 @@ namespace Unchained
 
                 string sUnfriendButton = UICommon.GetStandardButton(dtFriends.Rows[i]["id"].ToString(), "<i class='fa fa-heart-broken'></i>", "Unfriend",
                     "Unfriend this person");
-                
-                string sUserAnchor = "<a href='Person?lastname=" + Friend.LastName + "&firstname=" + Friend.FirstName + "'>" 
+                string sVURL = "Person?id=" + Friend.id;
+                string sUserAnchor = "<a href=''>" 
                     + Friend.FullUserName() + "</a>";
                 string sID = dtFriends.Rows[i]["id"].ToString();
 

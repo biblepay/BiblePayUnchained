@@ -9,6 +9,7 @@ namespace Unchained
     {
         protected new void Page_Load(object sender, EventArgs e)
         {
+            string sMyTest = "";
 
         }
 
@@ -21,6 +22,12 @@ namespace Unchained
         protected string GetPeople()
         {
             BiblePayCommon.BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "user1");
+            string sFilter = Config("hideusersdomain");
+            if (sFilter != "")
+            {
+                dt = dt.FilterBBPDataTable(sFilter);
+            }
+
             // Reserved:Filter by Domain:
             if (txtSearch.Text != "")
             {
@@ -28,17 +35,10 @@ namespace Unchained
                     + "%' or LastName like '%" + txtSearch.Text + "%' or TelegramLinkName like '%"
                     + txtSearch.Text + "' or TelegramLinkURL like '%" + txtSearch.Text + "%' or TelegramLinkDescription like '%" + txtSearch.Text + "%'");
 
-                         }
-            dt = dt.FilterBBPDataTable("PublicText is not null");
-
-            double dFilter = BiblePayCommon.Common.GetDouble(Config("hideuserswithoutavatar"));
-            if (dFilter == 1)
-            {
-                dt = dt.FilterBBPDataTable("isnull(AvatarURL,'') <> ''");
             }
+            //dt = dt.FilterBBPDataTable("PublicText is not null");
             string html = UICommon.GetUserGallery(this, dt, paginator1, 3);
             return html;
-
         }
 
         protected void btnSearch_Click(object sender, EventArgs e)
