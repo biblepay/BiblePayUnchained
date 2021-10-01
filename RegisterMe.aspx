@@ -59,6 +59,9 @@
         <asp:Button ID="btnRegister" runat="server" Text="Save" OnClick="btnRegister_Click" />
         <asp:Button ID="btnSetAvatar" runat="server" Text="Set Avatar" OnClick="btnSetAvatar_Click" />
 
+        <asp:Button ID="btnModifyProfile"  runat="server" Text="Modify my Social Media Profile" OnClick="btnModifyProfile_Click" />
+        
+
         <asp:Button ID="btnSetTwoFactor"  runat="server" Text="Set Up 2FA" OnClick="btnSetTwoFactor_Click" />
         <asp:Button ID="btnCheckTwoFactor" runat="server" Text="Test 2FA" OnClientClick="return true;var pin=prompt('Enter PIN >');var e={};e.Event='Validate2FA_Click';e.Value=pin;BBPPostBack2(null,e);return true;" 
             OnClick="btnValidateTwoFactor_Click" />

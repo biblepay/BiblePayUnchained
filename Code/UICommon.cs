@@ -22,6 +22,11 @@ namespace Unchained
 
         public static string GetCurrentThemeName(Page p)
         {
+            string sDomainDefault = Config("defaulttheme");
+            if (sDomainDefault != "")
+            {
+                return sDomainDefault;
+            }
             string sTheme = gUser(p).ThemeName;
             if (sTheme == null || sTheme == "")
                 sTheme = "black";
@@ -229,6 +234,11 @@ namespace Unchained
             return sImg;
         }
 
+        public static string GetBeta(Page p)
+        {
+            string sBeta = Config("beta");
+            return sBeta;
+        }
         public static string GetBioImg(string orphanid)
         {
             string sql = "Select BioURL from SponsoredOrphan where orphanid=@orphanid";
@@ -355,7 +365,7 @@ namespace Unchained
             string sDecoratedChain = IsTestNet(p) ? "<font color=lime>TESTNET</font>" : "<font color=gold>MAINNET</font>";
             string sChainAnchor = GetStandardAnchor("ancChain", "btnChangeChain", sChain, sDecoratedChain, "Change your Chain");
             string sKeys = gUser(p).FirstName.ToNonNullString().Length > 0 ? sWallet + " • " + sChainAnchor : "";
-            string html = "<aside class='main-sidebar divsidebar' id='mySidenav'>";
+            string html = "<div id='entireleftmenu'><aside class='main-sidebar' id='mySidenav'>";
             html += "<section class='sidebar'><div class='user-panel' class='trump'>"
               + "<a onclick='closeNav();' href = '#' class='sidebar-toggle' data-toggle='offcanvas' role='button'>"
               + "<i class='fa fa-close'></i></a>"
@@ -363,7 +373,7 @@ namespace Unchained
               + "<div class='pull-left info'><p><small>" + gUser(p).FirstName.ToNonNullString() + "</small></p><small><p>" + sKeys + "</p></small>" + "</div>"
               + "</div><div id='divsidebar-menu' class='divsidebar'><ul class='sidebar-menu'>";
             html += AddMenuOptions(gUser(p).LoggedIn);
-            html += "</div></section></aside>";
+            html += "</div></section></aside></div>";
             string sFunction = "<script>function myfunc(iActive) { $('#bbpdd' + iActive.toString()).attr('expanded',0);  for (var i = 0; i < 50; i++) {   "
                 + "$('#bbpdd' + i.toString() ).attr('xexpanded', 0); $('#bbpdd' + i.toString()).css('display','none'); localStorage.setItem('bbpdd' + i.toString() , 1);   } localStorage.setItem('bbpdd' + iActive.toString() , 1);      }</script>";
             sFunction = "<script>function myfunc(iActive) { }</script>";

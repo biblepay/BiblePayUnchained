@@ -91,6 +91,8 @@ namespace Unchained
                 btnSetTwoFactor.Visible = true;
                 btnCheckTwoFactor.Visible = true;
                 btnRemoveTwoFactor.Visible = true;
+                btnModifyProfile.Visible = true;
+
             }
             else
             {
@@ -100,6 +102,8 @@ namespace Unchained
                 btnSetTwoFactor.Visible = false;
                 btnRemoveTwoFactor.Visible = false;
                 btnCheckTwoFactor.Visible = false;
+                btnModifyProfile.Visible = false;
+
             }
 
             if (_user.LoggedIn)
@@ -172,6 +176,12 @@ namespace Unchained
                 }
             }
         }
+
+        protected void btnModifyProfile_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("Profile");
+        }
+
         protected void btnVerifyEmail_Click(object sender, EventArgs e)
         {
             User u = gUser(this);

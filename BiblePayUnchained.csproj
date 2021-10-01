@@ -192,6 +192,7 @@
     <Content Include="GreetingCard.aspx" />
     <Content Include="Images\dec-high-tech.jpg" />
     <Content Include="FriendRequests.aspx" />
+    <Content Include="Images\truthbook-clear.png" />
     <Content Include="TicketAdd.aspx" />
     <Content Include="TicketList.aspx" />
     <Content Include="TicketView.aspx" />

@@ -15,24 +15,19 @@
     height: 65px;
 }
 
-divsidebar {
-    xoverflow-y: scroll;
-    xheight: 99%;
-}
-
 .main-sidebar, left-side {
     overflow-y: scroll;
     height: 99%;
-    scrollbar-width: thin;
 }
 
-::-webkit-scrollbar {
-    width: 3px;
-    xheight: 11px;
+#mySidenav::-webkit-scrollbar {
+    background: black;
+    width: 2px;
 }
 
-@media (max-width: 768px) {
-    .sidebar-menu .treeview-menu > li > a {
+
+    @media (max-width: 768px) {
+        .sidebar-menu .treeview-menu > li > a {
         font-size: 16px;
     }
 

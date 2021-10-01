@@ -150,6 +150,15 @@ namespace Unchained
         protected global::System.Web.UI.WebControls.Button btnSetAvatar;
 
         /// <summary>
+        /// btnModifyProfile control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnModifyProfile;
+
+        /// <summary>
         /// btnSetTwoFactor control.
         /// </summary>
         /// <remarks>

@@ -42,3 +42,5 @@ Properties/PublishProfiles/FolderProfile.pubxml.user
 .vs/BiblePayUnchained/config/applicationhost.config
 .vs/BiblePayUnchained/DesignTimeBuild/.dtbcache
 *.tmp
+*.pdb
+Dependencies/BiblePayCommon.pdb

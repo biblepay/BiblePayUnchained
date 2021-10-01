@@ -20,9 +20,9 @@ namespace Unchained
     public static class Common
     {
         public static Data gData = new Data(Data.SecurityType.REQ_SA);
-        public static string GetLongSiteName(Page p)
+        public static string GetSiteTitle(Page p)
         {
-            return Config("longsitename");
+            return Config("sitetitle");
         }
 
         public static string GetElement(string data, string delimiter, int n)

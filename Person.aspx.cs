@@ -86,7 +86,7 @@ namespace Unchained
             // By default, DACResult returns true if there is no error:
             r.TXID = "";
             r.Event = "AddFriendRequest";
-            r.Result = "Add Friend";
+            r.Result = "Friend Request";
             return r;
         }
         protected override void Event(BBPEvent e)
@@ -293,7 +293,7 @@ namespace Unchained
             }
 
             string sUserAvatar = "<img src='" + u.AvatarURL + "' class='person' />";
-            string sUserAnchor = UICommon.GetStandardAnchor("ancUser", "EditUserProfile", "", sUserAvatar, "Edit your User Profile Fields");
+            string sUserAnchor = UICommon.GetStandardAnchor("ancUser", "EditUserProfile", "", sUserAvatar, "Edit my User Profile Fields");
             if (!fMe)
                 sUserAnchor = sUserAvatar;
 
@@ -305,14 +305,20 @@ namespace Unchained
             html += "<tr><td>" + u.TelegramLinkDescription;
             // Their video channel:
             string sVideoAnchor = "<a href=VideoList?lastname=" + u.LastName + "&firstname=" + u.FirstName + ">My Video Channel</a>";
+            string sModifyProfile = UICommon.GetStandardButton("btnModifyProfile", "Modify my Profile", "EditUserProfile", "Modify my Profile");
 
             html += "<tr><td>" + sVideoAnchor;
+
+            if (gUser(this).id == u.id)
+            {
+                html += "<td>" + sModifyProfile;
+            }
 
             if (gUser(this).LoggedIn)
             {
                 html += "<td>" + sAddFriendButton;
             }
-                
+            
             html += "</tr>";
             html += "</table>";
             html +=  "<br><br>";
