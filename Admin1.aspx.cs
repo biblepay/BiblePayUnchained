@@ -71,37 +71,25 @@ namespace Unchained
             }
             string sTest = "";
             return;
-
         }
 
 
         private void InitializeObject(bool fTestNet)
         {
             BiblePayCommon.Entity.versememorizer1 n = new BiblePayCommon.Entity.versememorizer1();
-
             DataOps.InsertIntoTable(this, true, n, gUser(this));
             DataOps.InsertIntoTable(this, false, n, gUser(this));
-
         }
-
-
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
 
-            //UICommon.ReskinCSS("darkblue", "blue", "#00004B", "blue");
-            //UICommon.ReskinCSS("maroon", "#c32148", "#400000", "maroon");
-            //UICommon.ReskinCSS("#696969", "#808080", "#393939", "grey");
-            //            UICommon.ReskinCSS("black", "#202020", "#393939", "black");
-            //            FixVideos(false);
-          
-            //            Bibl/ePayDLL.Sidechain.FixVidCat();
-
-            string sTest1 = "";
-
+            UICommon.ReskinCSS("darkblue", "blue", "#00004B", "blue", "white", "white");
+            UICommon.ReskinCSS("black", "#202020", "#393939", "black", "white", "grey");
+            UICommon.ReskinCSS("maroon", "#c32148", "#400000", "maroon", "white", "black");
+            UICommon.ReskinCSS("#696969", "#808080", "#393939", "grey", "silver", "silver"); 
+            UICommon.ReskinCSS("#ffffff", "darkblue", "#ececec", "whiteblue", "#0096FF", "#89CFF0");
             return;
-
-    
         }
     }
 }
