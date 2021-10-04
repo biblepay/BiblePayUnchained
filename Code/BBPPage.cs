@@ -38,6 +38,18 @@ namespace Unchained
                      UICommon.MsgBox("Error", "Sorry, the object could not be deleted. ", this);
                 }
             }
+            else if (_bbpevent.EventName=="UploadVideo_Click")
+            {
+                Response.Redirect("UnchainedUpload");
+            }
+            else if (_bbpevent.EventName == "WatchVideos_Click")
+            {
+                Response.Redirect("VideoList");
+            }
+            else if (_bbpevent.EventName == "PeopleModule_Click")
+            {
+                Response.Redirect("Person?homogenized=1");
+            }
             else if (_bbpevent.EventName == "LogOut_Click")
             {
                 this.Page.Session[Common.GetChain0(Common.IsTestNet(this)) + "user"] = null;

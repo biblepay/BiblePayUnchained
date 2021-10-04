@@ -72,8 +72,8 @@
         <!--Above div height is used to calculate the whole page size (so the footer knows the page height)-->
         <div class="navbar navbar-inverse navbar-fixed-top" style="z-index:256;">
             <div class="container" style="padding-left:1%;">
-                <div style="max-height:63px;overflow:hidden;">
-                 <span style="padding-left:115px;"><img src="<%=Unchained.UICommon.GetHeaderImage(this.Page) %>" height="63px" /> </span>
+                <div style="max-height:64px;overflow:hidden;">
+                 <span style="padding-left:115px;"><img src="<%=Unchained.UICommon.GetHeaderImage(this.Page) %>" height="64px" /> </span>
                     <span style="font-family:candara;color:antiquewhite;font-size:22px;">&nbsp;<%=Unchained.UICommon.GetHeaderBanner(this.Page) %></span>
                     <span style="color:lime;font-size:22px;">&nbsp;<%=Unchained.UICommon.GetBeta(this.Page) %></span>
                     <div style="float:right;">&nbsp;

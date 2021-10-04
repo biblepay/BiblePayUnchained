@@ -12,7 +12,7 @@
         </script>
 
     
-    <div style="z-index:1;top:-50px;">&nbsp;&nbsp;&nbsp;
+    <div style="z-index:1;top:-50px;">
         <small><asp:TextBox ID="txtSearch" width="500px" runat="server" onkeydown = "search(this);return (event.keyCode!=13);"></asp:TextBox>
         <asp:Button ID="btnSearch" runat="server" Text="Search" UseSubmitBehavior="false" OnClick="btnSearch_Click" /></small>
     </div>

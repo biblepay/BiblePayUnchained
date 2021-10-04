@@ -4,6 +4,8 @@ using static BiblePayCommon.DataTableExtensions;
 using static Unchained.Common;
 using static BiblePayCommon.Common;
 using static BiblePayCommonNET.CommonNET;
+using System.Net.Mail;
+using System.Web;
 
 namespace Unchained
 {
@@ -41,8 +43,8 @@ namespace Unchained
                     return;
 
                 }
-                string sDisposition = Request.Form["input_dddispositions"] ?? "";
-                string sAssignee = Request.Form["input_ddasignees"] ?? "";
+                string sDisposition = Request.Form["dddispositions"] ?? "";
+                string sAssignee = Request.Form["ddasignees"] ?? "";
                 if (sDisposition == "")
                 {
                     BiblePayCommonNET.UICommonNET.MsgModal(this, "Error", "The ticket must have a disposition.", 400, 200, true);
@@ -62,6 +64,7 @@ namespace Unchained
                 th.Disposition = sDisposition;
                 th.id = Guid.NewGuid().ToString();
                 th.AssignedTo = sAssignee;
+                User uAssignee = gUserById(this,sAssignee);
                 BiblePayCommon.Common.DACResult rh = DataOps.InsertIntoTable(this, IsTestNet(this), th, gUser(this));
                 if (rh.fError())
                     UICommon.MsgBox("Error while inserting object", "Sorry, the object was not saved: " + rh.Error, this);
@@ -73,6 +76,23 @@ namespace Unchained
                 if (rt.fError())
                     UICommon.MsgBox("Error", "Error while saving the ticket. " + rt.Error, this);
 
+                // Notify the assignee
+                if (uAssignee.FirstName.ToNonNullString2() != "")
+                {
+                    MailMessage m = new MailMessage();
+                    string sLastNarr = gUser(this).FirstName + " said:<br>" + th.Body + "<br><br>";
+                    string sDomainName = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
+                    string sURL = sDomainName + "/TicketView?id=" + id;
+
+                    string sNarr = "Dear " + uAssignee.FirstName + ",<br><br>Ticket number " + T.TicketNumber.ToString() + " has been assigned to you for " + T.Disposition + ".  "
+                        + "<br><br>To view the ticket, click <a href='" + sURL + "'>here. </a><br><br>" + sLastNarr 
+                        +"Thank you.<br>Your Crypto Team<br>";
+                    m.Subject = "[Transactional Message] Ticket #" + T.TicketNumber + " - " + T.Title + " has been assigned to you for " + T.Disposition;
+                    m.Body = sNarr;
+                    m.IsBodyHtml = true;
+                    m.To.Add(new MailAddress(uAssignee.EmailAddress, uAssignee.FullUserName()));
+                    DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(this), m);
+                }
                 Response.Redirect("TicketList");
             }
 
@@ -95,9 +115,8 @@ namespace Unchained
                 UICommon.MsgBox("Not Found", "We are unable to find this object.", this);
                 return "";
             }
-            string sAssignedTo = dt.Rows[0]["AssignedTo"].ToString(); // UICommon.GetTopOneByTime(this, "TicketHistory", "parentid='" + id + "'", "AssignedTo");
-            string sDisposition = dt.Rows[0]["Disposition"].ToString(); // UICommon.GetTopOneByTime(this, "TicketHistory", "parentid='" + id + "'", "Disposition");
-
+            string sAssignedTo = dt.Rows[0]["AssignedTo"].ToString();
+            string sDisposition = dt.Rows[0]["Disposition"].ToString(); 
 
             string div = "<table class='comments'>"
                 + "<tr><th class='objheader' colspan=3><h3>" + _ObjectName + " - View</h3><th class='objheader' colspan=3><div class='prayer'>"
@@ -118,6 +137,20 @@ namespace Unchained
 
             string sHistory = "<hr><table class='comments'>";
 
+
+
+            // If the ticket is assigned to me, or if Im an admin: show the reply module
+            bool fPerms = (sAssignedTo == gUser(this).id || gUser(this).Administrator == 1);
+            if (fPerms)
+            {
+                string sReplyModule = "<tr><td width=10%>Your Comments:</td><td width=90% colspan=7><textarea id='txtComment' class='pc90 comments' name='txtComment' rows=10 cols=10></textarea><br><br></td></tr>";
+                sReplyModule += "<tr><td>Assign To:<td>" + UICommon.GetDropDownUser(this, "ddasignees", sAssignedTo, dt.GetColValue("UserID"), true) + "</td></tr>";
+                sReplyModule += "<tr><td>Disposition:<td>" + UICommon.GetDispositions("disp1", sDisposition) + "</td></tr>";
+                sReplyModule += "<tr><td>" + BiblePayCommonNET.UICommonNET.GetButtonTypeSubmit("btnSaveTicket", "SaveTicketHistory_Click", "Save Ticket Comments") + "</td></tr>";
+                sHistory += sReplyModule;
+            }
+            // End of Reply Module
+            
             for (int i = 0; i < th.Rows.Count; i++)
             {
                 string sAssignedFromControl = "<td><td>";
@@ -142,18 +175,6 @@ namespace Unchained
             // Ticket History
 
 
-            // If the ticket is assigned to me, or if Im an admin: show the reply module
-            bool fPerms = (sAssignedTo == gUser(this).id || gUser(this).Administrator == 1);
-
-            if (fPerms)
-            {
-                string sReplyModule = "<tr><td width=10%>Your Comments:</td><td width=90% colspan=7><textarea id='txtComment' class='pc90 comments' name='txtComment' rows=10 cols=10></textarea><br><br></td></tr>";
-                sReplyModule += "<tr><td>Assign To:<td>" + UICommon.GetAssignees(this, "ddasignees", sAssignedTo) + "</td></tr>";
-                sReplyModule += "<tr><td>Disposition:<td>" + UICommon.GetDispositions("disp1", sDisposition) + "</td></tr>";
-                sReplyModule += "<tr><td>" + BiblePayCommonNET.UICommonNET.GetButtonTypeSubmit("btnSaveTicket", "SaveTicketHistory_Click", "Save Ticket Comments") + "</td></tr>";
-
-                sHistory += sReplyModule;
-            }
             sHistory += "</table>";
             div += sHistory;
 

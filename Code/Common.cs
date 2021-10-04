@@ -465,6 +465,15 @@ namespace Unchained
             return o;
         }
 
+        public static BiblePayCommon.IBBPObject GetObjectWithFilter(bool fTestNet, string sTable, string sFilter)
+        {
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, sTable);
+            dt = dt.FilterDataTable(sFilter);
+            BiblePayCommon.IBBPObject o = BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, sTable, 0);
+            return o;
+        }
+
+
         public static bool HasOwnership(bool fTestNet, string sObjectID, string sTable, string sUserID)
         {
             if (System.Diagnostics.Debugger.IsAttached)                return true;

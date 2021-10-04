@@ -419,6 +419,14 @@ namespace BiblePayCommon
         {
             string sAmount = nAmount.ToString();
             bool fPin = sAmount.Contains(nPin.ToString());
+            if (fPin)
+                return fPin;
+            string sPin = nPin.ToString();
+            if (sPin.Substring(sPin.Length-1,1) == "0")
+            {
+                sPin = sPin.Substring(0, sPin.Length-1);
+                fPin = sAmount.Contains(sPin);
+            }
             return fPin;
         }
         public static double AddressToPin(string sBBPAddress, string sCryptoAddress)

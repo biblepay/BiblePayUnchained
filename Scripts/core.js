@@ -1,26 +1,56 @@
 
-        //BibleVerses
-        var refTagger = {
+//BibleVerses
+
+var refTagger = {
             settings: {
                 bibleVersion: "ESV"
             }
-        };
-        (function (d, t) {
+};
+
+(function (d, t) {
             var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
             g.src = '//api.reftagger.com/v2/RefTagger.js';
             s.parentNode.insertBefore(g, s);
-        }(document, 'script'));
+}(document, 'script'));
 
-        //CORE
+// Infinite scrolling paginator; start at record 29
 
-        // Control Keys
+var iGallery = 29;
+function MakeMoreVisible() {
+    for (var i = iGallery; i < iGallery + 30; i++)
+    {
+        //var o = document.getElementById('gallery' + i.toString());
+        $('#gallery' + i.toString()).toggleClass('galleryinvisible');
+    }
+    iGallery += 30;
+}
+
+// Scroll event listener
+
+window.addEventListener('scroll', () => {
+    const {
+        scrollTop,
+        scrollHeight,
+        clientHeight
+    } = document.documentElement;
+
+    if (scrollTop + clientHeight >= scrollHeight - 5)
+    {
+        MakeMoreVisible();
+    }
+}, {
+    passive: true
+});
+
+
+// Global application function key handler (Reserved for future use)
 $(document).ready(function () {
     var ctrlDown = false,
         ctrlKey = 17,
         cmdKey = 91,
         vKey = 86,
         cKey = 67;
-     // 112=f1, 123=f12, 27=esc, w=87
+        // Key Mappings: 112=f1, 123=f12, 27=esc, w=87
 
     $(document).keydown(function (e) {
         if (e.keyCode === ctrlKey || e.keyCode === cmdKey) ctrlDown = true;
@@ -37,28 +67,27 @@ $(document).ready(function () {
 
     $(".no-copy-paste").keydown(function (e) {
         // if (ctrlDown && (e.keyCode === vKey || e.keyCode === cKey)) return false;
-        
     });
    
-    
     // Document Ctrl + C/V 
     $(document).keydown(function (e) {
 
         if (ctrlDown && (e.keyCode === 68)) {
-            // ctrl d:
+            // ctrl d example; take user to videos:
             //window.location = "VideoList";
         }
 
         if (ctrlDown && (e.keyCode === cKey)) {
-          //  console.log("Document catch Ctrl+C");
+            // console.log("Document catch Ctrl+C");
         }
         if (ctrlDown && (e.keyCode === vKey)) {
-            //console.log("Document catch Ctrl+V");
+            // console.log("Document catch Ctrl+V");
         }
     });
 });
    
 
+// Continue with core JS functionality here:
 
         function showModalDialog(title, body, width, height)
         {
@@ -103,7 +132,6 @@ $(document).ready(function () {
         function showToast() {
             $.toast({ heading: heading, text: text1, icon: 'info', loader: true, loaderBg: '#9EC600' });
         }
-
 
 
         function populateWiki(url) {

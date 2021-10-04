@@ -1,3 +1,15 @@
+.buttondark {
+    background-color: #393939;
+    color: silver;
+}
+
+
+
+.navbar {
+    border-bottom: 1px solid silver;
+}
+
+
 .content-wrapper,
 .right-side,
 .main-footer {
@@ -84,7 +96,7 @@ body.hold-transition .main-header .logo {
 }
 .user-panel > .sidebar-toggle {
   float: right;
-  color: #FFFFFF;
+  color: silver;
   font-size: 18px;
   margin-top: 5px;
   margin-right: 5px;
@@ -151,10 +163,10 @@ body.hold-transition .main-header .logo {
   }
 }
 
+
 .navbar-inverse {
-    #top horizontal-main-horizontal-header-background-color:0;
     background-color: #696969;
-    border-color: #080808;
+    border-color: silver !important;
 }
 
 .main-sidebar,
@@ -214,7 +226,7 @@ body.hold-transition .main-header .logo {
   overflow: hidden;
   #xleft-menu: color2;
   background: #696969;
-  border-bottom: 1px solid #343e4a;
+  border-bottom: 1px solid silver;
 }
 .user-panel:before,
 .user-panel:after {
@@ -231,8 +243,8 @@ body.hold-transition .main-header .logo {
 .user-panel > .info > p {
    margin: 5px 0 0 0;
    padding: 5px 0 0 0;
-  font-size: 16px;
-  color: #eff0f2;
+   font-size: 16px;
+   xcolor: #eff0f2;
 }
 .info span {
 	font-size: 13px;
@@ -262,7 +274,7 @@ body.hold-transition .main-header .logo {
   width: 30px;
   vertical-align: middle;
   font-size: 22px;
-  color: #FFFFFF;
+  color: silver;
 }
 .sidebar-menu > li > a:hover > .fa,
 .sidebar-menu > li > a:hover > .glyphicon,
@@ -326,7 +338,7 @@ body.hold-transition .main-header .logo {
   font-size: 12px;
 }
 .sidebar-menu .treeview-menu > li > a:hover {
-	#color: silver;
+	color: silver;
 	#second color:1;
     #font-size:110%;
 	background-color: #808080;
@@ -414,7 +426,7 @@ body.hold-transition .main-header .logo {
 .sidebar-menu > li.header {
   white-space: nowrap;
   overflow: hidden;
-  color: #FFFFFF;
+  color: silver;
 }
 .sidebar-menu:hover {
   overflow: visible;
@@ -433,7 +445,7 @@ body.hold-transition .main-header .logo {
         #second color-top-and-bottom-border
         border-bottom: 1px solid #500000;
         xtext-transform: uppercase;
-        color: #FFFFFF;
+        color: silver;
         position: relative;
         text-decoration: none;
     }

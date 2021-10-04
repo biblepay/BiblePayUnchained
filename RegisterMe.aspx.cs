@@ -71,7 +71,9 @@ namespace Unchained
                   ddTheme.Items.Add("Maroon");
                   ddTheme.Items.Add("Blue");
                   ddTheme.Items.Add("Grey");
-                  ddTheme.SelectedValue = _user.ThemeName;
+                ddTheme.Items.Add("WhiteBlue");
+
+                ddTheme.SelectedValue = _user.ThemeName;
 
                   imgQrCode.Visible = false;
                   lblQR.Visible = false;
@@ -132,6 +134,13 @@ namespace Unchained
                 }
             }
 
+            // If Domain has a custom theme
+            string sDomainDefault = Config("defaulttheme");
+            if (sDomainDefault != "")
+            {
+                ddTheme.Visible = false;
+                lblTheme.Visible = false;
+            }
 
         }
 
@@ -197,7 +206,7 @@ namespace Unchained
                 return;
             }
 
-            // 9-24-2021 (Replay attack)
+            // (Replay attack prevention)
             double nReplay = BiblePayCommon.Common.GetDouble(BiblePayCommon.HalfordDatabase.GetKVWithExpiration("VerifyEmail" + u.id));
             if (nReplay == 1)
             {

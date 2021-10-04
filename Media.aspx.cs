@@ -20,8 +20,21 @@ namespace Unchained
 
         protected new void Page_Load(object sender, EventArgs e)
         {
+            string embedID = Request.QueryString["embedid"].ToNonNullString();
+            double nEmbedWidth = GetDouble(Request.QueryString["width"].ToNonNullString());
+            double nEmbedHeight = GetDouble(Request.QueryString["height"].ToNonNullString());
+            if (nEmbedWidth == 0)
+                nEmbedWidth = 800;
+            if (nEmbedHeight == 0)
+                nEmbedHeight = 600;
 
-
+            if (embedID != "")
+            {
+                string sJS = "<script src=\"https://dec.app/Content/embed-player3.min.js\"></script>";
+                string sVideo = sJS + GetEmbedVideo(embedID, (int)nEmbedWidth, (int)nEmbedHeight);
+                Response.Write(sVideo);
+                Response.End();
+            }
         }
 
         protected override void Event(BBPEvent e)
@@ -32,6 +45,14 @@ namespace Unchained
             if (e.EventAction == "EditVideo_Click")
             {
                 Response.Redirect("FormView?action=edit&id=" + e.EventValue + "&table=video1");
+            }
+            else if (e.EventAction == "ShareVideo_Click")
+            {
+                string sDomainName = HttpContext.Current.Request.Url.Host;
+                string sShareLink = "<iframe width=\"500\" height=\"300\" src=\"https://" + sDomainName + "/Media?embedid="
+                + e.EventValue + "&width=480&height=280\" style=\"border:0px;\" allowfullscreen></iframe>";
+                string sNarrative = "<br><br><textarea class=pc90 readonly=true rows=10 columns=10>" + sShareLink + "</textarea><br>";
+                MsgModal(this, "Sharing this Video", sNarrative, 550, 450, true);
             }
             else if (e.EventAction == "ContextMenu_Back")
             {
@@ -137,6 +158,51 @@ namespace Unchained
             return html1;
         }
 
+        protected string GetEmbedVideo(string sID, int nWidth, int nHeight)
+        {
+            BiblePayVideo.Video video1 = new BiblePayVideo.Video(this);
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
+            dt = dt.FilterDataTable("id='" + sID + "'");
+            if (dt.Rows.Count < 1)
+                return String.Empty;
+            string html = String.Empty;
+            video1.URL = dt.GetColValue("URL");
+            video1.SVID = dt.GetColValue("SVID");
+            video1.Body = dt.GetColValue("Body");
+
+            video1.Title = null;
+
+            video1.Width = nWidth;
+            video1.Height = nHeight;
+            video1.ID = "video1" + sID;
+            string sFID = dt.GetColValue("FID");
+            string sDownloadLink = "<a href='" + video1.URL + "'>Download</a>";
+
+            string sTheirChannel = "VideoList?channelid=" + dt.GetColValue("userid");
+
+            /*
+            video1.Footer = "Uploaded by <a href='" + sTheirChannel + "'>"
+                + UICommon.GetUserAvatarAndName(this, dt.GetColValue("userid"), true)
+                + "</a> • " + GetObjectRating(IsTestNet(this), sID, "video1", gUser(this)) + " • "
+                + UICommon.GetFollowControl(IsTestNet(this), dt.GetColValue("userid"), gUser(this).id)
+                + " • " + UICommon.GetTipControl(IsTestNet(this), dt.GetColValue("id"), dt.GetColValue("userid"))
+                + "<br>" + UICommon.GetWatchSum(IsTestNet(this), sID) + " view(s) • "
+                + dt.GetColDateTime(0, "time").ToString()
+                + " • " + sDownloadLink + " • " + dt.GetColValue("Category");
+                            video1.Footer += " • " + dt.GetColValue("domain");
+
+                */
+
+
+            video1.Playable = true;
+            
+
+            string sVideoControl = UICommon.RenderControl(video1);
+            UICommon.StoreCount(sID, this, "video");
+            return sVideoControl;
+
+        }
+
         protected string GetVideo()
         {
             BiblePayVideo.Video video1 = new BiblePayVideo.Video(this);
@@ -160,7 +226,10 @@ namespace Unchained
 
             string sFID = dt.GetColValue("FID");
             string sDownloadLink = "<a href='" + video1.URL + "'>Download</a>";
+            
+            
             string sTheirChannel = "VideoList?channelid=" + dt.GetColValue("userid");
+            string sShareAnchor = UICommon.GetStandardAnchor("share"+sID, "ShareVideo", sID, "<i class='fa fa-share'></i>", "Share this Video", "video1");
 
             video1.Footer = "Uploaded by <a href='" + sTheirChannel + "'>"
                 + UICommon.GetUserAvatarAndName(this, dt.GetColValue("userid"), true)
@@ -169,7 +238,7 @@ namespace Unchained
                 + " • " + UICommon.GetTipControl(IsTestNet(this), dt.GetColValue("id"), dt.GetColValue("userid"))
                 + "<br>" + UICommon.GetWatchSum(IsTestNet(this), sID) + " view(s) • "
                 + dt.GetColDateTime(0, "time").ToString()
-                + " • " + sDownloadLink + " • " + dt.GetColValue("Category");
+                + " • " + sDownloadLink + " • " + sShareAnchor + " • " + dt.GetColValue("Category");
 
             video1.Footer += " • " + dt.GetColValue("domain");
 
@@ -181,6 +250,11 @@ namespace Unchained
             }
             string sTranscript = dt.GetColValue("Transcript");
             sTranscript = sTranscript.Replace("\n", "<br>");
+            bool fMobile = BiblePayCommonNET.UICommonNET.fBrowserIsMobile(this);
+            if (fMobile)
+                sTranscript = ""; //Looks terrible on the cell phone; mask it
+
+
             string sVideoControl = UICommon.RenderControl(video1);
             html = "<table><tr><td class='videosingle' >" 
                 + sVideoControl + "</td><td valign='top'><div class='videosingle' id='transcript1'>" + sTranscript + "</div></td></tr></table>";

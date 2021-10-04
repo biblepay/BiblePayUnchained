@@ -1,12 +1,12 @@
 .buttondark {
-    background-color: #400000;
-    color: white;
+    background-color: #ececec;
+    color: #0096FF;
 }
 
 
 
 .navbar {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid #89CFF0;
 }
 
 
@@ -96,7 +96,7 @@ body.hold-transition .main-header .logo {
 }
 .user-panel > .sidebar-toggle {
   float: right;
-  color: white;
+  color: #0096FF;
   font-size: 18px;
   margin-top: 5px;
   margin-right: 5px;
@@ -165,14 +165,14 @@ body.hold-transition .main-header .logo {
 
 
 .navbar-inverse {
-    background-color: maroon;
-    border-color: black !important;
+    background-color: #ffffff;
+    border-color: #89CFF0 !important;
 }
 
 .main-sidebar,
 .left-side {
     xthisistheleft-menubackgroudncolor-left-menu-mid-to-bottom: #500000;
-    background-color: maroon;
+    background-color: #ffffff;
     position: fixed;
     top: 0;
     left: 0;
@@ -225,8 +225,8 @@ body.hold-transition .main-header .logo {
   height: 85px;
   overflow: hidden;
   #xleft-menu: color2;
-  background: maroon;
-  border-bottom: 1px solid black;
+  background: #ffffff;
+  border-bottom: 1px solid #89CFF0;
 }
 .user-panel:before,
 .user-panel:after {
@@ -274,7 +274,7 @@ body.hold-transition .main-header .logo {
   width: 30px;
   vertical-align: middle;
   font-size: 22px;
-  color: white;
+  color: #0096FF;
 }
 .sidebar-menu > li > a:hover > .fa,
 .sidebar-menu > li > a:hover > .glyphicon,
@@ -324,7 +324,7 @@ body.hold-transition .main-header .logo {
 .sidebar-menu > li > .treeview-menu {
     margin: 0;
     #second-color-left-menu-expanded-menus-background;
-    background: #400000;
+    background: #ececec;
 }
 .sidebar-menu .treeview-menu .treeview-menu {
   padding-left: 20px;
@@ -338,10 +338,10 @@ body.hold-transition .main-header .logo {
   font-size: 12px;
 }
 .sidebar-menu .treeview-menu > li > a:hover {
-	color: white;
+	color: #0096FF;
 	#second color:1;
     #font-size:110%;
-	background-color: #c32148;
+	background-color: darkblue;
 }
 .sidebar-menu .treeview-menu > li > a > .fa,
 .sidebar-menu .treeview-menu > li > a > .glyphicon,
@@ -426,7 +426,7 @@ body.hold-transition .main-header .logo {
 .sidebar-menu > li.header {
   white-space: nowrap;
   overflow: hidden;
-  color: white;
+  color: #0096FF;
 }
 .sidebar-menu:hover {
   overflow: visible;
@@ -445,7 +445,7 @@ body.hold-transition .main-header .logo {
         #second color-top-and-bottom-border
         border-bottom: 1px solid #500000;
         xtext-transform: uppercase;
-        color: white;
+        color: #0096FF;
         position: relative;
         text-decoration: none;
     }
@@ -458,7 +458,7 @@ body.hold-transition .main-header .logo {
 .sidebar-menu > li:hover > a, .sidebar-menu > li.active > a {
     color: #DDDDDD;
     #second color-left-menu-hover-color-over-major-areas:500000;
-    background: #c32148;
+    background: darkblue;
 	text-decoration: none;
 }
 

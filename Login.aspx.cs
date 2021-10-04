@@ -137,7 +137,16 @@ namespace Unchained
                     Session[GetChain0(IsTestNet(this)) + "user"] = u;
                     this.Page.Session["stack"] = UICommon.Toast("Logging In", "You are now logged in.");
                     Session["balance"] = null;
-                    Response.Redirect("VideoList");
+                    // This should be configurable by key also
+                    string sDefaultDocument = Config("DefaultDocument");
+                    if (sDefaultDocument == "")
+                    {
+                        Response.Redirect("VideoList");
+                    }
+                    else
+                    {
+                        Response.Redirect(sDefaultDocument);
+                    }
                 }
                 else
                 {

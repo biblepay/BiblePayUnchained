@@ -259,7 +259,7 @@ namespace BiblePayCommon
         }
 
         public static string RESTRICTED_FIELDS = "extrakey,_id,updated,chain,deleted,guid,hash,lastblockhash,signature,signingkey,signaturetime,height,time,id,userid,serversignature,"
-            + "serversigningkey,serversignaturetime,domain,organization,parentid";
+            + "serversigningkey,serversignaturetime,domain,parentid";
         public static string HIDDEN_FIELDS = "filename,fid,url2,transcriptjobid,svid,attachment,subject";
         public static string READONLY_FIELDS = "duration,size,url,classification";
 
@@ -342,7 +342,6 @@ namespace BiblePayCommon
             public int height { get; set; }
             public long updated { get; set; }
             public string domain { get; set; }
-            public string organization { get; set; }
             public string ParentID { get; set; }
 
             /* End of BiblePay internal fields */
@@ -419,10 +418,53 @@ namespace BiblePayCommon
             {
                 return GetSha256HashI(Subject + Body + UserID);
             }
-
-
         }
 
+        public class Organization: BaseEntity, IBBPObject
+        {
+            public string Name { get; set; }
+            public string Domain { get; set; }
+
+            public override string GetHash()
+            {
+                return GetSha256HashI(Name);
+            }
+        }
+
+        public class Role : BaseEntity, IBBPObject
+        {
+            public string OrganizationID { get; set; }
+            public string Name { get; set; }
+            public override string GetHash()
+            {
+                return GetSha256HashI(OrganizationID + Name);
+            }
+        }
+
+        public class UserRole : BaseEntity, IBBPObject
+        {
+            public string UserGuid { get; set; }
+            public string RoleID { get; set; }
+            public override string GetHash()
+            {
+                return GetSha256HashI(UserID + RoleID);
+            }
+        }
+
+        public class Permission : BaseEntity, IBBPObject
+        {
+            public string RoleID { get; set; }
+            public string Name { get; set; }
+            public string EntityName { get; set; }
+            public int ReadAccess { get; set; }
+            public int AddAccess { get; set; }
+            public int UpdateAccess { get; set; }
+            public int DeleteAccess { get; set; }
+            public override string GetHash()
+            {
+                return GetSha256HashI(RoleID + Name);
+            }
+        }
 
         public class user1 : BaseEntity, IBBPObject
         {

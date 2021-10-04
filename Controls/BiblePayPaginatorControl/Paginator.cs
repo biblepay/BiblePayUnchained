@@ -46,13 +46,16 @@ namespace BiblePayPaginator
 
         public int PageNumber
         {
+            
             get
             {
-                return Convert.ToInt32(this.Page.Session[this.ClientID + "PageNumber"]);
+                string key = Page.Request.RawUrl;
+                return Convert.ToInt32(this.Page.Session[key + "PageNumber"]);
             }
             set
             {
-                this.Page.Session[this.ClientID + "PageNumber"] = value;
+                string key = Page.Request.RawUrl;
+                this.Page.Session[key + "PageNumber"] = value;
             }
         }
 

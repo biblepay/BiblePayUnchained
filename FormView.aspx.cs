@@ -126,7 +126,7 @@ namespace Unchained
                 // If this is a dropdown...
                 if (sTable == "video1" && sColName.ToLower() == "category")
                 {
-                    sValueControl = UICommon.GetVideoCategories("category", sOrigValue);
+                    sValueControl = UICommon.GetVideoCategories("input_category", sOrigValue);
                 }
                 
                 string sRow = "<tr><td width=25%><span>" + sColName + ":</span><td>" + sValueControl + "</tr>\r\n";

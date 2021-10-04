@@ -46,7 +46,7 @@ namespace Unchained
 
         protected string OffchainUpload(BiblePayCommon.Entity.object1 o1, int iFileNo)
         {
-            string sCat = Request.Form["input_ddCategory"].ToNonNullString();
+            string sCat = Request.Form["ddCategory"].ToNonNullString();
             if (iFileNo == 1)
             {
                 o1.Category = sCat;

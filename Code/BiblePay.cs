@@ -141,7 +141,6 @@ namespace Unchained
                 Portfolios p = new Portfolios();
                 User u = UICommon.GetUserRecord(fTestNet, dt.Rows[i]["UserID"].ToString());
 
-                
 
                 try
                 {

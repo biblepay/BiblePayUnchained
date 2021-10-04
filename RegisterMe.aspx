@@ -24,7 +24,7 @@
        
                <asp:Label ID="lblEmailVerified" runat="server" Text="NA" style="color:red;"></asp:Label>
         <br />
-        <label class="offset" for="ddTheme">Choose Theme: </label><asp:dropdownlist runat="server" id="ddTheme"></asp:dropdownlist>   
+        <asp:Label ID="lblTheme" runat="server" Text="">Choose Theme:<br /></asp:Label> <asp:dropdownlist runat="server" id="ddTheme"></asp:dropdownlist>   
 
         <br />
         <label class="offset">Account 2FA Enabled:</label><asp:TextBox ID="txtTwoFactorEnabled" readonly="true" runat="server"></asp:TextBox>

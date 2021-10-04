@@ -16,14 +16,9 @@ namespace Unchained
         {
             string sThemeName = UICommon.GetCurrentThemeName(this.Page);
             string sFullPath = "/content/sidenav_" + sThemeName + ".css";
-            //sFullPath = Server.MapPath(sFullPath);
-
             //<link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/Offside/css/index.css?fin20" />
-
             string sLink = "<link rel=\"stylesheet\" type='text/css' href='" + sFullPath + "' />";
-
             sitecss.Text = sLink;
-
         }
 
         protected void btnMessageBox_Click(object sender, EventArgs e)

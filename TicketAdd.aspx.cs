@@ -33,8 +33,8 @@ namespace Unchained
             }
 
             double nTicketNumber = BiblePayUtilities.GetNextTicketNumber(this);
-            string sDisposition = Request.Form["input_dddispositions"] ?? "";
-            string sAssignee= Request.Form["input_ddasignees"] ?? "";
+            string sDisposition = Request.Form["dddispositions"] ?? "";
+            string sAssignee= Request.Form["ddasignees"] ?? "";
             /*
             if (sDisposition == "")
             {

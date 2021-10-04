@@ -251,36 +251,11 @@ namespace Unchained
         }
 
 
-        protected string GetPerson()
+        protected string GetUserProfileStuff(User u)
         {
-            BiblePayPaginator.Paginator _paginator = new BiblePayPaginator.Paginator();
-            _paginator.Page = this;
-            string sID = Request.QueryString["id"].ToNonNullString();
-            string sFirstName = Request.QueryString["firstname"].ToNonNullString();
-            string sLastName = Request.QueryString["lastname"].ToNonNullString();
-            bool fHomogenized = Request.QueryString["homogenized"].ToNonNullString() == "1";
-            string sUserID = Request.QueryString["id"].ToNonNullString();
-
-            if (sUserID == "")
-            {
-                sFirstName = gUser(this).FirstName;
-                sLastName = gUser(this).LastName;
-                sUserID = gUser(this).id;
-            }
-            // For each timeline entry, pull in attachments (mp4, mp3, video, pdf) - Sort timeline desc:
-            User u = gUserById(this, sUserID);
+            string html = "";
             bool fMe = (u.id == gUser(this).id);
-            string html = "<div id='user" + u.id + "'>";
 
-            if (u.id==null)
-            {
-                html += "Sorry, we cannot find this user.</div>";
-                return html;
-            }
-            html += "";
-
-            DateTime dtBirthday = BiblePayCommon.Common.ConvertFromUnixTimestamp(u.BirthDate);
-            TimeSpan t = DateTime.Now.Subtract(dtBirthday);
             // Add friend request button (Unless they are already friends); This can say FRIEND
 
             DACResult r = AmIFriend(this, u.id, gUser(this).id);
@@ -294,6 +269,10 @@ namespace Unchained
                 sAddFriendButton = UICommon.GetStandardButton(u.id, r.Result, r.Event, r.Alt);
             }
 
+
+            DateTime dtBirthday = BiblePayCommon.Common.ConvertFromUnixTimestamp(u.BirthDate);
+            TimeSpan t = DateTime.Now.Subtract(dtBirthday);
+
             string sUserAvatar = "<img src='" + u.AvatarURL + "' class='person' />";
             string sUserAnchor = UICommon.GetStandardAnchor("ancUser", "EditUserProfile", "", sUserAvatar, "Edit my User Profile Fields");
             if (!fMe)
@@ -303,7 +282,7 @@ namespace Unchained
             html += "<tr><td>Age: " + (t.Days / 365).ToString() + "</td></tr>";
             html += "<tr><td>Gender: " + u.Gender;
             html += "<tr><td>Telegram: <a href='" + u.TelegramLinkURL + "'>" + u.TelegramLinkName + "</a>";
-            
+
             html += "<tr><td>" + u.TelegramLinkDescription;
             // Their video channel:
             string sVURL = "VideoList?userid=" + u.id;
@@ -321,11 +300,12 @@ namespace Unchained
             {
                 html += "<td>" + sAddFriendButton;
             }
-            
+
             html += "</tr>";
             html += "</table>";
-            html +=  "<br><br>";
-           
+
+            html += "<br><br>";
+
             html += "<div class='person' ><div class='tab'><button class='tablinks' onclick=\"openProfile(event, 'Public');return false;\">Public</button>"
                  + "<button class='tablinks' onclick=\"openProfile(event, 'Friends');return false;\">Friends Only</button>"
                  + "<button class='tablinks' onclick=\"openProfile(event, 'Professional');return false;\">Professional</button>"
@@ -349,6 +329,57 @@ namespace Unchained
                 html += "<div id='Religious' class='tabcontent'>" + ToHTML(u.ReligiousText) + "</div>";
             }
             html += "</div><br><br><script>openProfile(this, 'Public');</script>";
+            return html;
+
+        }
+
+
+        protected string GetPerson()
+        {
+            BiblePayPaginator.Paginator _paginator = new BiblePayPaginator.Paginator();
+            _paginator.Page = this;
+            string sID = Request.QueryString["id"].ToNonNullString();
+            string sFirstName = Request.QueryString["firstname"].ToNonNullString();
+            string sLastName = Request.QueryString["lastname"].ToNonNullString();
+            bool fHomogenized = Request.QueryString["homogenized"].ToNonNullString() == "1";
+            string sUserID = Request.QueryString["id"].ToNonNullString();
+
+            if (sUserID == "")
+            {
+                sUserID = gUser(this).id;
+            }
+            // For each timeline entry, pull in attachments (mp4, mp3, video, pdf) - Sort timeline desc:
+            User u = gUserById(this, sUserID);
+            bool fMe = (u.id == gUser(this).id);
+            string html = "<div id='user" + u.id + "'>";
+
+            if (u.id==null)
+            {
+                html += "Sorry, we cannot find this user.</div>";
+                return html;
+            }
+            html += "";
+
+
+            // Begin User Profile
+            string sUserProfileSection = GetUserProfileStuff(u);
+            if (!fHomogenized)
+            {
+                html += sUserProfileSection;
+            }
+
+            // End user profile
+            
+            // Add the "Share something with the world" (Append timeline): 
+            string sAddTimelineButton = "<input class='pc90' autocomplete='off' id='timeline1'></input><button id='btntimeline1' onclick=\""
+                   + "var o=document.getElementById('timeline1');var e={};e.Event='AddTimeline_Click';e.Value='"
+                   + sID + "';e.Body=o.value;BBPPostBack2(null, e);\">Share something with the world, " + gUser(this).FirstName + "</button><br> ";
+
+            if (gUser(this).LoggedIn)
+            {
+                html += "<br>" + sAddTimelineButton + "<hr>";
+            }
+
 
             // For each timeline entry...
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "Timeline");
@@ -401,16 +432,6 @@ namespace Unchained
                 sTimeline += UICommon.GetComments(IsTestNet(this), dt.Rows[i]["id"].ToString(), this, true);
                 // Display the comments for the timeline entry
                 html += sTimeline;
-            }
-            // Add a new Timeline 
-
-            string sAddTimelineButton = "<input class='pc90' autocomplete='off' id='timeline1'></input><button id='btntimeline1' onclick=\""
-                   + "var o=document.getElementById('timeline1');var e={};e.Event='AddTimeline_Click';e.Value='" 
-                   + sID + "';e.Body=o.value;BBPPostBack2(null, e);\">Say Something</button> ";
-
-            if (gUser(this).id == u.id)
-            {
-                html += "<br>" + sAddTimelineButton;
             }
             html += "</div>";
             return html;

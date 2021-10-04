@@ -17,22 +17,17 @@ namespace Unchained
 {
     public partial class VideoList : BBPPage
     {
-        BiblePayPaginator.Paginator _paginator = null;
         protected new void Page_Load(object sender, EventArgs e)
         {
-            _paginator = (BiblePayPaginator.Paginator)this.Master.FindControl("MainContent").FindControl("paginator2");
-            int nPageNo = _paginator.PageNumber;
 
             if (IsPostBack)
             {
-                //_paginator.PageNumber = 0;
                 Session["search"] = txtSearch.Text;
 
             }
             else
             {
                 txtSearch.Text = Session["search"].ToNonNullString();
-
             }
         }
         protected void btnSearch_Click(object sender, EventArgs e)
@@ -250,7 +245,7 @@ namespace Unchained
                 dt = dt.FilterBBPDataTable("subject like '%" + sCategory + "' or title like '%" + sCategory + "' or category like '%" + sCategory + "%'");
             }
 
-            string html = UICommon.GetGallery(this, dt, _paginator, sType, 33, 400, 300);
+            string html = UICommon.GetGallery(this, dt, null, sType, 33, 400, 300);
             return html;
             
         }

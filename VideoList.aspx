@@ -14,14 +14,13 @@
 
  <asp:UpdatePanel runat="server" ID="Up1">
     <ContentTemplate>
-            <div style="z-index:1;top:-50px;">&nbsp;&nbsp;&nbsp;
+            <div style="z-index:1;top:-50px;">
         <small>
         <asp:TextBox ID="txtSearch" width="500px" runat="server" onkeydown = "search(this);return (event.keyCode!=13);"></asp:TextBox>
         <asp:Button ID="btnSearch" runat="server" Text="Search" OnClick="btnSearch_Click" /></small>
     </div>
 
          <%=GetVideoList() %>
-         <BBP:Paginator id="paginator2" runat="server"></BBP:Paginator>
     </ContentTemplate>
   </asp:UpdatePanel>
     

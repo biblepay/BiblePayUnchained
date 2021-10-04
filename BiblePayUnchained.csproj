@@ -46,10 +46,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BiblePayWallet, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\BiblePayProtected\BiblePayWalletControl\bin\Debug\BiblePayWallet.dll</HintPath>
-    </Reference>
     <Reference Include="netstandard" />
     <Reference Include="Google.Authenticator, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\GoogleAuthenticator.2.1.1\lib\net45\Google.Authenticator.dll</HintPath>
@@ -184,10 +180,12 @@
   <ItemGroup>
     <Content Include="Admin.aspx" />
     <Content Include="Admin1.aspx" />
+    <Content Include="Content\embed-player3.min.js" />
     <Content Include="Content\sidenav_black.css" />
     <Content Include="Content\sidenav_blue.css" />
     <Content Include="Content\sidenav_grey.css" />
     <Content Include="Content\sidenav_maroon.css" />
+    <Content Include="Content\sidenav_whiteblue.css" />
     <Content Include="Friends.aspx" />
     <Content Include="GreetingCard.aspx" />
     <Content Include="Images\dec-high-tech.jpg" />
@@ -255,7 +253,7 @@
     <Content Include="Content\themes\base\tooltip.css" />
     <Content Include="BibleViewer.aspx" />
     <Content Include="Chat.aspx" />
-    <Content Include="Scripts\core0.js" />
+    <Content Include="Scripts\core.js" />
     <Content Include="ProposalAdd.aspx" />
     <Content Include="Leaderboard.aspx" />
     <Content Include="PortfolioBuilder.aspx" />

@@ -35,7 +35,7 @@ namespace Unchained
 
             string html = "<table class=saved><tr class='objheader'><th class='objheader' colspan=3>"
                + "<h3>" + _CollectionName + "</h3><th class='objheader' colspan=2><div style='text-align:right;'>";
-            string sAdd = UICommon.GetStandardAnchor("aAddObj", _EntityName, "", "<i class='fa fa-plus'></i>", "Add Object", "");
+            string sAdd = UICommon.GetStandardAnchor("aAddObj","AddObject", _EntityName, "<i class='fa fa-plus'></i>", "Add Object", "pray1");
             html += sAdd + "<tr><th width=20%>User</th><th width=20%>Added<th width=50%>Subject</tr>";
             for (int y = 0; y < dt.Rows.Count; y++)
             {
