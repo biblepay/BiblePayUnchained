@@ -148,14 +148,14 @@ namespace Unchained
                         + sID + "';BBPPostBack2(null, Extra); return true;"
                         + "\" value='Make Offer'>Make Offer</button>";
 
-                    string sAsset = "<iframe xwidth=95% style='height: 200px;width:300px;' src='" + sURLLow + "'></iframe>";
+                    string sAsset = "<iframe style='height: 200px;width:300px;' src='" + sURLLow + "'></iframe>";
                     if (sURLLow.Contains(".gif") || sURLLow.Contains(".jpg") || sURLLow.Contains(".jpeg") || sURLLow.Contains(".png"))
                     {
                         sAsset = "<img style='height:200px;width:300px;' src='" + sURLLow + "'/>";
                     }
                     else if (sURLLow.Contains(".mp4") || sURLLow.Contains(".mp3"))
                     {
-                        sAsset = "<video class='gallery' controls><source src='" + sURLLow + "' />        </video>";
+                        sAsset = "<video style='height:200px;width:300px;' controls><source src='" + sURLLow + "' />        </video>";
                     }
                     string sScrollY = sDesc.Length > 500 ? "overflow-y:scroll;" : "";
 
@@ -164,8 +164,8 @@ namespace Unchained
                         //sDesc = Left(sDesc, 550) + " ...";
                     }
                     string s1 = "<td style='padding:7px;border:1px solid white' cellpadding=7 cellspacing=7>"
-                        + "<b>" + sName + "</b><br>" + sAsset
-                        + "<br><div style='height:150px;width:310px;" + sScrollY + "'><font style='font-size:11px;'>"
+                        + "<b>" + sName + " • " + UnixTimeStampToDateControl(n[i].time) + "</b><br>" + sAsset
+                        + "<br><div style='border=1px;height:75px;width:310px;" + sScrollY + "'><font style='font-size:11px;'>"
                         + sDesc + "</font></div><br><small><font color=green>" + sBuyItCaption + " " + sBuyItNowPrice;
                     if (!fOrphansOnly)
                     {
@@ -253,6 +253,9 @@ namespace Unchained
                     BiblePayCommon.Entity.NFT n = (BiblePayCommon.Entity.NFT)Session["pendingpurchasenft"];
                     BiblePayCommon.Common.DACResult s = DataOps.InsertIntoTable(this, IsTestNet(this), n, gUser(this));
                     string sNarr = "You have successfully purchased NFT " + n.GetHash() + " on TXID " + s.Result + "!";
+                    // Send the email, especially if its an orphan
+                    BiblePayCommon.Entity.invoice1 i = (BiblePayCommon.Entity.invoice1)this.Session["PENDING_PURCHASE"];
+                    UICommon.NotifyOfSale(this, IsTestNet(this), gUser(this), n, i.Amount, s.Result);
                     UICommon.MsgBox("Success", sNarr, this);
                 }
                 else
@@ -268,15 +271,16 @@ namespace Unchained
                     return;
                 }
 
+
                 DACResult d = BiblePayUtilities.BuyNFT1(this, gUser(this).id, e.EventValue, GetDouble(e.Extra.Amount), true, IsTestNet(this));
                 if (d.fError())
                 {
-                    MsgModal(this, "NFT Bid Error", d.Error, 450, 200, false);
+                    MsgModal(this, "NFT Bid Error", d.Error, 450, 200, true);
                     return;
                 }
                 else
                 {
-                    MsgModal(this, "Success", "You have bidded " + e.Extra.Amount.ToString() + " BBP on this NFT.", 450, 250, false);
+                    MsgModal(this, "Success", "You have bidded " + e.Extra.Amount.ToString() + " BBP on this NFT.", 450, 250, true, true);
                     return;
                 }
         

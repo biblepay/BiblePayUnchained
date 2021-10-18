@@ -38,7 +38,7 @@
         <!--
                  <asp:Button ID="btnSendCode" runat="server" Text="Send SMS Code" OnClick="btnSendSMSCode_Click"/>         
                  <input type='button' id="bnexplain" 
-                     onclick='showModalDialog("Explain SMS Verification", "<br />Verified users receive higher voting weight.  <br>Message and Data Rates may apply. ", 500, 300);'
+                     onclick='showModalDiag("Explain SMS Verification", "<br />Verified users receive higher voting weight.  <br>Message and Data Rates may apply. ", 500, 300);'
                         value="Explain" /> 
                  <asp:Button ID="btnVerifySMSCode" runat="server" Text="Verify Pin" OnClick="btnVerifySMSCode_Click"/>
                              &nbsp;<asp:Label ID="lblVerified" runat="server" Text="NA" style="color:red;"></asp:Label>                    

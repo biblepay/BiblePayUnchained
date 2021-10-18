@@ -12,7 +12,8 @@
     <asp:Literal ID="sitecss" runat="Server" />
 
     <link rel="stylesheet" type="text/css" href="~/content/bootstrap.css" />
-    <link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/Offside/css/index.css?fin20" />
+    <link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/Offside/css/index.css?fin20" /> 
+
 	<link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/Offside/css/responsive.css?fin20" />
     <link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/Offside/css/font-awesome.css" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
@@ -71,24 +72,17 @@
 
         <!--Above div height is used to calculate the whole page size (so the footer knows the page height)-->
         <div class="navbar navbar-inverse navbar-fixed-top" style="z-index:256;">
-            <div class="container" style="padding-left:1%;">
-                <div style="max-height:64px;overflow:hidden;">
-                 <span style="padding-left:115px;"><img src="<%=Unchained.UICommon.GetHeaderImage(this.Page) %>" height="64px" /> </span>
-                    <span style="font-family:candara;color:antiquewhite;font-size:22px;">&nbsp;<%=Unchained.UICommon.GetHeaderBanner(this.Page) %></span>
-                    <span style="color:lime;font-size:22px;">&nbsp;<%=Unchained.UICommon.GetBeta(this.Page) %></span>
-                    <div style="float:right;">&nbsp;
-                        <%=Unchained.UICommon.GetBannerControls(this.Page) %>
-                        </div>
+            <div class="container" style="float:right">
+                    &nbsp;&nbsp;&nbsp;&nbsp;<%=Unchained.UICommon.GetBannerControls(this.Page) %>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <img style="overflow:hidden;" src="<%=Unchained.UICommon.GetHeaderImage(this.Page) %>" height="64px" />
+                        <span style="font-family:candara;color:antiquewhite;font-size:22px;">&nbsp;<%=Unchained.UICommon.GetHeaderBanner(this.Page) %></span> 
 
                     <div id='rightmenubutton' style='float:right;' class="close-sidebar hidden-lg hidden-sm">
                         <a href="#" onclick="openNav();" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-                            <i class="fa fa-navicon">
-                            </i>
+                            <i class="fa fa-navicon"></i>
                         </a>
                     </div>
-                </div>
             </div>
-
             <%=Unchained.Common.GetGlobalAlert(this.Page) %>
         </div>
 
@@ -100,11 +94,16 @@
                         <span style="position:relative; top:-90px;left:80px;" id="spanLoader1">50%</span>
                 </div>
                 
+
+                        <%=Unchained.UICommon.GetChatBox(this.Page) %>
                 <asp:ContentPlaceHolder ID="MainContent" runat="server">
                 </asp:ContentPlaceHolder>
             </div>
          <p></p><p></p>
+    
+    
     </div>        
+
     </form>
  </body>
 </html>

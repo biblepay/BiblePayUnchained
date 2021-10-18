@@ -1,6 +1,7 @@
 ﻿using BiblePayCommonNET;
 using System;
 using System.Data;
+using System.Net.Mail;
 using System.Web;
 using System.Web.UI;
 using static BiblePayCommon.Common;
@@ -9,6 +10,7 @@ using static BiblePayCommon.Entity;
 using static BiblePayCommonNET.CommonNET;
 using static BiblePayCommonNET.UICommonNET;
 using static Unchained.Common;
+using static Unchained.UICommon;
 
 namespace Unchained
 {
@@ -93,8 +95,14 @@ namespace Unchained
         {
             if (e.EventName == "AddTimeline_Click")
             {
+                if (!Common.gUser(this).LoggedIn)
+                {
+                    UICommon.MsgBox("Error", "You Must be logged in first.", this);
+                    return;
+                }
+
                 Timeline t = new Timeline();
-                t.Body = e.Extra.Body;
+                t.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(e.Extra.Body.ToString()));
                 t.UserID = gUser(this).id;
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), t, gUser(this));
                 if (r.fError())
@@ -104,17 +112,54 @@ namespace Unchained
                 }
                 else
                 {
+                    //SendBlastOutForTimeline(this, t);
                     ToastLater(this, "Success", "Your timeline entry has been saved!");
                 }
 
             }
+            else if (e.EventName == "AddTimelineURL_Click")
+            {
+                if (!Common.gUser(this).LoggedIn)
+                {
+                    UICommon.MsgBox("Error", "You Must be logged in first.", this);
+                    return;
+                }
+
+                Timeline t = new Timeline();
+                string sData = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(e.Extra.Body.ToString()));
+                t.Body = UICommon.MakeShareableLink(sData, "");
+                t.UserID = gUser(this).id;
+                if (t.Body == "")
+                {
+                    BiblePayCommonNET.UICommonNET.MsgModal(this, "Error", "Sorry, the URL was not shared because we could not access the document title; please be sure the target points to a valid web resource. ", 500, 200, true, true);
+                    return;
+                }
+                BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), t, gUser(this));
+                if (r.fError())
+                {
+                    BiblePayCommonNET.UICommonNET.MsgModal(this, "Error", "Sorry, the URL was not shared.", 500, 200, true);
+                    return;
+                }
+                else
+                {
+
+                    //SendBlastOutForTimeline(this, t);
+                    ToastLater(this, "Success", "Your URL entry has been shared!");
+                }
+            }
+
             else if (e.EventName == "EditUserProfile_Click")
             {
                 Response.Redirect("Profile");
             }
             else if (e.EventName == "AddTimelineAttachment_Click")
             {
-                string sURL = "UnchainedUpload?action=setattachment&parentid=" + e.EventValue;
+                string sURL = "UnchainedUpload?action=setattachment&type=Timeline&parentid=" + e.EventValue;
+                Response.Redirect(sURL);
+            }
+            else if (e.EventName == "AddProfileAttachment_Click")
+            {
+                string sURL = "UnchainedUpload?action=setattachment&type=Profile&parentid=" + e.EventValue;
                 Response.Redirect(sURL);
             }
             else if (e.EventName == "AcceptFriendRequest_Click")
@@ -185,6 +230,61 @@ namespace Unchained
                               , 700,  "", "", UICommon.InputType.multiline, false, e.EventValue);
 
             }
+            else if (e.EventName == "DeleteTimeline_Click")
+            {
+
+                string sID = _bbpevent.EventValue;
+                bool fDeleted = BiblePayDLL.Sidechain.DeleteObject(Common.IsTestNet(this), "Timeline",
+                          sID, Common.gUser(this));
+                if (fDeleted)
+                {
+                    BiblePayCommonNET.UICommonNET.ToastNow(this.Page, "Success!", "Your object was deleted!");
+                }
+                else
+                {
+                    UICommon.MsgBox("Error", "Sorry, the object could not be deleted. ", this);
+                }
+
+            }
+            else if (e.EventName == "EditTimeline_Click")
+            {
+                BiblePayCommon.Entity.Timeline t = (BiblePayCommon.Entity.Timeline)Common.GetObject(Common.IsTestNet(this), "Timeline", _bbpevent.EventValue);
+                if (t == null)
+                {
+                    UICommon.MsgBox("Error", "Sorry, cannot locate object.", this.Page);
+                    return;
+                }
+
+                UICommon.MsgInput(this, "EditedTimelineBody_Click", "Edit Comment", "Edit your Timeline Post:"
+                         , 700, "", "", UICommon.InputType.multiline, false, _bbpevent.EventValue, t.Body);
+            }
+            else if (_bbpevent.EventName == "EditedTimelineBody_Click")
+            {
+                if (!Common.gUser(this).LoggedIn)
+                {
+                    UICommon.MsgBox("Error", "You Must be logged in first.", this);
+                    return;
+                }
+
+                BiblePayCommon.Entity.Timeline t = (BiblePayCommon.Entity.Timeline)Common.GetObject(Common.IsTestNet(this), "Timeline", _bbpevent.EventValue);
+
+                if (t == null)
+                {
+                    UICommon.MsgBox("Error", "Sorry, cannot locate object.", this.Page);
+                    return;
+                }
+                t.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(_bbpevent.Extra.Output.ToString()));
+
+                BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), t, Common.gUser(this));
+                if (!r.fError())
+                {
+                    BiblePayCommonNET.UICommonNET.ToastNow(this.Page, "Saved", "Your Timeline Post been Edited!");
+                }
+                else
+                {
+                    UICommon.MsgBox("Error while inserting comment", "Sorry, the Timeline Post was not edited: " + r.Error, this);
+                }
+            }
             else if (e.EventName == "AddedTimelineComment_Click")
             {
                 if (!Common.gUser(this).LoggedIn)
@@ -250,6 +350,44 @@ namespace Unchained
             return sList;
         }
 
+        public static void SendBlastOutForTimeline(Page p, Timeline t)
+        {
+            try
+            {
+                string sMyFriendsList = GetFriendsList(IsTestNet(p), gUser(p).id);
+                if (sMyFriendsList.Length > 1)
+                {
+                    sMyFriendsList = sMyFriendsList.Replace("userid in", "id in");
+                }
+                DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "user1");
+                dt = dt.FilterDataTable(sMyFriendsList);
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    User u = gUserById(p, dt.Rows[i]["id"].ToString());
+                    if (u.EmailAddress != null && u.EmailAddress != "" && u.EmailAddress.Length > 3)
+                    {
+                        EmailNarr e = GetEmailFooter(p);
+
+                        MailMessage m = new MailMessage();
+                        string sDomainName = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
+                        string sURL = sDomainName + "/Person?homogenized=1";
+                        string sURLA = "<a href='" + sURL + "'>here</a>";
+                        string sNarr = "Dear " + u.FirstName + ",<br><br>One of your friends has posted this on their timeline:"
+                            + ".<br><br>" + t.Body + "<br><br>To view the post, click " + sURLA + ".<br><br>Thank you.<br>The " + e.DomainName + " Team<br>";
+                        m.Subject = "[Timeline Notification] A new post from " + gUser(p).FirstName;
+                        m.Body = sNarr;
+                        m.IsBodyHtml = true;
+                        m.To.Add(new MailAddress(u.EmailAddress, u.FirstName));
+                        // m.Bcc.Add(new MailAddress(gUser(p).EmailAddress, gUser(p).FirstName));
+
+                        DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(p), m, e.DomainName);
+                    }
+                }
+            }catch(Exception ex)
+            {
+                Log("SendBlastOutForTimeline Issue:: " + ex.Message);
+            }
+        }
 
         protected string GetUserProfileStuff(User u)
         {
@@ -270,16 +408,13 @@ namespace Unchained
             }
 
 
-            DateTime dtBirthday = BiblePayCommon.Common.ConvertFromUnixTimestamp(u.BirthDate);
-            TimeSpan t = DateTime.Now.Subtract(dtBirthday);
-
-            string sUserAvatar = "<img src='" + u.AvatarURL + "' class='person' />";
+            string sUserAvatar = u.GetAvatarImageNoDims("person");
             string sUserAnchor = UICommon.GetStandardAnchor("ancUser", "EditUserProfile", "", sUserAvatar, "Edit my User Profile Fields");
             if (!fMe)
                 sUserAnchor = sUserAvatar;
 
             html += "<table class='saved2'><tr><td rowspan=7>" + sUserAnchor + "</td><td>Name: " + u.FullUserName() + "</td></tr>";
-            html += "<tr><td>Age: " + (t.Days / 365).ToString() + "</td></tr>";
+            html += "<tr><td>Age: " + UnixTimeStampToDisplayAge(u.BirthDate) + "</td></tr>";
             html += "<tr><td>Gender: " + u.Gender;
             html += "<tr><td>Telegram: <a href='" + u.TelegramLinkURL + "'>" + u.TelegramLinkName + "</a>";
 
@@ -288,12 +423,14 @@ namespace Unchained
             string sVURL = "VideoList?userid=" + u.id;
             string sVideoAnchor = "<a href='" + sVURL + "'>My Video Channel</a>";
             string sModifyProfile = UICommon.GetStandardButton("btnModifyProfile", "Modify my Profile", "EditUserProfile", "Modify my Profile");
+            string sAddProfileAttachment = UICommon.GetStandardButton(u.id, "Add Profile Media", "AddProfileAttachment", 
+                "Add Profile Media Attachment (Picture, Video, PDF, etc..)", "", "");
 
             html += "<tr><td>" + sVideoAnchor;
 
             if (gUser(this).id == u.id)
             {
-                html += "<td>" + sModifyProfile;
+                html += "<td>" + sModifyProfile + "&nbsp;" + sAddProfileAttachment;
             }
 
             if (gUser(this).LoggedIn)
@@ -329,8 +466,10 @@ namespace Unchained
                 html += "<div id='Religious' class='tabcontent'>" + ToHTML(u.ReligiousText) + "</div>";
             }
             html += "</div><br><br><script>openProfile(this, 'Public');</script>";
+            string sFilter = "and title='Profile Attachment'";
+            string s1 = UICommon.GetAttachments(this, u.id, sFilter, "Profile Attachments", "");
+            html += s1;
             return html;
-
         }
 
 
@@ -353,13 +492,12 @@ namespace Unchained
             bool fMe = (u.id == gUser(this).id);
             string html = "<div id='user" + u.id + "'>";
 
-            if (u.id==null)
+            if (u.id == null)
             {
                 html += "Sorry, we cannot find this user.</div>";
                 return html;
             }
             html += "";
-
 
             // Begin User Profile
             string sUserProfileSection = GetUserProfileStuff(u);
@@ -373,20 +511,32 @@ namespace Unchained
             // Add the "Share something with the world" (Append timeline): 
             string sAddTimelineButton = "<input class='pc90' autocomplete='off' id='timeline1'></input><button id='btntimeline1' onclick=\""
                    + "var o=document.getElementById('timeline1');var e={};e.Event='AddTimeline_Click';e.Value='"
-                   + sID + "';e.Body=o.value;BBPPostBack2(null, e);\">Share something with the world, " + gUser(this).FirstName + "</button><br> ";
+                   + sID + "';e.Body=window.btoa(escape(o.value));BBPPostBack2(null, e);\">Share something with the world, " 
+                   + gUser(this).FirstName + "</button> ";
+            string sAddURLButton = "<button id='btnurl1' onclick=\""
+                   + "var o=document.getElementById('timeline1');var e={};e.Event='AddTimelineURL_Click';e.Value='"
+                   + sID + "';e.Body=window.btoa(escape(o.value));BBPPostBack2(null, e);\">Share a URL</button><br> ";
 
             if (gUser(this).LoggedIn)
             {
-                html += "<br>" + sAddTimelineButton + "<hr>";
+                html += "<br>" + sAddTimelineButton + sAddURLButton + "<hr>";
             }
-
 
             // For each timeline entry...
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "Timeline");
             if (fHomogenized)
             {
                 string sMyFriendsList = GetFriendsList(IsTestNet(this), gUser(this).id);
-                DataOps.FilterDataTable(ref dt, sMyFriendsList);
+                // Per Mike, just show system wide timeline until phase 2 - this will allow newbies to see some timeline data
+                if (false)
+                {
+                    DataOps.FilterDataTable(ref dt, sMyFriendsList);
+                    if (dt.Rows.Count == 0)
+                    {
+                        // Show homogenized view with everyones posts (since I have no friends yet, and no timeline posts yet):
+                        dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "Timeline");
+                    }
+                }
             }
             else
             {
@@ -406,29 +556,49 @@ namespace Unchained
 
                 string sAddCommentButton = UICommon.GetStandardButton(dt.Rows[i]["id"].ToString(),
                     "<i class='fa fa-chat'></i>", "AddTimelineComment", "Add a Comment to this timeline event...");
-                
+
+                string sDeleteTimelineButton =  UICommon.GetStandardButton(dt.Rows[i]["id"].ToString(),
+                    "<i class='fa fa-trash'></i>", "DeleteTimeline", "Delete timeline event...");
+
+                string sEditTimelineButton = UICommon.GetStandardButton(dt.Rows[i]["id"].ToString(),
+                    "<i class='fa fa-edit'></i>", "EditTimeline", "Edit timeline event...");
+
+
                 // Add the User - Said - @ timestamp (head of the timeline entry):
                 string sTime = dt.GetColDateTime(i, "time").ToString();
-                string sEntry = UICommon.GetUserAvatarAndName(this, dt.Rows[i]["userid"].ToString(), true) + " • " + sTime + ":";
+                string sEntry = "<div style='float:none;'>" + UICommon.GetUserAvatarAndName(this, dt.Rows[i]["userid"].ToString(), true) + " • " + sTime + ":" + "</div>";
 
-                string sTimeline = "<div>" + sEntry + "<br>"
-                    + "<textarea class='comments' rows='2' cols='200' name='timeline_" + dt.Rows[i]["id"].ToString() + "' readonly>"
-                    + dt.Rows[i]["body"].ToString() + "</textarea>&nbsp;";
+                string sTimeline = "<br><div style='float:none;' id='timeline" + dt.Rows[i]["id"].ToString() + "'>" + sEntry + "<br>";
 
-                if (gUser(this).id == u.id)
+                string sBody = dt.Rows[i]["body"].ToString();
+                string sValueControl = String.Empty;
+                if (sBody.Contains("shareablelink"))
                 {
-                    sTimeline += sAddTimelineAttachmentButton + "&nbsp;";
+                    // ToDo:  Make a better way to detect an html literal in the post...
+                    sValueControl = "<div class='comments'>" + sBody + "</div>";
+                }
+                else
+                {
+                    string[] vRows = sBody.Split("\n");
+                    int nRows = vRows.Length + 2;
+                    sValueControl = "<textarea class='comments' rows='" + nRows.ToString() + "' cols='200' name='timeline_" + dt.Rows[i]["id"].ToString() + "' readonly>"
+                        + sBody + "</textarea>";
                 }
 
-                sTimeline += sAddCommentButton + "<br></div>";
+                string sTimelineRowButtons = "";
+                if (gUser(this).id == dt.Rows[i]["UserID"].ToString())
+                {
+                    sTimelineRowButtons += sAddTimelineAttachmentButton + "&nbsp;" + sDeleteTimelineButton + "&nbsp;" + sEditTimelineButton + "&nbsp;";
+                }
+
+                sTimelineRowButtons += sAddCommentButton;
+
+                string sTimelineRow = "<table width=90%><tr><td width=75%>" + sValueControl + "</td><td width=16% nobreak>" + sTimelineRowButtons + "</td></tr></table>";
+
+                sTimeline += sTimelineRow;
 
                 // Display the attachments
-                DataTable dtAttachments = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
-                DataOps.FilterDataTable(ref dtAttachments, "attachment=1 and parentid='" + dt.Rows[i]["id"].ToString() +"'");
-                string sGallery = "<div class='person'>"
-                    + UICommon.GetGallery(this, dtAttachments, _paginator, "any", 25, 250, 250) + "</div>";
-
-                sTimeline += sGallery + "<br>";
+                sTimeline += UICommon.GetAttachments(this, dt.Rows[i]["id"].ToString(), "", "Timeline Attachments", "style='background-color:white;padding-left:30px;'");
                 sTimeline += UICommon.GetComments(IsTestNet(this), dt.Rows[i]["id"].ToString(), this, true);
                 // Display the comments for the timeline entry
                 html += sTimeline;

@@ -188,9 +188,13 @@
     <Content Include="Content\sidenav_whiteblue.css" />
     <Content Include="Friends.aspx" />
     <Content Include="GreetingCard.aspx" />
+    <Content Include="Images\anrsociallogo.png" />
     <Content Include="Images\dec-high-tech.jpg" />
     <Content Include="FriendRequests.aspx" />
     <Content Include="Images\truthbook-clear.png" />
+    <Content Include="Images\VideoRecordIcon.png" />
+    <Content Include="LiveRecord.aspx" />
+    <Content Include="Scripts\VideoRecord7.js" />
     <Content Include="TicketAdd.aspx" />
     <Content Include="TicketList.aspx" />
     <Content Include="TicketView.aspx" />
@@ -253,7 +257,7 @@
     <Content Include="Content\themes\base\tooltip.css" />
     <Content Include="BibleViewer.aspx" />
     <Content Include="Chat.aspx" />
-    <Content Include="Scripts\core.js" />
+    <Content Include="Scripts\core0.js" />
     <Content Include="ProposalAdd.aspx" />
     <Content Include="Leaderboard.aspx" />
     <Content Include="PortfolioBuilder.aspx" />
@@ -534,6 +538,13 @@
     </Compile>
     <Compile Include="FriendRequests.aspx.designer.cs">
       <DependentUpon>FriendRequests.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="LiveRecord.aspx.cs">
+      <DependentUpon>LiveRecord.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="LiveRecord.aspx.designer.cs">
+      <DependentUpon>LiveRecord.aspx</DependentUpon>
     </Compile>
     <Compile Include="TicketAdd.aspx.cs">
       <DependentUpon>TicketAdd.aspx</DependentUpon>

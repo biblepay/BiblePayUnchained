@@ -6,6 +6,8 @@ using static Unchained.Common;
 using static BiblePayCommonNET.StringExtension;
 using System.Net.Mail;
 using System.Web;
+using System.Web.UI;
+using static Unchained.UICommon;
 
 namespace Unchained
 {
@@ -94,10 +96,14 @@ namespace Unchained
             m.Body = sNarr;
             m.IsBodyHtml = true;
             m.To.Add(new MailAddress(g.EmailAddress, g.FirstName));
-            DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(this), m);
+            EmailNarr e1 = GetEmailFooter(this);
+
+            DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(this), m, e1.DomainName);
             MsgModal(this, r.OverallResult ? "Sent" : "Not Sent", 
                 r.OverallResult ? "Your password reset request has been e-mailed to you!" : "Your notification failed.", 400, 200, true);
         }
+
+
         protected void btnLogin_Click(object sender, EventArgs e)
         {
             if (txtEmailAddress.Text=="")
@@ -132,21 +138,7 @@ namespace Unchained
                 }
                 else if (f2FAPassed && fPasswordPassed)
                 {
-                    string sDomainName = HttpContext.Current.Request.Url.Host;
-                    BiblePayDLL.Sidechain.SetBiblePayAddressAndSignature(IsTestNet(this), sDomainName, ref u);
-                    Session[GetChain0(IsTestNet(this)) + "user"] = u;
-                    this.Page.Session["stack"] = UICommon.Toast("Logging In", "You are now logged in.");
-                    Session["balance"] = null;
-                    // This should be configurable by key also
-                    string sDefaultDocument = Config("DefaultDocument");
-                    if (sDefaultDocument == "")
-                    {
-                        Response.Redirect("VideoList");
-                    }
-                    else
-                    {
-                        Response.Redirect(sDefaultDocument);
-                    }
+                    UICommon.LogIn(this, u);
                 }
                 else
                 {
@@ -159,6 +151,8 @@ namespace Unchained
         {
             Session[GetChain0(IsTestNet(this)) + "user"] = null;
             this.Page.Session["stack"] = UICommon.Toast("Logging Off", "You are now logged off.");
+            // Cookie
+            BMS.StoreCookie("pwhash", "");
             Response.Redirect("Login");
         }
     }

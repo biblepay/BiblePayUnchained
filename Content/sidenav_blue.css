@@ -1,6 +1,37 @@
+
+
+table.saved td {
+    background-color: #00004B;
+    color:white;
+}
+
+.saved a:visited {
+    color: antiquewhite !important;
+}
+
+.saved a:link
+{
+    color:white !important;
+}
+
+a.decoratedlink {
+    color:white !important;
+}
+
+a.decoratedlink visited {
+    color: antiquewhite !important;
+}
+
+
 .buttondark {
     background-color: #00004B;
     color: white;
+}
+
+.largebuttondark {
+    background-color: #00004B;
+    color: white;
+    font-size-adjust:170%;
 }
 
 
@@ -8,7 +39,6 @@
 .navbar {
     border-bottom: 1px solid white;
 }
-
 
 .content-wrapper,
 .right-side,
@@ -163,7 +193,6 @@ body.hold-transition .main-header .logo {
   }
 }
 
-
 .navbar-inverse {
     background-color: darkblue;
     border-color: white !important;
@@ -220,13 +249,12 @@ body.hold-transition .main-header .logo {
   border-color: transparent;
 }
 .user-panel {
-  position: relative;
-  width: 100%;
-  height: 85px;
-  overflow: hidden;
-  #xleft-menu: color2;
-  background: darkblue;
-  border-bottom: 1px solid white;
+    position: relative;
+    width: 100%;
+    height: 85px;
+    overflow: hidden;
+    background: darkblue;
+    border-bottom: 1px solid white;
 }
 .user-panel:before,
 .user-panel:after {

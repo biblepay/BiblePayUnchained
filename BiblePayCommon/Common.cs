@@ -45,8 +45,11 @@ namespace BiblePayCommon
         public static string DOMAIN_NAME = "";
         public static string EmptyAvatar()
         {
-            string s1 = "<img src='images/emptyavatar.png' width=50 height=50>";
-            return s1;
+            return "<img src='images/emptyavatar.png' width='50' height='50'>";
+        }
+        public static string EmptyAvatarNoDims(string sClass)
+        {
+            return "<img src='images/emptyavatar.png' class='" + sClass + "'>";
         }
         public static string NotNull(object o)
         {
@@ -159,7 +162,7 @@ namespace BiblePayCommon
             public string Slogan { get; set; }
             public string Testimony { get; set; }
 
-            public string ThemeName {get;set;}
+            public string ThemeName { get; set; }
             public string Domain { get; set; }
             public string RSAKey { get; set; }
             public string Shared2FA { get; set; }
@@ -185,7 +188,7 @@ namespace BiblePayCommon
             {
                 string sFullName = this.FirstName.ToNonNullString2() + " " + this.LastName.ToNonNullString2();
 
-                if (sFullName.Trim()=="")
+                if (sFullName.Trim() == "")
                 {
                     sFullName = UserName.ToNonNullString2();
                 }
@@ -206,7 +209,17 @@ namespace BiblePayCommon
                 {
                     return "<img src='" + AvatarURL + "' width=50 height=50>";
                 }
-
+            }
+            public string GetAvatarImageNoDims(string sClass)
+            {
+                if (AvatarURL == "" || AvatarURL == null || AvatarURL.Contains("emptyavatar"))
+                {
+                    return EmptyAvatarNoDims(sClass);
+                }
+                else
+                {
+                    return "<img src='" + AvatarURL + "' class='" + sClass + "'>";
+                }
             }
         }
 
@@ -319,6 +332,38 @@ namespace BiblePayCommon
         {
             DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
             return origin.AddSeconds(timestamp);
+        }
+
+        public static string UnixTimeStampToDisplayAge(double timestamp)
+        {
+            if (timestamp == 0)
+                return "N/A";
+            DateTime dtBirthday = BiblePayCommon.Common.ConvertFromUnixTimestamp(timestamp);
+            TimeSpan t = DateTime.Now.Subtract(dtBirthday);
+            int nAge = (t.Days / 365);
+            return nAge.ToString();
+        }
+
+        public static int DateToUnixTimeStamp(string sDate)
+        {
+            try
+            {
+                int d = (int)DateTimeToUnixTimestamp(Convert.ToDateTime(sDate));
+                return d;
+            }
+            catch(Exception ex)
+            {
+                return 0;
+            }
+        }
+
+        public static String UnixTimeStampToDateControl(double timestamp)
+        {
+            // From Unix UTC to yyyy-MM-dd for a datepicker control
+            if (timestamp == 0)
+                return "";
+            string dt = BiblePayCommon.Common.ConvertFromUnixTimestamp(timestamp).ToString("yyyy-MM-dd");
+            return dt;
         }
 
         public static int UnixTimeStamp()

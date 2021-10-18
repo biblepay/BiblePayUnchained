@@ -6,6 +6,7 @@ using static BiblePayCommon.Common;
 using static BiblePayCommonNET.CommonNET;
 using System.Net.Mail;
 using System.Web;
+using static Unchained.UICommon;
 
 namespace Unchained
 {
@@ -16,7 +17,6 @@ namespace Unchained
         {
             this.Title = _CollectionName + " - Add";
         }
-
 
         protected override void Event(BBPEvent e)
         {
@@ -32,19 +32,13 @@ namespace Unchained
                 }
                 string sBody = Request.Form["txtComment"].ToString();
 
-                if (sBody.Length < 1)
-                {
-                    BiblePayCommonNET.UICommonNET.MsgModal(this.Page, "Error", "Sorry, the content of the Body or the Title must be longer.", 400, 200, true);
-                    return;
-                }
                 if (id == "" || id == null)
                 {
                     UICommon.MsgBox("Error", "The id is invalid.", this);
                     return;
-
                 }
                 string sDisposition = Request.Form["dddispositions"] ?? "";
-                string sAssignee = Request.Form["ddasignees"] ?? "";
+                string sAssignee = Request.Form["ddAssignees"] ?? "";
                 if (sDisposition == "")
                 {
                     BiblePayCommonNET.UICommonNET.MsgModal(this, "Error", "The ticket must have a disposition.", 400, 200, true);
@@ -83,23 +77,28 @@ namespace Unchained
                     string sLastNarr = gUser(this).FirstName + " said:<br>" + th.Body + "<br><br>";
                     string sDomainName = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
                     string sURL = sDomainName + "/TicketView?id=" + id;
+                    EmailNarr e1 = GetEmailFooter(this);
 
                     string sNarr = "Dear " + uAssignee.FirstName + ",<br><br>Ticket number " + T.TicketNumber.ToString() + " has been assigned to you for " + T.Disposition + ".  "
                         + "<br><br>To view the ticket, click <a href='" + sURL + "'>here. </a><br><br>" + sLastNarr 
-                        +"Thank you.<br>Your Crypto Team<br>";
+                        +"Thank you.<br>The " + e1.DomainName + " Team<br>";
                     m.Subject = "[Transactional Message] Ticket #" + T.TicketNumber + " - " + T.Title + " has been assigned to you for " + T.Disposition;
                     m.Body = sNarr;
                     m.IsBodyHtml = true;
                     m.To.Add(new MailAddress(uAssignee.EmailAddress, uAssignee.FullUserName()));
-                    DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(this), m);
+
+                    DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(this), m, e1.DomainName);
                 }
                 Response.Redirect("TicketList");
             }
+            else if (e.EventName == "AddAttachment_Click")
+            {
+                string sURL = "UnchainedUpload?action=setticketattachment&parentid=" + e.EventValue;
+                Response.Redirect(sURL);
+            }
+        }
 
-    }
-
-
-    public string GetTicket()
+        public string GetTicket()
         {
             // Displays the prayer that the user clicked on from the web list.
             string id = Request.QueryString["id"] ?? "";
@@ -116,25 +115,36 @@ namespace Unchained
                 return "";
             }
             string sAssignedTo = dt.Rows[0]["AssignedTo"].ToString();
-            string sDisposition = dt.Rows[0]["Disposition"].ToString(); 
-
-            string div = "<table class='comments'>"
-                + "<tr><th class='objheader' colspan=3><h3>" + _ObjectName + " - View</h3><th class='objheader' colspan=3><div class='prayer'>"
-                + UICommon.GetStandardAnchor(id, "DeleteObject", id, "<i class='fa fa-trash'></i>","Delete this " + _EntityName, _EntityName ) 
-                + "</div></th></tr>"
-                + "<tr><td width=10%>Added By:<td>" + UICommon.GetUserAvatarAndName(this, dt.GetColValue("UserID"))
-                
-                + "<tr><td>Added:<td>" + dt.GetColDateTime(0, "time").ToString() + "</td></tr>"
-                + "<tr><td>Title:<td>" + dt.Rows[0]["title"].ToString() + "</td></tr>"
-                + "<tr><td>Disposition:<td>" + sDisposition + "</td></tr>"
-                + "<tr><td>Assigned To:<td>" + UICommon.GetUserAvatarAndName(this, sAssignedTo) + "</td></tr>"
-                + "<tr><td colspan=6><textarea class='pc90 comments' rows=10 columns=10 readonly=true>" + dt.GetColValue("Body") + "</textarea></td></tr>"
-                +"</table>";
-
+            string sDisposition = dt.Rows[0]["Disposition"].ToString();
             BiblePayCommon.BBPDataTable th = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "TicketHistory");
             th = th.FilterBBPDataTable("parentid='" + id + "'");
             th = th.OrderBy0("time desc");
 
+            string sLastInteraction = "";
+            if (th.Rows.Count > 0)
+            {
+
+                sLastInteraction = th.Rows[0]["Body"].ToString();
+            }
+            else
+            {
+                sLastInteraction = dt.Rows[0]["Body"].ToString();
+            }
+
+            string div = "<table class='comments'>"
+                + "<tr><th class='objheader' colspan=3><h3>" + _ObjectName + " #" + dt.GetColValue(0,"TicketNumber") 
+                + " - View</h3><th class='objheader' colspan=3><div class='prayer'>"
+                + UICommon.GetStandardAnchor(id, "DeleteObject", id, "<i class='fa fa-trash'></i>","Delete this " + _EntityName, _EntityName ) 
+                + "</div></th></tr>"
+                + "<tr><td width=10%>Added By:<td>" + UICommon.GetUserAvatarAndName(this, dt.GetColValue("UserID"))
+                + "<tr><td>Added:<td>" + dt.GetColDateTime(0, "time").ToString() + "</td></tr>"
+                + "<tr><td>Title:<td>" + dt.Rows[0]["title"].ToString() + "</td></tr>"
+                + "<tr><td>Disposition:<td>" + sDisposition + "</td></tr>"
+                + "<tr><td>Assigned To:<td>" + UICommon.GetUserAvatarAndName(this, sAssignedTo) + "</td></tr>"
+                + "<tr><td>Last Interaction:<td colspan=6><textarea class='pc90 comments' rows=10 columns=10 readonly=true>" + sLastInteraction + "</textarea></td></tr>"
+                + "</table>";
+
+            // Ticket History
             string sHistory = "<hr><table class='comments'>";
 
 
@@ -143,14 +153,23 @@ namespace Unchained
             bool fPerms = (sAssignedTo == gUser(this).id || gUser(this).Administrator == 1);
             if (fPerms)
             {
-                string sReplyModule = "<tr><td width=10%>Your Comments:</td><td width=90% colspan=7><textarea id='txtComment' class='pc90 comments' name='txtComment' rows=10 cols=10></textarea><br><br></td></tr>";
-                sReplyModule += "<tr><td>Assign To:<td>" + UICommon.GetDropDownUser(this, "ddasignees", sAssignedTo, dt.GetColValue("UserID"), true) + "</td></tr>";
-                sReplyModule += "<tr><td>Disposition:<td>" + UICommon.GetDispositions("disp1", sDisposition) + "</td></tr>";
-                sReplyModule += "<tr><td>" + BiblePayCommonNET.UICommonNET.GetButtonTypeSubmit("btnSaveTicket", "SaveTicketHistory_Click", "Save Ticket Comments") + "</td></tr>";
+                string sReplyModule = "<form id='myform10'><tr><td width=10%>Your Comments:</td><td width=90% colspan=7><textarea id='txtComment' class='pc90 comments' name='txtComment' rows=10 cols=10></textarea><br><br></td></tr>";
+                sReplyModule += "<tr><td>Assign To:<td>" + UICommon.GetDropDownUser(this, "ddAssignees", sAssignedTo, dt.GetColValue("UserID"), true) + "</td></tr>";
+                sReplyModule += "<tr><td>Disposition:<td>" + UICommon.GetDispositions("ddDispositions", sDisposition) + "</td></tr>";
+                string js = "var o1=document.getElementById(\"ddDispositions\");o1.style.visibility=\"hidden\";";
+                string js2 = "var o2=document.getElementById(\"ddAssignees\");o2.style.visibility=\"hidden\";";
+
+                //js = "";
+                sReplyModule += "<tr><td>" + BiblePayCommonNET.UICommonNET.GetButtonTypeSubmit("btnSaveTicket",
+                    "SaveTicketHistory_Click", "Save Ticket Comments", js + js2,"") + "</td></tr></form>";
                 sHistory += sReplyModule;
             }
+
+            sHistory += "<tr><td colspan=10><h4><hr>Ticket History</td></tr>";
             // End of Reply Module
-            
+            BiblePayPaginator.Paginator _paginator = new BiblePayPaginator.Paginator();
+            _paginator.Page = this;
+
             for (int i = 0; i < th.Rows.Count; i++)
             {
                 string sAssignedFromControl = "<td><td>";
@@ -159,21 +178,42 @@ namespace Unchained
                     string sAssignedFrom = th.GetColValue(i + 1, "AssignedTo");
                     sAssignedFromControl = "<td width=10%>Worked By:</td><td>" + UICommon.GetUserAvatarAndName(this, sAssignedFrom) + "</td>";
                 }
-                else
-                {
-                    sAssignedFromControl = "<td width=10%>Initiated By:</td><td>" + UICommon.GetUserAvatarAndName(this, dt.GetColValue("UserID")) + "</td>";
-                }
                 string sRow = "<tr><td colspan=10><hr></tr><tr>" + sAssignedFromControl;
                 string sBody = th.Rows[i]["Body"].ToString();
+                // Add Attachment button
+                string sAddTimelineAttachmentButton = "";
+                if (th.GetColValue(i, "UserID") == gUser(this).id)
+                {
+                    sAddTimelineAttachmentButton = UICommon.GetStandardButton(th.Rows[i]["id"].ToString(),
+                        "<i class='fa fa-file'></i>", "AddAttachment", "Add media to this post, such as a URL, a video, an mp3, a pdf, an image...etc");
+                }
 
                 sRow += "<td>" + th.Rows[i]["Disposition"].ToString() + "</td>";
-                sRow += "<td>" + th.GetColDateTime(i, "time").ToString() 
-                    + "<tr><td colspan=6><textarea class='pc90 comments' rows=10 columns=10 readonly=true>" + sBody + "</textarea></td></tr>";
+                if (sBody.Length > 0)
+                {
+                    sRow += "<td>" + th.GetColDateTime(i, "time").ToString()
+                        + "<tr><td colspan=6><textarea class='pc90 comments' rows=10 columns=10 readonly=true>" + sBody + "</textarea>"
+                        + sAddTimelineAttachmentButton + "</td></tr>";
+                }
+
                 sHistory += sRow;
+
+                // Display the attachments
+                string sAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetAttachments(this, th.Rows[i]["id"].ToString(), "", "Ticket Attachments", "") 
+                    + "</td></tr></table></td></tr>";
+                sHistory += sAttachments;
             }
-            
+
             // Ticket History
 
+            // Original Post
+
+            string sBody1 = dt.GetColValue(0, "Body").ToString();
+            string sNewRow = "<td width=10%>Initiated By:</td><td>" + UICommon.GetUserAvatarAndName(this, dt.GetColValue("UserID")) + "</td>";
+            sNewRow += "<tr><td colspan=6><textarea class='pc90 comments' rows=10 columns=10 readonly=true>" + sBody1 + "</textarea>"
+                + "</td></tr>";
+            sHistory += sNewRow;
+            // End of OP Post
 
             sHistory += "</table>";
             div += sHistory;

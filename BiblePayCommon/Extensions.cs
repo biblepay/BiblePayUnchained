@@ -84,7 +84,47 @@ namespace BiblePayCommon
                 return dt1;
             }
         }
- 
+
+        public static DataTable SortDataTable(this DataTable table, string sql)
+        {
+            try
+            {
+                table.DefaultView.Sort = sql;
+                table.DefaultView.ApplyDefaultSort = true;
+                return table;
+            }
+            catch(Exception ex)
+            {
+                return table;
+            }
+
+        }
+
+        public static DataTable FilterAndSort(this DataTable table, string sFilter, string sSort)
+        {
+            try
+            {
+                DataRow[] dr1 = table.Select(sFilter, sSort);
+                DataTable dtNew = new DataTable();
+                if (dr1.Length > 0)
+                {
+                    dtNew = table.Clone();
+
+                    foreach (DataRow temp in dr1)
+                    {
+                        dtNew.ImportRow(temp);
+                    }
+                }
+                return dtNew;
+            }
+            catch (Exception)
+            {
+                DataTable dt1 = new DataTable();
+                return dt1;
+            }
+        }
+
+
         public static string GetColValue(this DataTable table, string colName)
         {
             if (table.Rows.Count < 1)
@@ -112,6 +152,17 @@ namespace BiblePayCommon
             }
             return table.Rows[iRow][colName].ToString();
         }
+
+        public static double GetColDouble(this DataRowView dr, string colName)
+        {
+            if (dr == null)
+                return 0;
+
+
+            double nOut = BiblePayCommon.Common.GetDouble(dr[colName].ToString());
+            return nOut;
+        }
+
 
         public static double GetColDouble(this DataTable table, int iRow, string colName)
         {

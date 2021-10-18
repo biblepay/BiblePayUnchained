@@ -68,7 +68,7 @@ namespace Unchained
                 }
                 User uTip  = UICommon.GetUserRecord(IsTestNet(this), e.Extra.TipTo.ToString());
                 string sChannelName = uTip.FullUserName();
-                if (uTip.BiblePayAddress==null)
+                if (uTip.BiblePayAddress.ToNonNullString() == "")
                 {
                     MsgModal(this, "Error", "Sorry, this user does not have a biblepay address.", 400, 240, true);
                     return;
@@ -229,7 +229,7 @@ namespace Unchained
             
             
             string sTheirChannel = "VideoList?channelid=" + dt.GetColValue("userid");
-            string sShareAnchor = UICommon.GetStandardAnchor("share"+sID, "ShareVideo", sID, "<i class='fa fa-share'></i>", "Share this Video", "video1");
+            string sShareAnchor = UICommon.GetStandardAnchor("share"+sID, "ShareVideo", sID, "Share&nbsp;<i class='fa fa-share'></i>", "Share this Video", "video1");
 
             video1.Footer = "Uploaded by <a href='" + sTheirChannel + "'>"
                 + UICommon.GetUserAvatarAndName(this, dt.GetColValue("userid"), true)

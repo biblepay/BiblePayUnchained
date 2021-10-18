@@ -70,6 +70,7 @@ namespace Unchained
         {
             Log("Starting Executor v1.3...");
             System.Threading.Thread.Sleep(20000);
+            bool fAttached = System.Diagnostics.Debugger.IsAttached;
 
             while (true)
             {
@@ -86,6 +87,10 @@ namespace Unchained
                         DailyUTXOExport(true);
                         DailyUTXOExport(false);
 
+                        Sidechain.UpdateWatchCounts(true);
+                        Sidechain.UpdateWatchCounts(false);
+                        
+
                         double nPrice1 = BiblePayCommon.Common.GetDouble(BiblePayCommon.HalfordDatabase.GetKVWithExpiration("price1"));
                         if (nPrice1 == 0)
                         {
@@ -94,13 +99,15 @@ namespace Unchained
                             BiblePayUtilities.GetCryptoPrices(false);
                         }
                     }
+
+                    System.Threading.Thread.Sleep(fAttached ? 60000 * 1 : 60000 * 7);
                 }
                 catch(Exception ex)
                 {
                     Log("Error in Executor::" + ex.Message);
                 }
                 
-                System.Threading.Thread.Sleep(60000 * 1);
+
 
             }
         }

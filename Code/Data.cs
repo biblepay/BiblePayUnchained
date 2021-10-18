@@ -33,13 +33,8 @@ namespace Unchained
        
         public static DACResult InsertIntoTable(Page p, bool fTestNet, BiblePayCommon.IBBPObject o, User u=new User())
         {
-            string sEntityName = BiblePayCommon.EntityCommon.GetEntityName(fTestNet, o);
-
+            // string sEntityName = BiblePayCommon.EntityCommon.GetEntityName(fTestNet, o);
             DACResult r = BiblePayDLL.Sidechain.InsertIntoDSQL(fTestNet, o, u);
-            if (r.fError())
-            {
-                BiblePayCommonNET.UICommonNET.MsgModal(p, "Error while saving record", r.Error + "<br>You may need to log in first.", 700, 350, true);
-            }
             return r;
         }
 

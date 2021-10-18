@@ -10,7 +10,7 @@
         <br />
 
 
-        <label class="offset" for="txtBirthDate">My Birth Date: </label><asp:TextBox width="200px" id="txtBirthDate" runat="server"></asp:TextBox> 
+        <label class="offset" for="txtBirthDate">My Birth Date: </label><asp:TextBox width="200px" type="date" id="txtBirthDate" runat="server"></asp:TextBox> 
 
         <br />
         <label class="offsetv" for="txtPublicText">About Me (Public): </label><asp:TextBox width="700px" TextMode="MultiLine"  Rows="5" 

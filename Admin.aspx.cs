@@ -85,7 +85,6 @@ namespace Unchained
             BiblePayCommonNET.UICommonNET.ToastLater(this, "Sucess", "Successfully added.");
         }
 
-
         protected void btnSaveUserRole_Click(object sender, EventArgs e)
         {
             if (gUser(this).Administrator != 1)
@@ -152,7 +151,6 @@ namespace Unchained
                 // This is an Update; so lets pull up the old record first
                 P = (BiblePayCommon.Entity.Permission)o;
             }
-
 
             P.RoleID = sPermRole;
             P.EntityName = txtEntityName.Text;

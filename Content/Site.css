@@ -1,16 +1,38 @@
-﻿.galleryvisibile {
-    visibility:visible;
+﻿.DropZone1 {
+    width: 300px;
+    height: 90px;
+    xbackground-color: #357A2B;
+    border-color: #CCCCCC;
+    color: #767676;
+    float: left;
+    text-align: center;
+    font-size: 16px;
+    color: white;
+    background: repeating-linear-gradient( 45deg, #606dbc, #606dbc 10px, #465298 10px, #465298 20px );
+
+}
+.attachment-container .RadUpload .ruUploadProgress {
+    width: 210px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: top;
+}
+
+
+.galleryvisibile {
+    display:block;
 }
 
 .galleryinvisible {
-    visibility:collapse;
+    xvisibility:collapse;
+    display:none;
 }
 
 
 /* Overridden mobile menu */
 .buttondark {
-    xbackground-color: #2f2f2f;
-    xbackground-color: #0096FF;
     border: none;
     xcolor: white;
     padding: 5px 5px;
@@ -30,7 +52,7 @@
 }
 
 #mySidenav::-webkit-scrollbar {
-    background: lightblue;
+    xbackground: lightblue;
     width: 1px;
 }
 
@@ -60,7 +82,7 @@
 
     /* bbp customized media player */
     div.videoinner {
-        background-color: black;
+        background-color: antiquewhite;
     }
 
     /* form view */
@@ -73,11 +95,27 @@
     }
 
     /* chat */
-    div.chat {
+    .screenOuter{
+        position:relative;
+        top:400px;
+    }
+
+    .chatHeader {
+        border: 1px solid #ccc;
+        background-color: #f1f1f1;
+    }
+
+    .chat {
         overflow-y: scroll;
         border: 1px solid gold;
-        height: 500px;
-        min-height: 500px;
+        background-color: lightgrey;
+        color:darkblue;
+        height: 450px;
+        width: 25%;
+        min-height: 450px;
+        position: absolute;
+        top: -10px;
+        right: 0;
     }
 
     /* news */
@@ -102,15 +140,19 @@
     }
 
     /* Video display of a single video (media.aspx) */
-    td.videosingle {
-        width: 75%;
-        vertical-align: top;
-    }
+td.videosingle {
+    width: 75%;
+    vertical-align: top;
+}
 
     div.videosingle {
         height: 700px;
         overflow-y: scroll;
     }
+
+.video-container {
+    background-color: antiquewhite;
+}
 
     /* comments in Common */
     table.comments {
@@ -125,6 +167,18 @@
         border: 1px solid #e0e0e0;
         border-radius:25px;
     }
+
+    div.comments {
+     border: 1px solid #e0e0e0;
+     border-radius: 25px;
+     padding-left:15px;
+    }
+
+div.border {
+    border: 1px solid #e0e0e0;
+    border-radius: 1px;
+    padding-left: 15px;
+}
     
     textarea.comments {
        -webkit-border-radius: 15px;
@@ -137,6 +191,12 @@
         padding-right: 15px;
         padding-top: 2px;
     }
+
+div.gallerycontainer {
+    padding-right: 15px;
+    padding-top: 2px;
+    xfloat:left;
+}
 
     div.gallery {
         min-height: 200px;
@@ -160,21 +220,26 @@
         vertical-align: top;
     }
 
+    img.gallerycontainer {
+        float:left;
+        width:100%;
+    }
+
     img.gallery {
-        xmax-width: 100%;
-        width: 100%;
-        height: 220px;
+        width: 350px;
+        max-width:350px;
+        height: 200px;
+        max-height:200px;
         object-fit: scale-down;
-        xheight: 220px;
         xheight: auto;
         xmax-height: 220px;
-        background-color: black;
+        background-color: antiquewhite;
+        overflow:hidden;
     }
 
     img.gallerypdf {
-        max-width: 250px;
+        max-width: 350px;
         max-height: 200px;
-        width: 100%;
         height: 220px;
         background-color: transparent;
     }
@@ -185,8 +250,9 @@
     }
 
     div.person {
-        max-width: 85%;
-        width: 70%;
+        max-width: 100%;
+        width: 100%;
+        
     }
 
     span.contextsensitive {
@@ -856,7 +922,7 @@
 
     /* the lime table */
     table.saved td {
-        background-color: lime;
+        xbackground-color: lime;
         margin: 12px 12px 12px 12px;
         padding: 12px 12px 12px 12px;
     }
@@ -876,6 +942,7 @@
     }
 
     table.saved2 {
+        
         border-collapse: separate;
         border-spacing: 10px;
         *border-collapse: expression('separate', cellSpacing = '10px');

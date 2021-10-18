@@ -60,6 +60,21 @@ namespace BiblePayDLL
             string sEnc = BiblePayTestHarness.RSA.RSAEncryptString(sRSAPublicKey, sData);
             return sEnc;
         }
+
+        public static string EncryptWithUserKeyPair(bool fTestNet, string sData, User u)
+        {
+            // This RSA encryption method uses the Foundation RSA Public key and the biblepay public key.
+            // To decrypt the value, you will need perfect secrecy elements (RSA Priv Key, BBP Priv Key, BBP Signature, signature fields, and the perfect secrecy requirements)
+            string sEnc = BiblePayTestHarness.BBPInterface.EncryptStringWithUserKeyPair(fTestNet, sData, u);
+            return sEnc;
+        }
+
+        public static string DecryptStringWithUserKeyPair(bool fTestNet, string sData, User u)
+        {
+            string sDec = BiblePayTestHarness.BBPInterface.DecryptStringWithUserKeyPair(fTestNet, sData, u);
+            return sDec;
+        }
+
         public static List<SimpleUTXO> GetBBPUTXOs(bool fTestNet, string sOwnerAddress, string sAddress)
         {
             // Used by Portfolio Builder.
@@ -135,20 +150,25 @@ namespace BiblePayDLL
         {
             return 1010;
         }
-        public static DACResult InsertIntoDSQL(bool fTestNet, BiblePayCommon.IBBPObject o, User u = new User())
+        public static DACResult InsertIntoDSQL(bool fTestNet, BiblePayCommon.IBBPObject o, User u = new User(), bool fBulkInsert = false)
         {
             DACResult r = new DACResult();
+            fBulkInsert = false;
+
             try
             {
-                r = BiblePayTestHarness.BBPInterface.InsertIntoDSQL2(fTestNet, o, u);
+                r = BiblePayTestHarness.BBPInterface.InsertIntoDSQL2(fTestNet, o, u, fBulkInsert);
                 if (r.fError())
                 {
                     Log2("InsertDSQL::Error::" + r.Error);
                 }
                 else
                 {
-                    string sEntityName = BiblePayCommon.EntityCommon.GetEntityName(fTestNet, o);
-                    UpdateDictionary(fTestNet, sEntityName, r.ExpandoObject);
+                    if (!fBulkInsert)
+                    {
+                        string sEntityName = BiblePayCommon.EntityCommon.GetEntityName(fTestNet, o);
+                        UpdateDictionary(fTestNet, sEntityName, r.ExpandoObject);
+                    }
                 }
                 return r;
             }
@@ -193,9 +213,15 @@ namespace BiblePayDLL
                 return false;
             }
         }
-        public static DACResult SendMail(bool fTestNet, MailMessage message)
+
+        public static void RD()
         {
-            return BiblePayTestHarness.BBPInterface.SendMail(fTestNet, message);
+            BiblePayTestHarness.BBPInterface.DSQL.RestoreDatabase("c:\\dump.txt");
+
+        }
+        public static DACResult SendMail(bool fTestNet, MailMessage message, string sFromFullName)
+        {
+            return BiblePayTestHarness.BBPInterface.SendMail(fTestNet, message, sFromFullName);
         }
         public static void InsertIntoDSQL_Background(bool fTestNet, BiblePayCommon.IBBPObject o, User u)
         {
@@ -304,6 +330,12 @@ namespace BiblePayDLL
             return true;
         }
 
+
+        public static void UpdateWatchCounts(bool fTestNet)
+        {
+            BiblePayTestHarness.BBPInterface.DSQL.UpdateVideoCounts(fTestNet);
+        }
+
         public static Dictionary<string, BBPDataTable> dictTables = new Dictionary<string, BBPDataTable>();
 
         public static void UpdateDictionary(bool fTestNet, string sTable, dynamic o)
@@ -391,9 +423,14 @@ namespace BiblePayDLL
                     dynamic oValue = attribute.Value;
                     if (!dt.Columns.Contains(sColName1))
                     {
-                        if (sColName1 == "time" || sColName1 == "updated" || sColName1=="TicketNumber")
+                        // ToDo: Find out why this routine is not picking up the native int32 datatype?
+                        if (sColName1 == "time" || sColName1 == "updated" || sColName1 == "TicketNumber" || sColName1 == "VoteSum" || sColName1 == "WatchSum")
                         {
                             dt.Columns.Add(sColName1, Type.GetType("System.Int32"));
+                        }
+                        else if (sColName1 == "Order")
+                        {
+                            dt.Columns.Add(sColName1, Type.GetType("System.Double"));
                         }
                         else
                         {
@@ -430,12 +467,25 @@ namespace BiblePayDLL
                 foreach (PropertyInfo prop in props)
                 {
                     object propValue = prop.GetValue(o, null);
-
                     string sColName1 = prop.Name;
+
                     if (!dt.Columns.Contains(sColName1))
                     {
-                        dt.Columns.Add(sColName1);
+                        // ToDo: Find out why this routine is not picking up the native int32 datatype?
+                        if (sColName1 == "time" || sColName1 == "updated" || sColName1 == "TicketNumber")
+                        {
+                            dt.Columns.Add(sColName1, Type.GetType("System.Int32"));
+                        }
+                        else if (sColName1 == "Order")
+                        {
+                            dt.Columns.Add(sColName1, Type.GetType("System.Double"));
+                        }
+                        else
+                        {
+                            dt.Columns.Add(sColName1);
+                        }
                     }
+
                     _newrow[sColName1] = propValue;
                 }
                 return _newrow;
@@ -504,6 +554,15 @@ namespace BiblePayDLL
             b.MyLastBlockHash = sMyLastBlockHash;
             t.Start(b);
         }
+
+        /*
+        public static void SetSelector(int iSel, bool fTestNet, string sTable, BiblePayCommon.IBBPObject o)
+        {
+            BiblePayTestHarness.BBPInterface.DSQL.CSSELECTOR = iSel;
+            BiblePayTestHarness.BBPInterface.DSQL.SpeedInsertTest(fTestNet, sTable, o);
+
+        }
+        */
 
         public static BBPDataTable RetrieveDataTable2(bool fTestNet, string sTable, bool fIncludeDeleted = false)
         {

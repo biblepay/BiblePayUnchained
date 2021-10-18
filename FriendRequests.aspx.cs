@@ -33,7 +33,7 @@ namespace Unchained
                 // delete the friends request; add the friend
 
                 bool fExists = DataExists(IsTestNet(this), "Friend", "userid='" + f.UserID + "' and requesterid='" + f.RequesterID + "'");
-                if (fExists)
+                if (fExists && false)
                 {
                     UICommon.MsgBox("Error", "Sorry, you are already friends with this person. ", this);
                     return;
@@ -70,7 +70,7 @@ namespace Unchained
             for (int i = 0; i < dtFriends.Rows.Count; i++)
             {
                 User requestor = gUserById(this, dtFriends.Rows[i]["RequesterID"].ToString());
-                string sApproveButton = UICommon.GetStandardButton(dtFriends.Rows[i]["id"].ToString(), "<i class='fa fa-heart'></i>", "ApproveFriendRequest", "Approve Friend Request");
+                string sApproveButton = UICommon.GetStandardButton(dtFriends.Rows[i]["id"].ToString(), "<i style='color:black;' class='fa fa-heart'></i>", "ApproveFriendRequest", "Approve Friend Request");
                 
                 string sVURL = "Person?id=" + requestor.id + "'";
                 string sUserAnchor = "<a href='" + sVURL + "'>" + requestor.FullUserName() + "</a>";

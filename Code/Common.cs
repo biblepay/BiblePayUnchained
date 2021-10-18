@@ -14,6 +14,8 @@ using static BiblePayCommonNET.UICommonNET;
 using static BiblePayCommonNET.StringExtension;
 using static BiblePayCommonNET.DataTableExtensions;
 using System.Dynamic;
+using System.Net.Mail;
+using static Unchained.UICommon;
 
 namespace Unchained
 {
@@ -54,6 +56,7 @@ namespace Unchained
         public static string ReplaceURLs(string s)
         {
             s = s.Replace("\r\n", " <br><br>");
+            s = s.Replace("\n", " <br>");
 
             string[] vWords = s.Split(" ");
             string sOut = "";
@@ -213,6 +216,12 @@ namespace Unchained
             bool fProd = nChain != 2;
             return !fProd;
         }
+        public static bool IsTestNetFromSession(System.Web.SessionState.HttpSessionState s)
+        {
+            double nChain = GetDouble(s["mainnet_mode"]);
+            bool fProd = nChain != 2;
+            return !fProd;
+        }
 
         public static string GetChain0(bool fTestNet)
         {
@@ -232,18 +241,47 @@ namespace Unchained
             return (User)o;
         }
 
+        public static User gUserSession(System.Web.SessionState.HttpSessionState s)
+        {
+            User u = new User();
+
+            if (s[GetChain0(IsTestNetFromSession(s)) + "user"] != null)
+            {
+                u = (User)s[GetChain0(IsTestNetFromSession(s)) + "user"];
+                u.LoggedIn = u.FirstName.ToNonNullString().Length > 1;
+                if (!u.LoggedIn)
+                {
+                    u.UserName = "Guest";
+                    u.FirstName = "Guest";
+                }
+                else
+                {
+                    u.UserName = u.FirstName;
+                }
+                return u;
+            }
+            return u;
+
+        }
 
         public static User gUser(Page p)
         {
+
+            double nTriedFromCookie = GetDouble(p.Session["cookielogin"]);
+            if (nTriedFromCookie == 0)
+            {
+                p.Session["cookielogin"] = 1;
+                UICommon.LoginWithCookie(p);
+            }
+
+
             User u = new User();
             if (p.Session["mainnet_mode"] == null)
             {
                 p.Session["mainnet_mode"] = 1;
             }
-
             if (p.Session[GetChain0(IsTestNet(p)) + "user"] != null)
             {
-
                 u = (User)p.Session[GetChain0(IsTestNet(p)) + "user"];
                 u.LoggedIn = u.FirstName.ToNonNullString().Length > 1;
                 if (!u.LoggedIn)
@@ -255,7 +293,6 @@ namespace Unchained
                 {
                     u.UserName = u.FirstName;
                 }
-
                 return u;
             }
             u.FirstName = "Guest";
@@ -368,23 +405,54 @@ namespace Unchained
             return u10;
         }
 
-        // Save User Record
-        public static bool SaveUserRecord(bool fTestNet, User u, Page p)
+        public static void NotifyOfNewUser(User u, Page p)
         {
+            try
+            {
+                string sNotify = Config("notifyofnewuser");
+                if (sNotify != "")
+                {
+                    MailMessage m = new MailMessage();
+                    EmailNarr e = GetEmailFooter(p);
+
+                    string sNarr = "Dear " + sNotify + ",<br><br>User " + u.FirstName + " " + u.LastName + " has registered with e-mail address " + u.EmailAddress + ". "
+                        + "<br><br>Thank you.<br>" +"The "+ e.DomainName + " Team<br>";
+
+                    m.Subject = "[Transactional Message] Notification of Save User Record";
+                    m.Body = sNarr;
+                    m.IsBodyHtml = true;
+                    m.To.Add(new MailAddress(sNotify));
+                    m.Bcc.Add(new MailAddress("rob@biblepay.org"));
+                   
+                    DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(p), m, e.DomainName);
+                }
+            }catch(Exception ex)
+            {
+
+            }
+
+        }
+        // Save User Record
+        public static DACResult SaveUserRecord(bool fTestNet, User u, Page p)
+        {
+            DACResult r = new DACResult();
+
             BiblePayCommon.Entity.user1 o = ConvertUserToUserEntity(u);
             
             if (!IsEmailValid(o.EmailAddress))
             {
-                MsgModal(p, "Error", "Sorry, the e-mail address is invalid.", 400, 200, true);
-                return false;
+                r.Error = "Sorry, the E-mail address is invalid.";
+                MsgModal(p, "Error", r.Error, 400, 200, true);
+                return r;
             }
             if (o.UserGuid == null)
             {
 
                 if (gUser(p).LoggedIn)
                 {
-                    MsgModal(p, "Error", "Sorry, you are already logged in as another user.", 400, 200, true);
-                    return false;
+                    r.Error = "Sorry, you are already logged in as another user.";
+                    MsgModal(p, "Error", r.Error, 400, 200, true);
+                    return r;
                 }
                 // create a new user
                 o.UserGuid = Guid.NewGuid().ToString();
@@ -399,14 +467,16 @@ namespace Unchained
                 User uEmail = gUser(p, o.EmailAddress);
                 if (uEmail.EmailAddress != null)
                 {
-                    MsgModal(p, "Error", "Sorry, this user already exists.", 400, 200, true);
-                    return false;
+                    r.Error = "Sorry, this user already exists.";
+                    MsgModal(p, "Error",  r.Error, 400, 200, true);
+                    return r;
                 }
 
                 if (u.FirstName.Length < 3 || u.LastName.Length < 3)
                 {
-                    MsgModal(p, "Error", "Your name must be longer than 3 chars.", 400, 200, true);
-                    return false;
+                    r.Error = "Your name must be longer than 3 characters.";
+                    MsgModal(p, "Error", r.Error, 400, 200, true);
+                    return r;
                 }
             }
 
@@ -418,37 +488,42 @@ namespace Unchained
                 if (uEmailUser.id == null)
                 {
                     o.EmailVerified = 0;
-
                 }
                 else
                 {
-                    MsgModal(p, "Error", "Sorry, this new e-mail address is already taken.", 500, 250, true);
-                    return false;
+                    r.Error = "Sorry, this new e- mail address is already taken.";
+                    MsgModal(p, "Error", r.Error, 500, 250, true);
+                    return r;
                 }
             }
 
             if (u.PasswordHash.ToNonNullString().Length != 64)
             {
-                MsgModal(p, "Error", "Sorry, your password did not meet the minimum complexity guidelines [8 characters+,1 Uppercase Letter+,1 Number+].", 400, 200, true);
-                return false;
+                r.Error = "Sorry, your password did not meet the minimum complexity guidelines [8 characters+,1 Uppercase Letter+,1 Number+].";
+                MsgModal(p, "Error", r.Error, 400, 200, true);
+                return r;
             }
 
-            BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(p, fTestNet, o, u);
+            string sDomainName = HttpContext.Current.Request.Url.Host;
+            o.domain = sDomainName;
+            u.Domain = sDomainName;
+
+            r = DataOps.InsertIntoTable(p, fTestNet, o, u);
             if (r.fError())
             {
                 MsgModal(p, "Error", r.Error, 500, 250, true);
-                return false;
+                return r;
             }
             else
             {
                 // With the user ID
+                NotifyOfNewUser(u, p);
                 u = gUser(p, u.EmailAddress);
                 // This is where we save the users session
-                string sDomainName = HttpContext.Current.Request.Url.Host;
                 BiblePayDLL.Sidechain.SetBiblePayAddressAndSignature(IsTestNet(p), sDomainName, ref u);
                 p.Session[GetChain0(fTestNet) + "user"] = u;
             }
-            return true;
+            return r;
         }
         public static bool DataExists(bool fTestNet, string sTable, string sFilter)
         {
@@ -476,7 +551,7 @@ namespace Unchained
 
         public static bool HasOwnership(bool fTestNet, string sObjectID, string sTable, string sUserID)
         {
-            if (System.Diagnostics.Debugger.IsAttached)                return true;
+            if (System.Diagnostics.Debugger.IsAttached) return true;
 
             if (sUserID == null || sUserID == "")
                 return false;

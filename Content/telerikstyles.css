@@ -9,11 +9,11 @@
     background-image: url("./images/header.png");
     height: 130px;
     width: 454px;
-}
+} 
 
 .attachment-container {
     display: inline-block;
-    background: rgba(58, 174, 251, .6);
+    xbackground: rgba(58, 174, 251, .6);
     filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#993aaefb', endColorstr='#993aaefb');
     width: 410px;
     padding: 25px 22px 22px;

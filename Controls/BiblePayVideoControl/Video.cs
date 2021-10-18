@@ -152,7 +152,7 @@ namespace BiblePayVideo
                 + Width.ToString() + "px;height:" + Height.ToString() + "px;' name='player1' class='videoinner videosize muse-video-player' " + sAutoPlay + " data-resume='1' data-video='" 
                 + SVID + "' data-height='" + Height.ToString() + "' data-width='" + Width.ToString() + "'></div>";
 
-            if (URL.EndsWith("png") || URL.EndsWith("jpeg") || URL.EndsWith("jpg") || URL.EndsWith("bmp"))
+            if (URL.EndsWith("png") || URL.EndsWith("jpeg") || URL.EndsWith("jpg") || URL.EndsWith("PNG") || URL.EndsWith("JPEG") || URL.EndsWith("JPG") || URL.EndsWith("bmp"))
             {
                 sHTML = "<img width='" + (Width-100).ToString() + "px;' height='" + (Height-100).ToString() + "px;' src='" + URL.ToString() + "'/>";
             }

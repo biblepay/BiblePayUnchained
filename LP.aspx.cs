@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Web.Services;
 using static BiblePayCommon.Common;
 using static BiblePayCommonNET.StringExtension;
@@ -60,7 +61,7 @@ namespace Unchained
                 string s1 = Request.Headers["headeraction"].ToNonNullString();
                 string sID = Common.GetElement(s1, "|", 0);
                 string sAct1 = Common.GetElement(s1, "|", 1);
-
+                
                 if (!gUser(this).LoggedIn)
                 {
                     Response.Write("notloggedin||||");
@@ -92,6 +93,42 @@ namespace Unchained
                     UpdateFollowStatus(sID, false);
                     string sStatus = UICommon.GetFollowStatus(IsTestNet(this), sID, gUser(this).id);
                     Response.Write(sStatus + "|");
+                    Response.End();
+                }
+                else if (sID == "chat")
+                {
+                    if (gUser(this).LoggedIn == false)
+                    {
+                        Response.Write("||||");
+                        Response.End();
+                        return;
+                    }
+
+                    UICommon.ChatStructure myChat;
+
+                    bool fGot = UICommon.dictChats.TryGetValue(gUser(this).id, out myChat);
+
+                    string sDec = BiblePayCommon.Encryption.Base64Decode(sAct1);
+
+                    if (!fGot)
+                    {
+                        Response.Write("||||");
+                        Response.End();
+                    }
+                    
+                    if (sDec != "")
+                    {
+                        List<string> lChat = null;
+                        fGot = UICommon.dictChatHistory.TryGetValue(myChat.chatGuid, out lChat);
+                        if (!fGot)
+                        {
+                            UICommon.dictChatHistory[myChat.chatGuid] = new List<string>();
+                            lChat = UICommon.dictChatHistory[myChat.chatGuid];
+                        }
+                        lChat.Add(sDec);
+                    }
+                    String sInnerDiv = UICommon.GetChatInner(this);
+                    Response.Write(sInnerDiv + "|chatreply");
                     Response.End();
                 }
             }

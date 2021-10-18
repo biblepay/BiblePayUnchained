@@ -82,7 +82,23 @@ namespace BiblePayCommon
             string sNewData = sData + "<zcolumn>" + nExpiration.ToString();
             AppendData(sNewData, sKey);
         }
-        
+
+
+        public static double GetKVDWX(string sKey)
+        {
+            double n1 = GetDouble(BiblePayCommon.HalfordDatabase.GetKVWithExpiration(sKey));
+            return n1;
+        }
+
+        public static void SetKVDWX(string sKey, double nValue, double nExpirationSeconds)
+        {
+            BiblePayCommon.HalfordDatabase.SetKV(nValue.ToString(), sKey, (int)nExpirationSeconds);
+        }         
+
+
+
+
+
         public static string GetKVWithExpiration(string sKey)
         {
 

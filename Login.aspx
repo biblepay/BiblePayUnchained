@@ -11,6 +11,9 @@
 <br />
 
      <fieldset style="width:70%;">
+
+         <asp:Panel ID="p" runat="server" DefaultButton="btnLogin">
+
         <legend><asp:Label ID="lblFieldset" runat="server">Log In:</asp:Label><small><asp:Label ID="lblInfo" runat="server" Text=""></asp:Label></small></legend>
         <asp:Label ID="lblEmailAddress" Width="110px" runat="server" Text="">E-Mail Address:</asp:Label><asp:TextBox ID="txtEmailAddress" style="width:400px;" runat="server"></asp:TextBox>
         <br />
@@ -28,7 +31,7 @@
         <asp:Button ID="btnRegister" runat="server" Text="Register" OnClick="btnRegister_Click"/>    
         <asp:Button ID="btnLockedOut" runat="server" Text="I'm Locked Out" OnClick="btnLockedOut_Click"/>    
 
-
+        </asp:Panel>
      </fieldset>
      <script>
          const togglePassword = document.getElementById('togglePassword');

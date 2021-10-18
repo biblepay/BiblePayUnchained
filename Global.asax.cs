@@ -26,7 +26,7 @@ namespace Unchained
         {
 
             BiblePayCommon.Common.DOMAIN_NAME = System.Web.Hosting.HostingEnvironment.SiteName;
-            BiblePayCommon.Common.Log2("BiblePay Unchained - Starting Up - Site Name: " + BiblePayCommon.Common.DOMAIN_NAME);
+            BiblePayCommon.Common.Log2("BiblePay Unchained v1.3 - Starting Up - Site Name: " + BiblePayCommon.Common.DOMAIN_NAME);
 
             bool fOK = BiblePayDLL.Sidechain.CheckForUpgrade();
             if (!fOK)
@@ -80,7 +80,7 @@ namespace Unchained
             });
             ScriptManager.ScriptResourceMapping.AddDefinition("core", new ScriptResourceDefinition
             {
-                Path = "~/Scripts/core.js",
+                Path = "~/Scripts/core0.js",
                 LoadSuccessExpression = "window.core"
             });
             ScriptManager.ScriptResourceMapping.AddDefinition("muse", new ScriptResourceDefinition

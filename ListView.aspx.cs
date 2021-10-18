@@ -39,18 +39,23 @@ namespace Unchained
                 // Retail Only
             }
             string sObjectName = sTable; // Todo - get the human readable name from the classes static property.
-            // Table header
-            string html = "<table class=saved><tr class='objheader'><th class='objheader'>"
-                + "<h3>" + sObjectName + "</h3><th class='objheader' colspan=19><div class='objheader'>";
-            html += UICommon.GetStandardAnchor("ancPrayer1", "AddPrayer", "", "<i class='fa fa-plus'></i>", "Add Prayer", "pray1");
+                                         // Table header
             string sRow = "<tr>";
-
+            int iColCt = 0;
             for (int i = 0; i < dt.Columns.Count; i++)
             {
                 bool fRestricted = BiblePayCommon.EntityCommon.IsRestrictedColumn(dt.Columns[i].ColumnName);
                 if (!fRestricted || fIncDeleted)
-                         sRow += "<th>" + dt.Columns[i].ColumnName + "</th>";
+                {
+                    sRow += "<th>" + dt.Columns[i].ColumnName + "</th>";
+                    iColCt++;
+                }
             }
+
+            string html = "<table class=saved><tr class='objheader'><th class='objheader' colspan='" + iColCt.ToString() + "'>"
+                + "<h3>" + sObjectName + "</h3>";
+            html += "<span style='float:right;'>" + UICommon.GetStandardAnchor("ancPrayer1", "AddPrayer", "", "<i class='fa fa-plus'></i>", "Add Prayer", "pray1") + "</span>";
+
             sRow += "</tr>";
             html += sRow;
 
@@ -77,7 +82,7 @@ namespace Unchained
                         string sID = dt.Rows[y]["id"].ToString();
                         string sURL = "FormView?table=" + sTable + "&id=" + sID;
                         string sAnchor = "<a href='" + sURL + "'>" + sValue + "</a>";
-                        sRow += "<td>" + sAnchor + "</td>";
+                        sRow += "<td class='saved'>" + sAnchor + "</td>";
                     }
                     
                 }

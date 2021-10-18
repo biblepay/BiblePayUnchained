@@ -6,6 +6,7 @@ using static BiblePayCommon.Common;
 using static BiblePayCommonNET.CommonNET;
 using static BiblePayCommonNET.UICommonNET;
 using static Unchained.Common;
+using static Unchained.UICommon;
 
 namespace Unchained
 {
@@ -26,7 +27,7 @@ namespace Unchained
                 {
                     u.EmailVerified = 1;
                     SaveUserRecord(IsTestNet(this), u, this);
-                    this.Page.Session["stack"] = Toast("Updated", "Thank you!  Your e-mail has been verified!");
+                    this.Page.Session["stack"] = BiblePayCommonNET.UICommonNET.Toast("Updated", "Thank you!  Your e-mail has been verified!");
                     Response.Redirect("RegisterMe");
                 }
                 else
@@ -170,12 +171,11 @@ namespace Unchained
                     User u = gUser(this);
                     u.FA2Verified = 1;
                     u.Shared2FA = BiblePayDLL.Sidechain.RSAEncryptValue(Session["2FA"].ToString());
-                    bool fSaved = SaveUserRecord(IsTestNet(this), u, this);
-                    if (fSaved)
+                    DACResult r0 = SaveUserRecord(IsTestNet(this), u, this);
+                    if (!r0.fError())
                     {
                         Session["2FA"] = null;
-
-                        this.Page.Session["stack"] = Toast("Saved", "Your pin has been verified!");
+                        this.Page.Session["stack"] = BiblePayCommonNET.UICommonNET.Toast("Saved", "Your pin has been verified!");
                         Response.Redirect("RegisterMe");
                     }
                 }
@@ -215,16 +215,18 @@ namespace Unchained
             }
             BiblePayCommon.HalfordDatabase.SetKV("1", "VerifyEmail" + u.id, 60 * 30);
             MailMessage m = new MailMessage();
+            EmailNarr e1 = GetEmailFooter(this);
+
             string sDomainName = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
             string sURL = sDomainName + "/RegisterMe?action=verifyemail&id=" + sID;
             string sURLA = "<a href='" + sURL + "'>confirm your user record e-mail address that you requested</a>";
             string sNarr = "Dear " + u.FirstName + ",<br><br>Please " + sURLA + " to update your e-mail verification flag to VERIFIED and this will elevate your account privileges"
-                +".<br><br>Thank you.<br>The Crypto Team<br>";
+                +".<br><br>Thank you.<br>The " + e1.DomainName + " Team<br>";
             m.Subject = "[Transactional Message] Please confirm the address on your account that you initiated.";
             m.Body = sNarr;
             m.IsBodyHtml = true;
             m.To.Add(new MailAddress(u.EmailAddress, u.FirstName));
-            DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(this), m);
+            DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(this), m, e1.DomainName);
             MsgModal(this, r.OverallResult ? "Sent" : "Not Sent", r.OverallResult ? "Your notification has been sent" : "Your notification failed.", 400, 200, true);
         }
 
@@ -322,8 +324,8 @@ namespace Unchained
                 MsgModal(this, "Password Error", "Sorry, the passwords do not match.", 350, 200, true);
                 return;
             }
-            bool fSaved = SaveUserRecord(IsTestNet(this), u, this);
-            if (fSaved)
+            DACResult r0 = SaveUserRecord(IsTestNet(this), u, this);
+            if (!r0.fError())
             {
                 lblStatus.Text = "Updated.";
                 if (sOldTheme != u.ThemeName && sOldTheme != null)
@@ -332,7 +334,7 @@ namespace Unchained
                 }
                 else
                 {
-                    this.Page.Session["stack"] = Toast("Saved", "Your user record has been Updated!");
+                    this.Page.Session["stack"] = BiblePayCommonNET.UICommonNET.Toast("Saved", "Your user record has been Updated!");
                     Response.Redirect("RegisterMe");
                 }
             }

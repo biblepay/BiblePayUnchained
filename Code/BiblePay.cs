@@ -352,10 +352,10 @@ namespace Unchained
         public static Dictionary<string, Portfolios> dictUTXO = new Dictionary<string, Portfolios>();
 
 
-        public static bool RPC_BuyNFT(BiblePayCommon.Entity.NFT n, Page p, double nAmount, string NewAddress, out string sError)
+        public static bool RPC_BuyNFT(BiblePayCommon.Entity.NFT n, Page p, double nAmount, string sBuyerUserID, string NewAddress, out string sError)
         {
 
-            bool fResult = ProcessNFT(p, n, "BUY", NewAddress, nAmount, false, out sError);
+            bool fResult = ProcessNFT(p, n, "BUY", sBuyerUserID, NewAddress, nAmount, false, out sError);
             return fResult;
         }
 
@@ -369,7 +369,7 @@ namespace Unchained
             return n;
         }
 
-        public static bool ProcessNFT(Page p, BiblePayCommon.Entity.NFT n, string Action, string BuyerAddress, double BuyPrice, bool fDryRun, out string sError)
+        public static bool ProcessNFT(Page p, BiblePayCommon.Entity.NFT n, string Action, string sBuyerUserID, string BuyerAddress, double BuyPrice, bool fDryRun, out string sError)
         {
             double nSend = 100;
             string sToAddress = "";
@@ -434,6 +434,8 @@ namespace Unchained
                 n.BuyItNowAmount = 0;
                 // End of Flags
                 n.UserID = BuyerAddress;
+                n.OwnerUserID = sBuyerUserID;
+
                 if (!BiblePayDLL.Sidechain.ValidateAddress(IsTestNet(p), sSellerCPK))
                 {
                     sError = "Invalid seller Address " + sSellerCPK;
@@ -552,6 +554,10 @@ namespace Unchained
                 return d;
             }
 
+            if (fBidOnly && nOfferPrice >= myNFT.LowestAcceptableAmount())
+            {
+                fBidOnly = false;
+            }
             if (fBidOnly)
             {
                 double nHighBid = GetHighBid(p, myNFT.GetHash());
@@ -578,7 +584,7 @@ namespace Unchained
                 return d;
             }
             // BUY
-            if (gUser(p).EmailAddress == "" && false)
+            if (gUser(p).EmailAddress == "")
             {
                 d.Error = "Sorry, the bid failed.  You must have an e-mail address populated first in your user record so we can send you the NFT information.  ";
                 return d;
@@ -587,7 +593,7 @@ namespace Unchained
             if (nOfferPrice >= myNFT.LowestAcceptableAmount() && myNFT.Marketable && !myNFT.fDeleted)
             {
                 string sError = "";
-                bool bResult = RPC_BuyNFT(myNFT, p, nOfferPrice, gUser(p).BiblePayAddress, out sError);
+                bool bResult = RPC_BuyNFT(myNFT, p, nOfferPrice, gUser(p).id,  gUser(p).BiblePayAddress, out sError);
                 if (sError == "")
                 {
                     d.TXID = myNFT.GetHash();

@@ -96,7 +96,8 @@ namespace Unchained
 			n.Description = txtDescription.Text;
 			n.Marketable = ckMarketable.Checked;
 			n.fDeleted = ckDeleted.Checked;
-			
+			n.OwnerUserID = gUser(this).id;
+
 			string sError = "";
 			if (n.Name.Length < 3)
 				sError += "NFT Name must be populated. ";
@@ -120,7 +121,7 @@ namespace Unchained
 				sError += "URL Length must be < 512 (lo) and 1024 (hi) chars.";
 
 			string sTXID = "";
-			bool fCreated = Unchained.BiblePayUtilities.ProcessNFT(this, n, _msMode, n.UserID, 0, false, out sError);
+			bool fCreated = Unchained.BiblePayUtilities.ProcessNFT(this, n, _msMode, gUser(this).id, n.UserID, 0, false, out sError);
 
 			string sNarr = (sError == "") ? "Successfully " + _msMode + "(ed) NFT " + sTXID + ". <br><br>Thank you for using BiblePay Non Fungible Tokens." : sError;
 			MsgModal(this, "Process NFT", sNarr, 400, 300);

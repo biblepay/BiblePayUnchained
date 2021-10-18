@@ -159,93 +159,122 @@ namespace Unchained
             }
             // Global filter (Federated vs. Private) etc.
 
-            BiblePayCommon.BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
-            
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
+            string sData = "";
             string sVideoFilter = Config("videofilter");
-            dt = dt.FilterBBPDataTable(sVideoFilter);
-            dt = dt.FilterBBPDataTable("isnull(attachment,0)=0");
-            dt = dt.FilterBBPDataTable("category not in (null,'')");
+            dt = dt.FilterDataTable(sVideoFilter);
+            dt = dt.FilterDataTable("isnull(attachment,0)=0");
+            if (sType == "video")
+            {
+                dt = dt.FilterDataTable("fid <> '0'");
+                if (sAction == "")
+                {
+
+                    dt = dt.SortDataTable("WatchSum desc");
+                    dt.DefaultView.ApplyDefaultSort = true;
+
+                    sData = "";
+                    foreach (DataRowView drv in dt.DefaultView)
+                    {
+                        sData += drv.Row["WatchSum"].ToString() + ",";
+                    }
+
+                    string s99 = "";
+
+
+                }
+            }
 
             if (sFirstName != "")
             {
                 dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
                 User u1 = gUser(this, sFirstName, sLastName);
-                dt = dt.FilterBBPDataTable("userid='" + u1.id + "'");
+                dt = dt.FilterDataTable("userid='" + u1.id + "'");
                 sType = "video";
             }
             else if (sUserID != "")
             {
-                dt = dt.FilterBBPDataTable("userid='" + sUserID + "'");
+                dt = dt.FilterDataTable("userid='" + sUserID + "'");
                 sType = "video";
             }
             else if (sTheirChannel != "")
             {
-                dt = dt.FilterBBPDataTable("userid='" + sTheirChannel + "'");
+                dt = dt.FilterDataTable("userid='" + sTheirChannel + "'");
                 sType = "video";
             }
             else if (sAction == "mychannel")
             {
-                dt = dt.FilterBBPDataTable("userid='" + gUser(this).id + "'");
+                dt = dt.FilterDataTable("userid='" + gUser(this).id + "'");
                 sType = "video";
             }
             else if (sAction == "myeditingroom")
             {
                 // User videos that have been uploaded as 'mass' or 'batch', and have not been categorized yet
                 dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
-                dt= dt.FilterBBPDataTable("userid='" + gUser(this).id + "' and isnull(category,'')=''");
+                dt= dt.FilterDataTable("userid='" + gUser(this).id + "' and isnull(category,'')=''");
                 sType = "video";
             }
             else if (sAction == "following")
             {
-                dt = dt.FilterBBPDataTable(GetFollowingList(IsTestNet(this), gUser(this).id));
+                dt = dt.FilterDataTable(GetFollowingList(IsTestNet(this), gUser(this).id));
                 sType = "video";
             }
-            else if (sAction == "trending")
+            else if (sAction == "popular")
             {
                 // highest rated videos in last 90 days or something
-                dt = dt.FilterBBPDataTable(GetTrendingList(IsTestNet(this)));
+                dt = dt.SortDataTable("WatchSum desc");
                 sType = "video";
             }
-            else if (sAction == "recentlyuploaded")
+            else if (sAction == "favorites")
             {
-                dt.SortBy("time desc");
+                dt = dt.SortDataTable("VoteSum desc");
+                sType = "video";
+            }
+            else if (sAction == "webm")
+            {
+                dt = dt.FilterDataTable("url like '%webm%'");
+                sType = "video";
+            }
+            else if (sAction == "recent")
+            {
+                dt = dt.SortDataTable("time desc");
                 sType = "video";
             }
             else if (sAction == "hashtags")
             {
-                dt = dt.FilterBBPDataTable(GetHashTagList(gUser(this)));
+                dt = dt.FilterDataTable(GetHashTagList(gUser(this)));
                 sType = "video";
             }
 
             if (sSearch != "")
             {
                 //string sPage = this.Request.Url.AbsoluteUri;
-                dt = dt.FilterBBPDataTable("body like '%" + sSearch + "%' or title like '%" + sSearch + "%' or Transcript like '%" + sSearch + "%'", true);
+                dt = dt.FilterDataTable("body like '%" + sSearch + "%' or title like '%" + sSearch + "%' or Transcript like '%" + sSearch + "%'");
             }
             // Filter by type starts here:
             if (sType == "video")
             {
-                dt = dt.FilterBBPDataTable("SVID <> ''");
+                dt = dt.FilterDataTable("SVID <> ''");
             }
             else if (sType == "pdf")
             {
-                dt = dt.FilterBBPDataTable("URL like '%.pdf%'");
+                dt = dt.FilterDataTable("URL like '%.pdf%'");
             }
             else if (sType == "wiki")
             {
-                dt = dt.FilterBBPDataTable("URL like '%.htm%'");
+                dt = dt.FilterDataTable("URL like '%.htm%'");
             }
             else if (sType == "image")
             {
-                dt = dt.FilterBBPDataTable("URL like '%.png%' or URL like '%.jpg%' or URL like '%.jpeg%' or URL like '%.gif%'");
+                dt = dt.FilterDataTable("URL like '%.png%' or URL like '%.gif' or URL Like '%.jpeg' or URL like '%.jpg%' or URL like '%.jpeg%' or URL like '%.gif%'");
             }
 
             if (sCategory != "")
             {
-                dt = dt.FilterBBPDataTable("subject like '%" + sCategory + "' or title like '%" + sCategory + "' or category like '%" + sCategory + "%'");
+                dt = dt.FilterDataTable("subject like '%" + sCategory + "' or title like '%" + sCategory + "' or category like '%" + sCategory + "%'");
             }
 
-            string html = UICommon.GetGallery(this, dt, null, sType, 33, 400, 300);
+            string html = UICommon.GetGallery(this, dt, null, sType, 33, 400, 300, true, false, "");
             return html;
             
         }

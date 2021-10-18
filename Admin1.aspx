@@ -17,7 +17,7 @@
          <asp:Button ID="btnSave" runat="server" onclick="btnSave_Click"  Text="Save" />
          <br /><br />
         
-      <input type="button" onclick="var e = RSAEncrypt('this is a test.');showModalDialog('This is my title', e);" value="showmodal"/>
+      <input type="button" onclick="var e = RSAEncrypt('this is a test.');showModalDialog('This is my title', e, true);" value="showmodal"/>
       <input type="button" onclick="<%=Unchained.UICommon.Toast("title", "thetoast")%>" value="The Toast" />
 
 

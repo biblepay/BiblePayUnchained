@@ -17,10 +17,11 @@ var refTagger = {
 
 var iGallery = 29;
 function MakeMoreVisible() {
+    //alert(iGallery);
     for (var i = iGallery; i < iGallery + 30; i++)
     {
-        //var o = document.getElementById('gallery' + i.toString());
-        $('#gallery' + i.toString()).toggleClass('galleryinvisible');
+        // $('#gtd' + i.toString()).css('visibility', 'visible');
+        $('#gtd' + i.toString()).toggleClass('galleryinvisible');
     }
     iGallery += 30;
 }
@@ -34,7 +35,7 @@ window.addEventListener('scroll', () => {
         clientHeight
     } = document.documentElement;
 
-    if (scrollTop + clientHeight >= scrollHeight - 5)
+    if (scrollTop + clientHeight >= scrollHeight - 50)
     {
         MakeMoreVisible();
     }
@@ -89,7 +90,7 @@ $(document).ready(function () {
 
 // Continue with core JS functionality here:
 
-        function showModalDialog(title, body, width, height)
+        function showModalDialog(title, body, width, height, fReload)
         {
             $("#divdialog").dialog({
                 "body": body,
@@ -98,7 +99,14 @@ $(document).ready(function () {
                 "width": width,
                 "height": height,
                 buttons: {
-                    OK: function () { $(this).dialog("close"); }
+                    OK: function () {
+                        if (fReload) {
+                            document.location.reload();
+                        }
+                        else {
+                            $(this).dialog("close");
+                        }
+                    }
                 },
             });
             var e = document.getElementById("spandialog");
@@ -153,10 +161,11 @@ $(document).ready(function () {
             //TransmitSerializedLocalStorage();
         }
 
+/*
         function getRemoteValue(sessionid) {
             $.ajax({    
                 type: "GET",
-                url: "Web.ashx/sessionid=" + sessionid,
+                url: "Legacy.ashx/sessionid=" + sessionid,
                 dataType: "html",   //expect html to be returned                
                 success: function (response) {
                     var s = response + "%";
@@ -164,7 +173,24 @@ $(document).ready(function () {
                 }
             });
         }
+        */
 
+
+var lastupdate = 0;
+function UpdateChatWindow() {
+    var ts = Date.now();
+    var elapsed = ts - lastupdate;
+    if (elapsed > 1500) {
+        //alert(elapsed);
+        setRemoteValue('voting', 'chat|', 'chatinner', '');
+        lastupdate = ts;
+        setTimeout("UpdateChatWindow()", 3000);
+    }
+}
+
+
+var lastvalue1 = "";
+var notified = false;
         function setRemoteValue(actionname, data1, elementToUpdate, elementToUpdate2) {
             $.ajax({
                 type: "POST",
@@ -182,23 +208,41 @@ $(document).ready(function () {
 
                             if (parts[0] === "notloggedin") {
                                 // User is not logged in
-                                showModalDialog("Action failed", "Sorry, you must be logged in first.  Click Log In from the left menu. ", 475, 400);
+                                showModalDialog("Action failed", "Sorry, you must be logged in first.  Click Log In from the left menu. ", 475, 400, false);
                             }
                             else {
                                 if (elementToUpdate) {
                                     var e = document.getElementById(elementToUpdate);
-                                    e.innerHTML = parts[0];
+                                    if (e) {
+                                        if (parts[0] && parts[0].length > 0) {
+                                            // alert(parts[0]);
+                                            e.innerHTML = parts[0];
+                                            lastvalue1 = parts[0];
+                                            console.log('updated');
+                                        }
+                                    }
                                 }
                                 if (elementToUpdate2) {
+                                    
                                     var f = document.getElementById(elementToUpdate2);
+                                    
                                     f.innerHTML = parts[1];
                                 }
+                                return true;
+
                             }
                         }
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    alert('Wallet error');
+                    console.log(jqXHR);
+                    console.log(textStatus);
+                    console.log(errorThrown);
+                    if (!notified) {
+                        alert('Wallet error' + textStatus);
+                        notified = true;
+                        return false;
+                    }
                 }
             });
         }
@@ -222,11 +266,9 @@ $(document).ready(function () {
             if (spinning) {
                 nSpinValue++;
                 var s = "Working[0]...<br>ETA: N/A<br>Elapsed: " + nSpinValue + "s";
-
-                $("#spanLoader1").html(s);
-
-                getRemoteValue(1);
-                setTimeout(UpdateSpinner, 1000);
+                //$("#spanLoader1").html(s);
+                //getRemoteValue(1);
+                //setTimeout(UpdateSpinner, 1000);
             }
         }
 

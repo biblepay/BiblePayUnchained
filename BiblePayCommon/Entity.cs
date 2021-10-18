@@ -123,7 +123,7 @@ namespace BiblePayCommon
             if (propertyInfo != null)
             {
                 string sPropType = propertyInfo.PropertyType.ToString();
-                if (sPropType == "System.Int32" || sPropType == "System.Int64")
+                if (sPropType == "System.Int32" || sPropType == "System.Int64" || sPropType == "System.Double")
                 {
                     if (oNewValue.ToString() == "")
                         oNewValue = 0;
@@ -203,12 +203,12 @@ namespace BiblePayCommon
         public static BiblePayCommon.IBBPObject TableRowToStronglyCastObject(DataTable dt, string sTable, int iRow)
         {
             BiblePayCommon.IBBPObject o = (BiblePayCommon.IBBPObject)BiblePayCommon.EntityCommon.GetInstance("BiblePayCommon.Entity+" + sTable);
-
+            string sColName = "";
             try
             {
                 for (int i = 0; i < dt.Columns.Count; i++)
                 {
-                    string sColName = dt.Columns[i].ColumnName;
+                    sColName = dt.Columns[i].ColumnName;
                     object oOrigValue = dt.Rows[iRow][dt.Columns[i].ColumnName];
                     if (oOrigValue == System.DBNull.Value)
                     {
@@ -220,7 +220,7 @@ namespace BiblePayCommon
             }
             catch(Exception ex)
             {
-                Log2("TRTSCO::" + ex.Message);
+                Log2("TRTSCO::" + ex.Message + " for " + sTable + ", " + sColName);
                 return o;
             }
         }
@@ -260,7 +260,7 @@ namespace BiblePayCommon
 
         public static string RESTRICTED_FIELDS = "extrakey,_id,updated,chain,deleted,guid,hash,lastblockhash,signature,signingkey,signaturetime,height,time,id,userid,serversignature,"
             + "serversigningkey,serversignaturetime,domain,parentid";
-        public static string HIDDEN_FIELDS = "filename,fid,url2,transcriptjobid,svid,attachment,subject";
+        public static string HIDDEN_FIELDS = "filename,fid,url2,transcriptjobid,svid,attachment,subject,organization";
         public static string READONLY_FIELDS = "duration,size,url,classification";
 
         private static bool InList(string[] vList, string sTarget)
@@ -309,6 +309,7 @@ namespace BiblePayCommon
         long serversignaturetime { get; set; }
         int height { get; set; }
         int Attachment { get; set; }
+        string organization { get; set; }
 
         string lastblockhash { get; set; }
         string hash { get; set; }
@@ -329,7 +330,7 @@ namespace BiblePayCommon
             public long time { get; set; }
             public string lastblockhash { get; set; }
             public int Attachment { get; set; }
-
+            public string organization { get; set; }
             public string guid { get; set; }
             public string hash { get; set; }
             public string UserID { get; set; }
@@ -373,9 +374,12 @@ namespace BiblePayCommon
             public string TranscriptJobID { get; set; }
             public int Transcripted2 { get; set; }
             public string Classification { get; set; }
+            public int VoteSum { get; set; }
+            public int WatchSum { get; set; }
             public string SVID { get; set; }
             public long Duration { get; set; }
             public int Size { get; set; }
+            public double Order { get; set; }
             public string HashTags { get; set; }
             public string Category { get; set; }
             public string Subject { get; set; } //to be removed in favor of Category, Title and Body
@@ -552,7 +556,7 @@ namespace BiblePayCommon
             public string URL { get; set; }
             public override string GetHash()
             {
-                return GetSha256HashI(UserID + DirectoryName + FileName);
+                return GetSha256HashI(UserID + DirectoryName + FileName + Title + Body + Subject);
             }
         }
 
@@ -742,6 +746,20 @@ namespace BiblePayCommon
         }
 
 
+        public class performance1 : BaseEntity, IBBPObject
+        {
+            public override string GetHash()
+            {
+                return GetSha256HashI(id);
+            }
+
+            public string field1 { get; set; }
+            public string field2 { get; set; }
+            public string field3 { get; set; }
+
+
+        }
+
 
         public class NFT : BaseEntity, IBBPObject
         {
@@ -755,6 +773,7 @@ namespace BiblePayCommon
             public double MinimumBidAmount { get; set; }
             public double ReserveAmount { get; set; }
             public double BuyItNowAmount { get; set; }
+            public string OwnerUserID { get; set; }
 
             public int nIteration { get; set; }
             public bool Marketable { get; set; }

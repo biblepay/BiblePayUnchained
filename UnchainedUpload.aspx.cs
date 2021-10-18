@@ -13,6 +13,18 @@ namespace Unchained
     public partial class UnchainedUpload : BBPPage
     {
         public string _action = "";
+
+        protected string GetVideoCategories()
+        {
+            _action = Request.QueryString["action"] ?? "";
+            if (_action == "setavatar")
+            {
+                return "";
+            }
+
+            string s = Unchained.UICommon.GetVideoCategories("ddCategory", "");
+            return s;
+        }
         protected new void Page_Load(object sender, EventArgs e)
         {
             _action = Request.QueryString["action"] ?? "";
@@ -21,16 +33,21 @@ namespace Unchained
                 lblPageHeading.Text = "Upload your avatar picture here:";
                 lblBody.Text = "(Optional) Avatar Text:";
                 lblSubject.Text = "(Optional) Avatar Subject:";
-                string[] vExt = ".jpeg,.jpg,.bmp,.png".Split(",");
+                string[] vExt = ".jpeg,.gif,.jpg,.bmp,.png".Split(",");
+                lblHideArea.Visible = false;
                 AsyncUpload1.AllowedFileExtensions = vExt;
             }
-            else if (_action == "setattachment")
+            else if (_action == "setattachment" || _action == "setticketattachment")
             {
                 lblPageHeading.Text = "Upload your timeline attachment here:";
                 lblBody.Text = "(Optional) Write something about your timeline post:";
                 lblSubject.Text = "(Optional) Write a subject about your attachment:";
-                txtBody.Text = "Timeline Attachment";
-                txtSubject.Text = "Timeline Attachment";
+                if (!IsPostBack)
+                {
+                    string sType = Request.QueryString["type"] ?? "";
+                    txtBody.Text = sType + " Attachment + " + DateTime.Now.ToString();
+                    txtSubject.Text = sType + " Attachment";
+                }
             }
             else
             {
@@ -47,7 +64,7 @@ namespace Unchained
         protected string OffchainUpload(BiblePayCommon.Entity.object1 o1, int iFileNo)
         {
             string sCat = Request.Form["ddCategory"].ToNonNullString();
-            if (iFileNo == 1)
+            if (iFileNo == 1 || true)
             {
                 o1.Category = sCat;
             }
@@ -111,21 +128,22 @@ namespace Unchained
 
                     o.Attachment = 0;
 
-                    if (_action == "setavatar" || _action == "setattachment")
+                    if (_action == "setavatar" || _action == "setattachment" || _action == "setticketattachment")
                     {
                         o.Attachment = 1;
+                        //o.id = Guid.NewGuid().ToString();
                     }
                     string sURL = OffchainUpload(o, iFileNo);
                     fSuccess = true;  //mission critical; check the calling process, verify this fSuccss flag is actually valid.
 
-
+                    // Avatar
                     if (_action == "setavatar")
                     {
                         User u = gUser(this);
                         u.AvatarURL = sURL;
-                        bool fSaved = SaveUserRecord(IsTestNet(this), u, this);
-                        if (fSaved)
-                        { 
+                        DACResult r0 = SaveUserRecord(IsTestNet(this), u, this);
+                        if (!r0.fError())
+                        {
                             Session["stack"] = UICommon.Toast("Updated", "Your avatar has been updated!");
                         }
                         else
@@ -134,12 +152,28 @@ namespace Unchained
                         }
                         Response.Redirect("RegisterMe.aspx");
                     }
-                    else if (_action == "setattachment")
-                    {
-                        Response.Redirect("Person.aspx");
-                    }
+                    // End of Avatar
+
+
+
                 }
             }
+
+
+            // Redirects 
+
+            if (_action == "setattachment")
+            {
+                Response.Redirect("Person.aspx");
+            }
+            else if (_action == "setticketattachment")
+            {
+                Response.Redirect("TicketList.aspx");
+            }
+
+
+            // End of Redirects
+
 
             if (fSuccess)
             {

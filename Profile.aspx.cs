@@ -32,9 +32,8 @@ namespace Unchained
                 ddGender.Items.Add("Male");
                 ddGender.Items.Add("Female");
                 ddGender.SelectedValue = _user.Gender;
-                txtBirthDate.Text = BiblePayCommon.Common.ConvertFromUnixTimestamp(_user.BirthDate).ToShortDateString();
+                txtBirthDate.Text = UnixTimeStampToDateControl(_user.BirthDate);
             }
-
 
         }
 
@@ -49,15 +48,7 @@ namespace Unchained
             u.TelegramLinkName = txtTelegramLinkName.Text;
             u.TelegramLinkURL = txtTelegramURL.Text;
             u.TelegramLinkDescription = txtTelegramDescription.Text;
-
-            try
-            {
-                u.BirthDate = (int)DateTimeToUnixTimestamp(Convert.ToDateTime(txtBirthDate.Text));
-            }
-            catch (Exception)
-            {
-                // Show the user they entered a bad birthdate here.
-            }
+            u.BirthDate = DateToUnixTimeStamp(txtBirthDate.Text);
 
             return u;
         }
@@ -66,16 +57,11 @@ namespace Unchained
         {
             string sOldTheme = gUser(this).ThemeName;
             User u = PrepareUserRecord();
-            bool fSaved = SaveUserRecord(IsTestNet(this), u, this);
-            if (fSaved)
+            DACResult r = SaveUserRecord(IsTestNet(this), u, this);
+            if (!r.fError())
             {
                  this.Page.Session["stack"] = BiblePayCommonNET.UICommonNET.Toast("Saved", "Your user record has been Updated!");
                  Response.Redirect("Profile");
-            }
-            else
-            {
-                this.Page.Session["stack"] = BiblePayCommonNET.UICommonNET.Toast("Saved", "Your user record has been Updated!");
-                Response.Redirect("Profile");
             }
         }
 

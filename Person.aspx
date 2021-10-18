@@ -20,13 +20,20 @@
           }
 
           // Show the current tab, and add an "active" class to the button that opened the tab
-          document.getElementById(Name).style.display = "block";
-          evt.currentTarget.className += " active";
+          var o = document.getElementById(Name);
+          if (o) {
+            o.style.display = "block";
+          }
+          if (evt.currentTarget) {
+            evt.currentTarget.className += " active";
+          }
         }
         
   </script>
   <br />
-
-    <%=GetPerson()%>
-
+     <asp:UpdatePanel runat="server" ID="Up1">
+      <ContentTemplate>
+         <%=GetPerson()%>
+      </ContentTemplate>
+     </asp:UpdatePanel>
 </asp:Content>

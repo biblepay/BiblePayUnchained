@@ -1,14 +1,44 @@
+
+
+table.saved td {
+    background-color: #ececec;
+    color:#0096FF;
+}
+
+.saved a:visited {
+    color: darkblue !important;
+}
+
+.saved a:link
+{
+    color:#0096FF !important;
+}
+
+a.decoratedlink {
+    color:#0096FF !important;
+}
+
+a.decoratedlink visited {
+    color: darkblue !important;
+}
+
+
 .buttondark {
     background-color: #ececec;
     color: #0096FF;
 }
 
+.largebuttondark {
+    background-color: #ececec;
+    color: #0096FF;
+    font-size-adjust:170%;
+}
+
 
 
 .navbar {
-    border-bottom: 1px solid #89CFF0;
+    border-bottom: 1px solid white;
 }
-
 
 .content-wrapper,
 .right-side,
@@ -163,10 +193,9 @@ body.hold-transition .main-header .logo {
   }
 }
 
-
 .navbar-inverse {
-    background-color: #ffffff;
-    border-color: #89CFF0 !important;
+    background-color: #F0FFFF;
+    border-color: white !important;
 }
 
 .main-sidebar,
@@ -220,13 +249,12 @@ body.hold-transition .main-header .logo {
   border-color: transparent;
 }
 .user-panel {
-  position: relative;
-  width: 100%;
-  height: 85px;
-  overflow: hidden;
-  #xleft-menu: color2;
-  background: #ffffff;
-  border-bottom: 1px solid #89CFF0;
+    position: relative;
+    width: 100%;
+    height: 85px;
+    overflow: hidden;
+    background: #F0FFFF;
+    border-bottom: 1px solid white;
 }
 .user-panel:before,
 .user-panel:after {

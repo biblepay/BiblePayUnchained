@@ -117,13 +117,15 @@ namespace BiblePayCommonNET
             }
             return false;
         }
-        public static void MsgModal(Page p, string sTitle, string sNarrative, int nWidth, int nHeight, bool fUseScriptManager = false)
+        public static void MsgModal(Page p, string sTitle, string sNarrative, int nWidth, int nHeight, bool fUseScriptManager = false, bool fRedirectToPage = false)
         {
             sTitle = BiblePayCommon.Encryption.CleanModalString(sTitle);
             sNarrative = sNarrative.Replace("\r\n", "<br>");
             sNarrative = sNarrative.Replace("'", "&apos;");
             sNarrative = sNarrative.Replace("\"", "&quot;");
-            string sJavascript = "showModalDialog(\"" + sTitle + "\",\"" + sNarrative + "\", " + nWidth.ToString() + ", " + nHeight.ToString() + ");";
+            string sRedirect = fRedirectToPage ? "true" : "false";
+            string sJavascript = "showModalDialog(\"" + sTitle + "\",\"" + sNarrative + "\", " + nWidth.ToString() + ", " + nHeight.ToString() + "," 
+                + sRedirect + ");";
             if (fUseScriptManager)
                 ScriptManager.RegisterStartupScript(p, p.GetType(), "modalid1" + Guid.NewGuid().ToString(), sJavascript, true);
             else
@@ -144,7 +146,7 @@ namespace BiblePayCommonNET
         {
             string sToast = Toast(sTitle, sBody);
             RunScriptSM(p, sToast);
-            p.Session["stack"] = Toast(sTitle, sBody);
+           // p.Session["stack"] = Toast(sTitle, sBody);
         }
 
         public static void ToastLater(Page p, string sTitle, string sBody)
@@ -221,7 +223,7 @@ namespace BiblePayCommonNET
             o1.niteration = r.Next(1000);
             string sData = Newtonsoft.Json.JsonConvert.SerializeObject(o1);
             sData = sData.Replace("\"", "\\\"");
-            string sOnClientClick = sJS + "var e={};e.Value=\"" + sEventValue + "\";e.Event=\"" + sEventName + "\";BBPPostBack2(this,e);return true;";
+            string sOnClientClick = sJS + "var e={};e.Value=\"" + sEventValue + "\";e.Event=\"" + sEventName + "\";BBPPostBack2(this,e);";
             string sButton = "<button id='" + sID + "' name='" + sID + "' type='reset' value='Submit' onclick='" + sOnClientClick + "'>" + sCaption + "</button>";
             sHTML += sButton;
             return sHTML;
