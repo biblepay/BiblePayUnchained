@@ -20,6 +20,11 @@
     vertical-align: top;
 }
 
+@media(min-width:767px){
+    .navcontainer{
+        padding-left:250px;
+    }
+}
 
 .galleryvisibile {
     display:block;
@@ -784,7 +789,7 @@ div.gallerycontainer {
     .body-content {
         padding-left: 20px;
         padding-right: 20px;
-        padding-top: 70px;
+        padding-top: 110px;
     }
 
     /* Set widths on the form inputs since otherwise they're 100% wide */

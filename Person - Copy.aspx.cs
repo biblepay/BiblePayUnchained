@@ -14,34 +14,14 @@ using static Unchained.UICommon;
 
 namespace Unchained
 {
-    public partial class Person : BBPPage
+    public partial class PersonBK : BBPPage
     {
-         protected User user;
-        protected bool IsMe;
-        protected bool IsTestNet;
-        protected bool fHomogenized;
-        protected DACResult IsMyFriend;
         protected new void Page_Load(object sender, EventArgs e)
         {
-            string sID = Request.QueryString["id"].ToNonNullString();
-            string sFirstName = Request.QueryString["firstname"].ToNonNullString();
-            string sLastName = Request.QueryString["lastname"].ToNonNullString();
-            fHomogenized = Request.QueryString["homogenized"].ToNonNullString() == "1";
-            string sUserID = Request.QueryString["id"].ToNonNullString();
 
-            if (sUserID == "")
-            {
-                sUserID = gUser(this).id;
-            }
-            this.user = gUserById(this, sUserID);
-
-            IsMe = (this.user.id == gUser(this).id);
-            IsTestNet = IsTestNet(this);
-
-            IsMyFriend = AmIFriend(this, user.id, gUser(this).id);
         }
 
-       
+
         public static DACResult AmIFriend(Page p, string sFriendUserGuid, string sMyUserGuid)
         {
             DACResult r = new DACResult();
@@ -122,7 +102,6 @@ namespace Unchained
                 }
 
                 Timeline t = new Timeline();
-                //string b = e.Body;
                 t.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(e.Extra.Body.ToString()));
                 t.UserID = gUser(this).id;
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), t, gUser(this));
@@ -493,20 +472,23 @@ namespace Unchained
             return html;
         }
 
-        
+
         protected string GetPerson()
         {
             BiblePayPaginator.Paginator _paginator = new BiblePayPaginator.Paginator();
             _paginator.Page = this;
             string sID = Request.QueryString["id"].ToNonNullString();
+            string sFirstName = Request.QueryString["firstname"].ToNonNullString();
+            string sLastName = Request.QueryString["lastname"].ToNonNullString();
             bool fHomogenized = Request.QueryString["homogenized"].ToNonNullString() == "1";
-            
-            if (sID == "")
+            string sUserID = Request.QueryString["id"].ToNonNullString();
+
+            if (sUserID == "")
             {
-                sID = gUser(this).id;
+                sUserID = gUser(this).id;
             }
             // For each timeline entry, pull in attachments (mp4, mp3, video, pdf) - Sort timeline desc:
-            User u = gUserById(this, sID);
+            User u = gUserById(this, sUserID);
             bool fMe = (u.id == gUser(this).id);
             string html = "<div id='user" + u.id + "'>";
 

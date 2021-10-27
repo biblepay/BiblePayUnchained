@@ -488,6 +488,8 @@ namespace Unchained
             return true;
         }
 
+        
+
         public static User GetUserRecord(bool fTestNet, string id)
         {
             DataTable dtUsers = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "user1");
