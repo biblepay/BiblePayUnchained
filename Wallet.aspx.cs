@@ -18,7 +18,7 @@ namespace Unchained
         {
             if (e.EventName == "SentMoney")
             {
-                string sPin = BiblePayCommon.Encryption.Base64Decode((e.Extra.Output ?? "").ToString());
+                string sPin = BiblePayCommon.Encryption.Base64DecodeWithFilter((e.Extra.Output ?? "").ToString());
                 DACResult r30 = UICommon.BuySomething2(this, sPin);
             }
         }

@@ -78,7 +78,7 @@ namespace BiblePayCommon
                 }
                 return dtNew;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 DataTable dt1 = new DataTable();
                 return dt1;

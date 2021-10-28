@@ -424,7 +424,7 @@ namespace BiblePayDLL
                     if (!dt.Columns.Contains(sColName1))
                     {
                         // ToDo: Find out why this routine is not picking up the native int32 datatype?
-                        if (sColName1 == "time" || sColName1 == "updated" || sColName1 == "TicketNumber" || sColName1 == "VoteSum" || sColName1 == "WatchSum")
+                        if (sColName1 == "time" || sColName1 == "updated" || sColName1=="Hours" || sColName1=="ProcessTime" || sColName1 == "TicketNumber" || sColName1 == "VoteSum" || sColName1 == "WatchSum")
                         {
                             dt.Columns.Add(sColName1, Type.GetType("System.Int32"));
                         }

@@ -149,7 +149,7 @@ namespace Unchained
         {
             if (e.EventName=="ValidateTwoFactor_Click")
             {
-                string sPin = BiblePayCommon.Encryption.Base64Decode((e.Extra.Output ?? "").ToString());
+                string sPin = BiblePayCommon.Encryption.Base64DecodeWithFilter((e.Extra.Output ?? "").ToString());
                 if (sPin == "")
                 {
                     MsgModal(this, "Pin Empty", "Sorry, the pin is empty.  Unable to test the code.  Please click back and try again. ", 450, 200);
@@ -346,7 +346,7 @@ namespace Unchained
         }
         protected string GetRegistrationBanner()
         {
-            string sNarr = !gUser(this).LoggedIn ? "Register:" : "Welcome to Your User Record";
+            string sNarr = !gUser(this).LoggedIn ? "Register:" : "Your User Record";
             return sNarr;
         }
 

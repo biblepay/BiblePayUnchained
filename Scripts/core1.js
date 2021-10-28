@@ -13,8 +13,16 @@ var refTagger = {
             s.parentNode.insertBefore(g, s);
 }(document, 'script'));
 
-// Infinite scrolling paginator; start at record 29
+function getParameterByName(name, url = window.location.href) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
 
+// Infinite scrolling paginator; start at record 29
 var iGallery = 29;
 function MakeMoreVisible() {
     //alert(iGallery);
@@ -27,7 +35,6 @@ function MakeMoreVisible() {
 }
 
 // Scroll event listener
-
 window.addEventListener('scroll', () => {
     const {
         scrollTop,
@@ -35,9 +42,57 @@ window.addEventListener('scroll', () => {
         clientHeight
     } = document.documentElement;
 
-    if (scrollTop + clientHeight >= scrollHeight - 50)
+    var signalType = 0;
+    if (scrollTop === 0)
     {
-        MakeMoreVisible();
+        signalType = 1;
+    }
+
+    if (scrollTop + clientHeight >= scrollHeight - 50) {
+        signalType = 2;
+    }
+
+    if (signalType !== 0)
+    {
+        var pag = "0" + getParameterByName('pag');
+        var nPag = parseInt(pag);
+        var url = window.location.href;
+        var nOffset = 0;
+
+        if (signalType === 1) {
+            nOffset = -30;
+        }
+        else if (signalType === 2) {
+            nOffset = 30;
+        }
+
+        if (url.includes('TelegramChat') && signalType === 1) {
+            nOffset = 30;
+        }
+
+        var nNew = nPag + nOffset;
+        if (nNew < 1)
+            nNew = 1;
+        // First if this param exists; remove
+        if (nPag > 0) {
+            var sOld = "pag=" + (nPag).toString();
+            
+            var sNew = "pag=" + (nNew).toString();
+            url = url.replace(sOld, sNew);
+        }
+        else {
+            var fQ = url.includes('?');
+            url += fQ ? '&pag=' : '?pag=';
+            url += (nNew).toString();
+        }
+        // If the paginator is enabled for the page:
+
+        if (url.includes('TelegramChat') && signalType === 1) {
+            window.location.href = url;
+        }
+        if (url.includes('VideoList')) {
+            window.location.href = url;
+        }
     }
 }, {
     passive: true
@@ -323,7 +378,13 @@ function BBPPostBack2(oParent, ExtraObjectValues) {
         oParent.appendChild(input);
         o = document.getElementById("hfPostback");
     }
-    o.value = window.btoa(JSON.stringify(ExtraObjectValues));
+    var myData = JSON.stringify(ExtraObjectValues);
+    myData.replace('<', '[lessthan]');
+    myData.replace('>', '[greaterthan]');
+    myData.replace('&', '[ampersand]');
+
+    o.value = window.btoa(myData);
+
     var oButton = document.getElementById("hfButton");
     if (!oButton) {
         var oButton1 = document.createElement("input");
@@ -380,4 +441,20 @@ function RSAEncrypt(oData1)
     return encData;
 }
 
+
+// BiblePay's alternative to window.btoa 
+// This prevents XSS attacks
+function XSS(oData) {
+    if (oData === null)
+        return "";
+    oData = oData.replace('<script>', '[script]');
+    oData = oData.replace('</script>', '[endscript]');
+    oData = oData.replace('<', '[lessthan]');
+    oData = oData.replace('>', '[greaterthan]');
+    oData = oData.replace('&', '[ampersand]');
+
+    var oData2 = window.btoa(oData);
+    
+    return oData2;
+}
 

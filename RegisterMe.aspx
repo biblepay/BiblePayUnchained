@@ -57,7 +57,6 @@
       <br />
     
         <asp:Button ID="btnRegister" runat="server" Text="Save" OnClick="btnRegister_Click" />
-        <asp:Button ID="btnSetAvatar" runat="server" Text="Set Avatar" OnClick="btnSetAvatar_Click" />
 
         <asp:Button ID="btnModifyProfile"  runat="server" Text="Modify my Social Media Profile" OnClick="btnModifyProfile_Click" />
         
@@ -75,7 +74,15 @@
     </fieldset>
 
     <br />
+<fieldset>
+    <legend>Change Profile Picture:</legend>
 
+            <%=Unchained.Common.gUser(this).GetAvatarImage() %>
+            <br />
+
+            <asp:Button ID="btnSetAvatar" runat="server" Text="Change Profile Picture" OnClick="btnSetAvatar_Click" />
+
+</fieldset>
 
 
     <script>

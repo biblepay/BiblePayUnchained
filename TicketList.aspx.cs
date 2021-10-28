@@ -23,16 +23,55 @@ namespace Unchained
             }
         }
 
+        public static string GetTicketIdsFromHistory(bool fTestNet, string sUserID)
+        {
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "TicketHistory");
+            dt = dt.FilterDataTable("AssignedTo='" + sUserID + "'");
+            string sList = "id in (";
+            if (dt.Rows.Count == 0)
+            {
+                sList = Mid(sList, 0, sList.Length - 1);
+                sList += ")";
+                return sList;
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                //string sRequester = dt.Rows[i]["RequesterID"].ToString();
+                //string sRequestedBy = dt.Rows[i]["UserID"].ToString();
+                string sID = dt.Rows[i]["ParentID"].ToString();
+                sList += "'" + sID + "',";
+            }
+            sList = Mid(sList, 0, sList.Length - 1);
+            sList += ")";
+            return sList;
+        }
+
         protected new void Page_Load(object sender, EventArgs e)
         {
             this.Title = _CollectionName + " - List";
         }
+
+        protected void btnSearch_Click(object sender, EventArgs e)
+        {
+            // Refine the query
+        }
+
         protected string GetTicketList()
         {
             // Assigned to Me
-            string s1 = GetTicketListBase("AssignedTo='" + gUser(this).id + "' and isnull(disposition,'') <> 'Closed'", "Assigned to Me");
-            // Added By Me
-            string s2 = GetTicketListBase("UserID='" + gUser(this).id + "' and isnull(disposition,'') <> 'Closed'", "Added by Me");
+
+
+            string sTicketHistoryIDs = GetTicketIdsFromHistory(IsTestNet(this), gUser(this).id);
+
+            string s1 = GetTicketListBase("isnull(disposition,'') <> 'Closed' and (AssignedTo='" 
+                + gUser(this).id + "' or UserID='" + gUser(this).id + "')",
+                "Assigned To Me or Added by Me");
+
+            string s2 = GetTicketListBase("isnull(disposition,'') <> 'Closed' and (" + sTicketHistoryIDs + ")",
+                "Assigned By Me or Worked by Me");
+
+
+            // string s2 = GetTicketListBase("UserID='" + gUser(this).id + "' and isnull(disposition,'') <> 'Closed'", "Added by Me");
             // All tickets in the system , order by time desc
             string s3 = "";
             if (gUser(this).Administrator == 1)
@@ -47,7 +86,24 @@ namespace Unchained
             _EntityName = "Ticket";
 
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), _EntityName);
-            dt = dt.FilterDataTable(sFilter);
+            if (txtSearch.Text != "")
+            {
+                if (gUser(this).Administrator == 0)
+                {
+                    dt = dt.FilterDataTable(sFilter);
+                }
+                else
+                {
+                    dt = dt.FilterDataTable("isnull(TicketNumber,0)='" + GetDouble(txtSearch.Text)
+                        + "' or isnull(Body,'') like '%" + txtSearch.Text + "%' or isnull(Disposition,'') like '%"
+                        + txtSearch.Text + "%' or isnull(Title,'') like '%" + txtSearch.Text + "%'");
+                }
+            }
+            else
+            {
+                dt = dt.FilterDataTable(sFilter);
+            }
+
             dt = dt.OrderBy("time desc");
 
             string html = "<table class=saved><tr class='objheader'><th class='objheader' colspan=3>"

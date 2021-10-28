@@ -126,7 +126,9 @@ namespace Unchained
                 }
 
                 Timeline t = new Timeline();
-                string sData = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(e.Extra.Body.ToString()));
+                //string sData = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Body.ToString()));
+                string sData = BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Body.ToString());
+
                 t.Body = UICommon.MakeShareableLink(sData, "");
                 t.UserID = gUser(this).id;
                 if (t.Body == "")

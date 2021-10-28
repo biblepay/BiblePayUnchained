@@ -31,7 +31,7 @@ namespace Unchained
                     return;
                 }
                 string sBody = Request.Form["txtComment"].ToString();
-
+                string sHours = Request.Form["txtHours"].ToNonNullString2();
                 if (id == "" || id == null)
                 {
                     UICommon.MsgBox("Error", "The id is invalid.", this);
@@ -56,6 +56,7 @@ namespace Unchained
                 th.UserID = gUser(this).id;
                 th.Body = sBody;
                 th.Disposition = sDisposition;
+                th.Hours = GetDouble(sHours);
                 th.id = Guid.NewGuid().ToString();
                 th.AssignedTo = sAssignee;
                 User uAssignee = gUserById(this,sAssignee);
@@ -75,18 +76,37 @@ namespace Unchained
                 {
                     MailMessage m = new MailMessage();
                     string sLastNarr = gUser(this).FirstName + " said:<br>" + th.Body + "<br><br>";
+                    if (th.Hours > 0)
+                    {
+                        sLastNarr += "<br>Hours: " + th.Hours.ToString() + "<br><br>";
+                    }
                     string sDomainName = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
                     string sURL = sDomainName + "/TicketView?id=" + id;
                     EmailNarr e1 = GetEmailFooter(this);
 
-                    string sNarr = "Dear " + uAssignee.FirstName + ",<br><br>Ticket number " + T.TicketNumber.ToString() + " has been assigned to you for " + T.Disposition + ".  "
+                    string sNarr = "Dear " + uAssignee.FirstName + ",<br><br>Ticket number " + T.TicketNumber.ToString() 
+                        + " has been assigned to you for " + T.Disposition + ".  "
                         + "<br><br>To view the ticket, click <a href='" + sURL + "'>here. </a><br><br>" + sLastNarr 
-                        +"Thank you.<br>The " + e1.DomainName + " Team<br>";
+                        +" Thank you.<br>The " + e1.DomainName + " Team<br>";
                     m.Subject = "[Transactional Message] Ticket #" + T.TicketNumber + " - " + T.Title + " has been assigned to you for " + T.Disposition;
+                    // CC everyone who touched this ticket also
+                    BiblePayCommon.BBPDataTable th1 = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "TicketHistory");
+                    th1 = th1.FilterBBPDataTable("parentid='" + id + "'");
+                   
+                    for (int i = 0; i < th1.Rows.Count; i++)
+                    {
+                        string sAssignedTo = th1.Rows[i]["AssignedTo"].ToNonNullString2();
+                        User u1 = gUserById(this, sAssignedTo);
+                        if (u1.EmailAddress.ToNonNullString2() != "")
+                        {
+                            MailAddress mad = new MailAddress(u1.EmailAddress, u1.FullUserName());
+                            if (!m.CC.Contains(mad) && !m.To.Contains(mad) && !m.Bcc.Contains(mad))
+                                 m.CC.Add(mad);
+                        }
+                    }
                     m.Body = sNarr;
                     m.IsBodyHtml = true;
                     m.To.Add(new MailAddress(uAssignee.EmailAddress, uAssignee.FullUserName()));
-
                     DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(this), m, e1.DomainName);
                 }
                 Response.Redirect("TicketList");
@@ -147,21 +167,21 @@ namespace Unchained
             // Ticket History
             string sHistory = "<hr><table class='comments'>";
 
-
-
             // If the ticket is assigned to me, or if Im an admin: show the reply module
             bool fPerms = (sAssignedTo == gUser(this).id || gUser(this).Administrator == 1);
             if (fPerms)
             {
-                string sReplyModule = "<form id='myform10'><tr><td width=10%>Your Comments:</td><td width=90% colspan=7><textarea id='txtComment' class='pc90 comments' name='txtComment' rows=10 cols=10></textarea><br><br></td></tr>";
+                string sReplyModule = "<form id='myform10'><tr><td width=10%>Your Comments:</td><td width=90% colspan=7>"
+                    + "<textarea id='txtComment' class='pc90 comments' name='txtComment' rows=10 cols=10></textarea><br><br></td></tr>";
                 sReplyModule += "<tr><td>Assign To:<td>" + UICommon.GetDropDownUser(this, "ddAssignees", sAssignedTo, dt.GetColValue("UserID"), true) + "</td></tr>";
                 sReplyModule += "<tr><td>Disposition:<td>" + UICommon.GetDispositions("ddDispositions", sDisposition) + "</td></tr>";
-                string js = "var o1=document.getElementById(\"ddDispositions\");o1.style.visibility=\"hidden\";";
+                sReplyModule += "<tr><td>Hours:<td><input name='txtHours' id='txtHours'></input></td></tr>";
+
+                string js  = "var o1=document.getElementById(\"ddDispositions\");o1.style.visibility=\"hidden\";";
                 string js2 = "var o2=document.getElementById(\"ddAssignees\");o2.style.visibility=\"hidden\";";
 
-                //js = "";
                 sReplyModule += "<tr><td>" + BiblePayCommonNET.UICommonNET.GetButtonTypeSubmit("btnSaveTicket",
-                    "SaveTicketHistory_Click", "Save Ticket Comments", js + js2,"") + "</td></tr></form>";
+                    "SaveTicketHistory_Click", "Save Ticket Comments", js + js2, "") + "</td></tr></form>";
                 sHistory += sReplyModule;
             }
 
@@ -192,6 +212,7 @@ namespace Unchained
                 if (sBody.Length > 0)
                 {
                     sRow += "<td>" + th.GetColDateTime(i, "time").ToString()
+                        + "<td>Hours: " + th.GetColDouble(i,"Hours").ToString() + "</td></tr>"
                         + "<tr><td colspan=6><textarea class='pc90 comments' rows=10 columns=10 readonly=true>" + sBody + "</textarea>"
                         + sAddTimelineAttachmentButton + "</td></tr>";
                 }

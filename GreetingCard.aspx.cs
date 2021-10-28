@@ -197,7 +197,7 @@ namespace Unchained
 		{
 			if (e.EventAction == "BoughtGreetingCard")
 			{
-				string sPin = BiblePayCommon.Common.GetDouble(HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(e.Extra.Output.ToString())));
+				string sPin = BiblePayCommon.Common.GetDouble(BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Output.ToString()));
 
 				DACResult r30 = UICommon.BuySomething2(this, sPin);
 				if (!r30.fError())

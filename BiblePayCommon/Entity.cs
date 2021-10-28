@@ -245,7 +245,6 @@ namespace BiblePayCommon
                     { return propertyInfo1.Name.CompareTo(propertyInfo2.Name); });
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
-                Console.WriteLine(propertyInfo.Name);
                 lProps.Add(propertyInfo.Name);
                 string sPropType = propertyInfo.PropertyType.ToString();
             }
@@ -278,10 +277,22 @@ namespace BiblePayCommon
             string[] vRestricted = RESTRICTED_FIELDS.Split(new string[] { "," }, StringSplitOptions.None);
             return InList(vRestricted, sName);
         }
-        public static bool IsHidden(string sName)
+        public static bool IsHidden(string sEntityName, string sName)
         {
-            string[] vHidden = HIDDEN_FIELDS.Split(new string[] { "," }, StringSplitOptions.None);
-            return InList(vHidden, sName);
+            try
+            {
+                BiblePayCommon.IBBPObject o = (BiblePayCommon.IBBPObject)BiblePayCommon.EntityCommon.GetInstance("BiblePayCommon.Entity+" + sEntityName);
+                Dictionary<string, string> _oDict = BiblePayCommon.EntityCommon.GetStaticFieldValues(o);
+                string sHF = _oDict["HIDDEN_FIELDS"].ToString() + "," + HIDDEN_FIELDS;
+                string[] vHidden = sHF.Split(new string[] { "," }, StringSplitOptions.None);
+                return InList(vHidden, sName);
+            }
+            catch(Exception ex)
+            {
+                Log2("IsHidden::" + sEntityName + "?" + sName);
+
+                return false;
+            }
         }
         public static bool IsReadOnly(string sName)
         {
@@ -486,6 +497,7 @@ namespace BiblePayCommon
             public int EmailVerified { get; set; }
             public string AvatarURL { get; set; }
             public int Administrator { get; set; }
+            public int Banned { get; set; }
             public int Tickets { get; set; }
             public string HashTags { get; set; }
             public string Testimony { get; set; }
@@ -518,6 +530,7 @@ namespace BiblePayCommon
             public string Body { get; set; }
             public string AssignedTo { get; set; }
             public string Disposition { get; set; }
+            public double Hours { get; set; }
 
             public override string GetHash()
             {
@@ -569,6 +582,24 @@ namespace BiblePayCommon
                 return GetSha256HashI(URL);
             }
         }
+
+        public class VideoRequest : BaseEntity, IBBPObject
+        {
+            public static string HIDDEN_FIELDS = "Processed,URL2,ProcessTime";
+
+            public string URL { get; set; }
+            // URL is the Requested URL
+            // URL2 is the Output PROCESSED URL ready for viewing
+            public string URL2 { get; set; }
+            public string Processed { get; set; }
+            public int ProcessTime { get; set; }
+
+            public override string GetHash()
+            {
+                return GetSha256HashI(URL);
+            }
+        }
+
 
         public class versememorizer1 : BaseEntity, IBBPObject
         {

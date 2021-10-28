@@ -1,7 +1,114 @@
-﻿.DropZone1 {
+﻿
+
+.largebuttondark {
+    background-color: primary_darker_color;
+    color: primary_text_color;
+    font-size-adjust: 125%;
+    padding: 3px 3px !important;
+}
+
+.navbar-fixed-top, .navbar-fixed-bottom {
+    position: fixed;
+    right: 0;
+    left: 0;
+    z-index: 1030;
+}
+
+.navbar-fixed-top {
+    top: 0;
+    border-width: 0 0 1px;
+}
+
+.navbar:before, .navbar:after, .container1:before, .container1:after {
+    display: table;
+    content: " ";
+}
+
+.navbar:after, .navbar-header:after, .navbar-collapse:after, .pager:after, .panel-body:after, .modal-header:after, .modal-footer:after {
+    clear: both;
+}
+
+.container1 {
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.navbar {
+    position: fixed;
+    min-height: 50px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    display: inline-block;
+}
+
+
+
+.bubble-content {
+    max-width: 94%;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px 0 rgb(16 35 47 / 15%);
+    position: relative;
+    display: flex;
+    flex-direction: column-reverse;
+    height: -webkit-fit-content;
+    height: -moz-fit-content;
+    height: fit-content;
+    z-index: 2;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    background-color:purple;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: #fff;
+    background-color: var(--message-background-color);
+}
+
+.telegram-message {
+    font-size: 16px;
+    font-size: var(--messages-text-size);
+    padding: 0 .5rem .375rem .625rem;
+    max-width: 70%;
+    color: #000;
+    color: var(--primary-text-color);
+    line-height: 1.5125;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.avatar-normal {
+    /* This image is 687 wide by 1024 tall, similar to your aspect ratio */
+    /*background-image: url('http://i.stack.imgur.com/Dj7eP.jpg');*/
+    /* make a square container */
+    width: 60px;
+    height: 60px;
+    /* fill the container, preserving aspect ratio, and cropping to fit */
+    background-size: cover;
+    /* center the image vertically and horizontally */
+    background-position: top center;
+    /* round the edges to a circle with border radius 1/2 container size */
+    border-radius: 50%;
+}
+
+.avatar-element {
+    width:100px;
+    min-width:100px;
+    background-color:purple !IMPORTANT;
+    color: gold;
+    line-height: var(--size) !important;
+    border-radius: 50%;
+    border-width:30px;
+    text-align: center;
+    font-size: 40px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+
+.DropZone1 {
     width: 300px;
     height: 90px;
-    xbackground-color: #357A2B;
     border-color: #CCCCCC;
     color: #767676;
     float: left;
@@ -20,11 +127,6 @@
     vertical-align: top;
 }
 
-@media(min-width:767px){
-    .navcontainer{
-        padding-left:250px;
-    }
-}
 
 .galleryvisibile {
     display:block;
@@ -789,7 +891,7 @@ div.gallerycontainer {
     .body-content {
         padding-left: 20px;
         padding-right: 20px;
-        padding-top: 110px;
+        padding-top: 70px;
     }
 
     /* Set widths on the form inputs since otherwise they're 100% wide */

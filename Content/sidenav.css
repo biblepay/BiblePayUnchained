@@ -31,7 +31,8 @@ a.decoratedlink visited {
 .largebuttondark {
     background-color: primary_darker_color;
     color: primary_text_color;
-    font-size-adjust:170%;
+    font-size-adjust: 125%;
+    padding: 3px 3px !important;
 }
 
 

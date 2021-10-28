@@ -76,6 +76,15 @@ namespace Unchained
                     BiblePayCommonNET.UICommonNET.MsgModal(this, "Failure", "The chat no longer exists.", 400, 300, true);
                 }
             }
+            else if (_bbpevent.EventName == "BanUser_Click")
+            {
+                User uBanned = Common.gUserById(this, _bbpevent.EventValue);
+                uBanned.Banned = 1;
+                BiblePayCommon.Entity.user1 o = Common.ConvertUserToUserEntity(uBanned);
+                BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), o, Common.gUser(this));
+                string sNarr = r.fError() ? "Failed" : "Successfully banned.";
+                BiblePayCommonNET.UICommonNET.MsgModal(this, "Result", sNarr, 400, 300, true);
+            }
             else if(_bbpevent.EventName == "ChatNow_Click")
             {
                 Session["chatactiveuser"] = _bbpevent.EventValue;
@@ -85,8 +94,6 @@ namespace Unchained
                 c.chatGuid = Guid.NewGuid().ToString();
                 UICommon.dictChats[Common.gUser(this).id] = c;
                 UICommon.dictChats[_bbpevent.EventValue] = c;
-                //Response.Redirect("VideoList");
-
             }
             else if (_bbpevent.EventName=="RearrangeObjectUp_Click")
             {
@@ -170,7 +177,7 @@ namespace Unchained
                     UICommon.MsgBox("Error", "Sorry, cannot locate object.", this.Page);
                     return;
                 }
-                c.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(_bbpevent.Extra.Output.ToString()));
+                c.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(_bbpevent.Extra.Output.ToString()));
                 
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), c, Common.gUser(this));
                 if (!r.fError())
@@ -259,7 +266,9 @@ namespace Unchained
                     //mangled
                     return;
                 }
-                dynamic oEventInfo1 = JsonConvert.DeserializeObject<dynamic>(BiblePayCommon.Encryption.Base64Decode(hfPostback));
+                string sPreJson = BiblePayCommon.Encryption.Base64Decode0(hfPostback);
+
+                dynamic oEventInfo1 = JsonConvert.DeserializeObject<dynamic>(sPreJson);
 
                 _bbpevent.Iteration = oEventInfo1["Iteration"];
                 double nLastPBIteration = GetDouble(this.Page.Session["LastPostbackIteration2"]);
@@ -293,6 +302,64 @@ namespace Unchained
                 UICommon.RunScript(this, sStack);
             }
             Common.Log("Accessing " + this.Request.RawUrl + " " + Common.gUser(this).FullUserName());
+            // Penetration testing and ddos prevention
+            // If they attack our site, we detect this here and conserve our resources.
+            try
+            {
+                string path = this.Request.Url.GetLeftPart(UriPartial.Path); // This is the part without the params
+                double nLastWrite = GetDouble(Session["lastwrite_" + path].ToNonNullString());
+                double nQty = GetDouble(Session["qty_" + path].ToNonNullString()) + 1;
+                double nElapsed = BiblePayCommon.Common.UnixTimestampUTC() - nLastWrite;
+                if (nElapsed > 60)
+                {
+                    nQty = 0;
+                    nElapsed = 600;
+                }
+
+
+                double nTotalTime = GetDouble(Session["totaltime_" + path].ToNonNullString()) + nElapsed;
+                Session["totaltime_" + path] = nTotalTime.ToString();
+                Session["lastwrite_" + path] = UnixTimestampUTC().ToString();
+                Session["qty_" + path] = (nQty).ToString();
+
+                double nBehavior = nTotalTime / nQty;
+                if (path.Contains("MessagePage"))
+                {
+                    nBehavior = 100;
+                }
+                if (nBehavior < 20)
+                {
+                    // ddos
+                    if (nBehavior < 5 && nBehavior > 1)
+                    {
+                        // Warning
+                        Log2("WARNING!   A DDOS WARNING HAS BEEN ISSUED.");
+
+                        UICommon.MsgBox("Warning", "We have detected a d-dos coming from your network.  Please slow access down, otherwise you may be banned.", this);
+                        return;
+                    }
+                    else if (nBehavior < 1)
+                    {
+                        Log2("ATTACK!  A ddos attack has been detected, level II.");
+
+                        // block the user
+                        Response.Write("ATTACK");
+                        Response.End();
+                        return;
+
+
+                    }
+
+
+                }
+
+                
+
+            }
+            catch(Exception ex)
+            {
+                Log2("anti-ddos::" + ex.Message);
+            }
         }
 
         protected string _CollectionName = "";

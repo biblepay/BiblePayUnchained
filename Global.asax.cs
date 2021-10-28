@@ -80,7 +80,7 @@ namespace Unchained
             });
             ScriptManager.ScriptResourceMapping.AddDefinition("core", new ScriptResourceDefinition
             {
-                Path = "~/Scripts/core0.js",
+                Path = "~/Scripts/core1.js",
                 LoadSuccessExpression = "window.core"
             });
             ScriptManager.ScriptResourceMapping.AddDefinition("muse", new ScriptResourceDefinition

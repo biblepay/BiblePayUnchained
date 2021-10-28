@@ -1,4 +1,4 @@
-﻿using BiblePayCommonNET;
+using BiblePayCommonNET;
 using System;
 using System.Data;
 using System.Net.Mail;
@@ -123,7 +123,7 @@ namespace Unchained
 
                 Timeline t = new Timeline();
                 //string b = e.Body;
-                t.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(e.Extra.Body.ToString()));
+                t.Body = BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Body.ToString());
                 t.UserID = gUser(this).id;
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), t, gUser(this));
                 if (r.fError())
@@ -147,7 +147,8 @@ namespace Unchained
                 }
 
                 Timeline t = new Timeline();
-                string sData = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(e.Extra.Body.ToString()));
+                string sData = BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Body.ToString());
+                
                 t.Body = UICommon.MakeShareableLink(sData, "");
                 t.UserID = gUser(this).id;
                 if (t.Body == "")
@@ -294,7 +295,8 @@ namespace Unchained
                     UICommon.MsgBox("Error", "Sorry, cannot locate object.", this.Page);
                     return;
                 }
-                t.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(_bbpevent.Extra.Output.ToString()));
+                t.Body = BiblePayCommon.Encryption.Base64DecodeWithFilter(_bbpevent.Extra.Output.ToString());
+                
 
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), t, Common.gUser(this));
                 if (!r.fError())
@@ -322,8 +324,7 @@ namespace Unchained
 
                 BiblePayCommon.Entity.comment1 o = new BiblePayCommon.Entity.comment1();
                 o.UserID = Common.gUser(this).id;
-                o.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(e.Extra.Output.ToString()));
-
+                o.Body = BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Output.ToString());
                 o.ParentID = e.EventValue;
 
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), o, Common.gUser(this));
@@ -528,12 +529,12 @@ namespace Unchained
             
             // Add the "Share something with the world" (Append timeline): 
             string sAddTimelineButton = "<input class='pc90' autocomplete='off' id='timeline1'></input><button id='btntimeline1' onclick=\""
-                   + "var o=document.getElementById('timeline1');var e={};e.Event='AddTimeline_Click';e.Value='"
-                   + sID + "';e.Body=window.btoa(escape(o.value));BBPPostBack2(null, e);\">Share something with the world, " 
-                   + gUser(this).FirstName + "</button> ";
-            string sAddURLButton = "<button id='btnurl1' onclick=\""
-                   + "var o=document.getElementById('timeline1');var e={};e.Event='AddTimelineURL_Click';e.Value='"
-                   + sID + "';e.Body=window.btoa(escape(o.value));BBPPostBack2(null, e);\">Share a URL</button><br> ";
+	                       + "var o=document.getElementById('timeline1');var e={};e.Event='AddTimeline_Click';e.Value='"
+	                       + sID + "';e.Body=XSS(o.value);BBPPostBack2(null, e);\">Share something with the world, " 
+	                       + gUser(this).FirstName + "</button> ";
+	        string sAddURLButton = "<button id='btnurl1' onclick=\""
+	                       + "var o=document.getElementById('timeline1');var e={};e.Event='AddTimelineURL_Click';e.Value='"
+	                       + sID + "';e.Body=XSS(o.value);BBPPostBack2(null, e);\">Share a URL</button><br> ";
 
             if (gUser(this).LoggedIn)
             {
@@ -604,9 +605,9 @@ namespace Unchained
                 }
 
                 string sTimelineRowButtons = "";
-                if (gUser(this).id == dt.Rows[i]["UserID"].ToString())
-                {
-                    sTimelineRowButtons += sAddTimelineAttachmentButton + "&nbsp;" + sDeleteTimelineButton + "&nbsp;" + sEditTimelineButton + "&nbsp;";
+                if (gUser(this).Administrator==1 || gUser(this).id == dt.Rows[i]["UserID"].ToString())
+		{
+		                    sTimelineRowButtons += sAddTimelineAttachmentButton + "&nbsp;" + sDeleteTimelineButton + "&nbsp;" + sEditTimelineButton + "&nbsp;";
                 }
 
                 sTimelineRowButtons += sAddCommentButton;

@@ -174,13 +174,14 @@ namespace Unchained
                 sGrabber = "var v=$(\"#q1\").val();";
             }
             string sClear = "var o = document.getElementById('q1'); o.value='';";
+            //this used to say b t o a(escape(v)); test this 
 
             string sJavascript = "$('<form id=\"wform1\" method=\"POST\">" + sNarrative
                 + "<br>" + sInputControl + "<br></form>').dialog({"
                 + "  modal: true, width: " + nWidth.ToString() + ", title: '" + sTitle + "', buttons: {    'OK': function() {"
                 + "  " + sGrabber
                 + "  var Extra={};Extra.Value='" + sEventValue + "';Extra.Address='" + sAddress + "';Extra.Amount='" + sAmt + "';"
-                + "Extra.Output=window.btoa(escape(v));Extra.Event='" + sCallBackEvent + "';" + sClear + "BBPPostBack2(this, Extra);"
+                + "Extra.Output=XSS(v);Extra.Event='" + sCallBackEvent + "';" + sClear + "BBPPostBack2(this, Extra);"
                 + "$(this).dialog('close');"
                 + "  },     'Cancel': function() {       $(this).dialog('close');                 }            }        });";
             //p.ClientScript.RegisterStartupScript(p.GetType(), "msginput1", sJavascript, true);
@@ -439,7 +440,7 @@ namespace Unchained
                 + "var myname='" + gUser(p).FirstName 
                 + "';var theirname = '" + u.FirstName + "';"
                 + "function sendit(o) {if (event.key != 'Enter') return true; "
-                + "var data = window.btoa(myname + ' said: ' + o.value); transmit(\"" + "chat" + "\", data, 'chatinner', \"\"); o.value=''; "
+                + "var data = XSS(myname + ' said: ' + o.value); transmit(\"" + "chat" + "\", data, 'chatinner', \"\"); o.value=''; "
                 + "var owindow = document.getElementById('chat1'); "
                 + "owindow.scrollIntoView(false); return false;}";
 
@@ -452,7 +453,7 @@ namespace Unchained
             item = 0;
             string sWallet = "<a class='decoratedlink' href='Wallet'><i class='fa fa-wallet'></i>&nbsp;"
                 + GetAvatarBalance(p) + "</a>";
-            //              + "<div class='pull-left info'><p>" + gUser(p).FirstName.ToNonNullString() + "</p>" + "</div><div class='myicons'><ul>" + sKeys + "</ul></div>"
+            //  "<div class='pull-left info'><p>" + gUser(p).FirstName.ToNonNullString() + "</p>" + "</div><div class='myicons'><ul>" + sKeys + "</ul></div>"
 
             string sChain = IsTestNet(p) ? "TESTNET" : "MAINNET";
             string sDecoratedChain = IsTestNet(p) ? "<font color=lime>TESTNET</font>" : "<font color=silver>MAINNET</font>";
@@ -487,8 +488,6 @@ namespace Unchained
                 return false;
             return true;
         }
-
-        
 
         public static User GetUserRecord(bool fTestNet, string id)
         {
@@ -703,78 +702,89 @@ namespace Unchained
             nWidthPct = fMobile ? 100 : 33;
 
             int iItem = 0;
-
+            double nPag = GetDouble(p.Request.QueryString["pag"] ?? "");
+            if (nPag > dt.Rows.Count)
+            {
+                nPag = dt.Rows.Count - 30;
+            }
+            if (nPag < 0)
+                nPag = 0;
+            double nStart = nPag;
+            double nEnd = nStart + 30;
+            int iRowNumber = 0;
+            
             foreach (DataRowView drv in dt.DefaultView)
             {
 
-             //   for (int y = 0; y < dt.Rows.Count; y++)
-            //{
-                string sURL = drv["URL"].ToNonNullString();
-                //string sType = drv["Order"].DataType.ToString();
-                string sValue = drv["Order"].ToString();
-
-                if (sURL != "")
+                if (iRowNumber >= nStart && iRowNumber <= nEnd)
                 {
-                    User u = UICommon.GetUserRecord(IsTestNet(p), drv["UserID"].ToNonNullString());
-                    string sUserName = u.FullUserName();
-                    string sElement = "";
-                    if ((sViewType == "video" || sViewType == "any") && (sURL.ToLower().Contains(".mp4") || sURL.ToLower().Contains(".webm")))
-                    {
-                        sElement = CurateVideo(p, nWidth, drv["id"].ToNonNullString(), u, drv["URL2"].ToNonNullString(),
-                            drv["SVID"].ToNonNullString(), 
-                            drv["FID"].ToNonNullString(), (int)drv.GetColDouble("time"),
-                            drv["Title"].ToNonNullString(), drv["Body"].ToNonNullString(),fShowRearrangeOption, 
-                            GetDouble(drv["Order"].ToNonNullString()), sOptSnippet);
+                    string sURL = drv["URL"].ToNonNullString();
+                    string sValue = drv["Order"].ToString();
 
-                    }
-                    else if ((sViewType == "pdf" || sViewType == "any") && sURL.Contains(".pdf"))
+                    if (sURL != "")
                     {
-                        string sPDFLink = "GospelViewer?pdfsource=" + BiblePayCommon.Encryption.Base64Encode(sURL);
-                        string sAsset = "<a target='_blank' href='" + sPDFLink + "'>"
-                            + "<img class='gallerypdf' src='https://foundation.biblepay.org/images/pdf_icon.png'></a>";
-                        string sDiv = "<div class='gallery'>" + sAsset + "</div>";
-                        sDiv += "<div class='gallery-description'>" + drv["Title"].ToNonNullString() + " • Uploaded by " + sUserName + "</div>";
-                        sElement = sDiv;
-                    }
-                    else if ((sViewType == "wiki" || sViewType == "any") && sURL.Contains(".htm"))
-                    {
-                        string sAsset = "<a href='" + sURL + "'><iframe class='gallery' src='" + sURL + "'></iframe></a>";
-                        string sDiv = "<div class='gallery'>" + sAsset;
-                        sDiv += "<br>" + drv["Subject"].ToNonNullString() + " • Uploaded by "
-                            + sUserName + "</div>";
-                        string sEdit = "<input type='button' onclick=\"location.href='CreateNewDocument?file=" + sURL + "';\" id='w" + drv["id"].ToString() + "' value='Edit' />";
-                        sElement = sDiv;
-                    }
-                    else if ((sViewType == "image" || sViewType == "any"))
-                    {
-                        if (sURL.ToLower().Contains(".png") || sURL.ToLower().Contains(".jpg") || sURL.ToLower().Contains(".jpeg") || sURL.ToLower().Contains(".bmp") || sURL.ToLower().Contains(".gif"))
+                        User u = UICommon.GetUserRecord(IsTestNet(p), drv["UserID"].ToNonNullString());
+                        string sUserName = u.FullUserName();
+                        string sElement = "";
+                        if ((sViewType == "video" || sViewType == "any") && (sURL.ToLower().Contains(".mp4") || sURL.ToLower().Contains(".webm")))
                         {
-                            sElement = CurateImage(p, nWidth, drv["id"].ToNonNullString(), u, drv["URL"].ToNonNullString(),
-                                 (int)drv.GetColDouble("time"), drv["Title"].ToNonNullString(),
-                                 drv["Body"].ToNonNullString(), fShowRearrangeOption, 
-                                 GetDouble(drv["Order"].ToNonNullString()), sOptSnippet);
+                            sElement = CurateVideo(p, nWidth, drv["id"].ToNonNullString(), u, drv["URL2"].ToNonNullString(),
+                                drv["SVID"].ToNonNullString(),
+                                drv["FID"].ToNonNullString(), (int)drv.GetColDouble("time"),
+                                drv["Title"].ToNonNullString(), drv["Body"].ToNonNullString(), fShowRearrangeOption,
+                                GetDouble(drv["Order"].ToNonNullString()), sOptSnippet);
+
+                        }
+                        else if ((sViewType == "pdf" || sViewType == "any") && sURL.Contains(".pdf"))
+                        {
+                            string sPDFLink = "GospelViewer?pdfsource=" + BiblePayCommon.Encryption.Base64Encode(sURL);
+                            string sAsset = "<a target='_blank' href='" + sPDFLink + "'>"
+                                + "<img class='gallerypdf' src='https://foundation.biblepay.org/images/pdf_icon.png'></a>";
+                            string sDiv = "<div class='gallery'>" + sAsset + "</div>";
+                            sDiv += "<div class='gallery-description'>" + drv["Title"].ToNonNullString() + " • Uploaded by " + sUserName + "</div>";
+                            sElement = sDiv;
+                        }
+                        else if ((sViewType == "wiki" || sViewType == "any") && sURL.Contains(".htm"))
+                        {
+                            string sAsset = "<a href='" + sURL + "'><iframe class='gallery' src='" + sURL + "'></iframe></a>";
+                            string sDiv = "<div class='gallery'>" + sAsset;
+                            sDiv += "<br>" + drv["Subject"].ToNonNullString() + " • Uploaded by "
+                                + sUserName + "</div>";
+                            string sEdit = "<input type='button' onclick=\"location.href='CreateNewDocument?file=" + sURL + "';\" id='w" + drv["id"].ToString() + "' value='Edit' />";
+                            sElement = sDiv;
+                        }
+                        else if ((sViewType == "image" || sViewType == "any"))
+                        {
+                            if (sURL.ToLower().Contains(".png") || sURL.ToLower().Contains(".jpg") || sURL.ToLower().Contains(".jpeg") || sURL.ToLower().Contains(".bmp") || sURL.ToLower().Contains(".gif"))
+                            {
+                                sElement = CurateImage(p, nWidth, drv["id"].ToNonNullString(), u, drv["URL"].ToNonNullString(),
+                                     (int)drv.GetColDouble("time"), drv["Title"].ToNonNullString(),
+                                     drv["Body"].ToNonNullString(), fShowRearrangeOption,
+                                     GetDouble(drv["Order"].ToNonNullString()), sOptSnippet);
+                            }
+                        }
+
+                        string sVisibility = iItem < 29 ? "galleryvisibile" : "galleryinvisible";
+
+
+                        string sRow = "<td id='xgtd" + iItem.ToString() + "' width='" + nWidthPct.ToString() + "%' ><div id='gtd" + iItem.ToString() + "' class='gallerycontainer " + sVisibility + "'>"
+                            + sElement + "</div></td>";
+                        //string sRow = "<div id='gtd" + iItem.ToString() + "' style='width:'" + nWidthPct.ToString() + "%' class='gallerycontainer'>" + sElement + "</div>";
+                        //string sRow = sElement;
+
+                        html += sRow;
+                        iCol++;
+                        iItem++;
+
+                        if (iCol == nColsPerRow)
+                        {
+                            html += "</tr>\r\n<tr id='gallery" + iItem.ToString() + "'>";
+                            //html += "</div><div id='gallery" + iItem.ToString() + "' class='gallerycontainer " + sVisibility + "'>";
+                            iCol = 0;
                         }
                     }
-
-                    string sVisibility = iItem < 29 ? "galleryvisibile" : "galleryinvisible";
-
-
-                    string sRow = "<td id='xgtd" + iItem.ToString() + "' width='" + nWidthPct.ToString() + "%' ><div id='gtd" + iItem.ToString() + "' class='gallerycontainer " + sVisibility + "'>" 
-                        + sElement + "</div></td>";
-                    //string sRow = "<div id='gtd" + iItem.ToString() + "' style='width:'" + nWidthPct.ToString() + "%' class='gallerycontainer'>" + sElement + "</div>";
-                    //string sRow = sElement;
-
-                    html += sRow;
-                    iCol++;
-                    iItem++;
-
-                    if (iCol == nColsPerRow)
-                    {
-                        html += "</tr>\r\n<tr id='gallery" + iItem.ToString() + "'>";
-                        //html += "</div><div id='gallery" + iItem.ToString() + "' class='gallerycontainer " + sVisibility + "'>";
-                        iCol = 0;
-                    }
                 }
+                iRowNumber++;
             }
             html += "</table>";
             //html += "&nbsp;</div>";
@@ -818,7 +828,6 @@ namespace Unchained
                     _newrow["id"] = grp.Id;
                     _newrow[groupbycolumn] = grp.Key;
 
-                    //Console.WriteLine(String.Format("The Max of '{0}' is {1}& {2}", grp.Id, grp.nftid, grp.max1));
                     dtOut.Rows.Add(_newrow);
                 }
                 return dtOut;
@@ -856,6 +865,27 @@ namespace Unchained
                    + sCaption + "</button>";
             return sButton;
         }
+        public static string CleanseURL(string sURL)
+        {
+            // Prevents URL display from becoming XSS  vulnerability
+            string sData = BiblePayCommon.Encryption.CleanseXSS(sURL);
+            bool fOK = true;
+            if (sURL.ToLower().Contains("script") || sURL.ToLower().Contains("javascript") || sURL.ToLower().Contains("(") || sURL.Contains(")"))
+                fOK = false;
+            if (sURL.ToLower().Contains("javas	cript"))
+                fOK = false;
+            string sDecoded = System.Web.HttpUtility.UrlDecode(sURL);
+            sDecoded = sDecoded.Replace("\t", "");
+
+            if (sDecoded.ToLower().Contains("script"))
+                fOK = false;
+            if (fOK)
+            {
+                return "N/A";
+            }
+            //sData = System.Web.HttpUtility.UrlEncode(sURL);
+            return sData;
+        }
 
         public static string GetUserGallery(Page p, DataTable dt, BiblePayPaginator.Paginator pag, int nCols)
         {
@@ -891,10 +921,12 @@ namespace Unchained
                         + dt.GetColDateTime(y, "time").ToShortDateString()
                         + "<br>" + dt.Rows[y]["domain"].ToNonNullString() + "";
 
-                    string sTelegram = " • <a href='" + u.TelegramLinkURL.ToNonNullString() + "'>" + u.TelegramLinkName.ToNonNullString() + "</a>"
-                        + "<br>" + u.TelegramLinkDescription.ToNonNullString();
+                    string sTelegram = " • <a target='_blank' href='" + CleanseURL(u.TelegramLinkURL.ToNonNullString()) + "'>" 
+                        + BiblePayCommon.Encryption.CleanseXSS(u.TelegramLinkName.ToNonNullString()) + "</a>"
+                        + "<br>" + BiblePayCommon.Encryption.CleanseXSS(u.TelegramLinkDescription.ToNonNullString());
                     string sChatAnchor = GetStandardAnchor("ancChat", "ChatNow", u.id.ToString(),
                             " • Chat Now <i class='fa fa-chat'></i>", "Chat with this user Now", "");
+                    string sBanAnchor = GetStandardAnchor("ancBan", "BanUser", u.id.ToString(), "<i class='fa fa-ban'></i>", "Ban this User", "user1");
 
 
                     if (u.TelegramLinkURL.ToNonNullString().Length > 1)
@@ -906,6 +938,11 @@ namespace Unchained
                         sDiv += sChatAnchor;
                         sDiv += " • " + UICommon.GetTipControl(IsTestNet(p), u.id, u.id);
                     }
+                    if (gUser(p).Administrator==1)
+                    {
+                        sDiv += " • "+ sBanAnchor;
+                    }
+
                     sDiv += "</div>";
                     string sRow = "<td width='" + nWidthPct.ToString() + "%' class='gallery'>" + sDiv + "</td>";
                     html += sRow;

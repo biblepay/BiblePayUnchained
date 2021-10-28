@@ -21,6 +21,8 @@ namespace Unchained
 {
     public static class Common
     {
+        public static int nVersionLocal = 1401;
+
         public static Data gData = new Data(Data.SecurityType.REQ_SA);
         public static string GetSiteTitle(Page p)
         {
@@ -409,19 +411,40 @@ namespace Unchained
         {
             try
             {
-                string sNotify = Config("notifyofnewuser");
-                if (sNotify != "")
+
+                double nReplay = BiblePayCommon.Common.GetDouble(BiblePayCommon.HalfordDatabase.GetKVWithExpiration("NotifyOfNewUser" + u.EmailAddress));
+                if (nReplay == 1)
                 {
+                    // already notified
+                    return;
+                }
+                BiblePayCommon.HalfordDatabase.SetKV("1", "NotifyOfNewUser" + u.EmailAddress, 60 * 60 * 24 * 30);
+
+                string sTemplate = Config("TemplateNewUser");
+                if (sTemplate != "")
+                {
+                    string sPath = "c:\\inetpub\\wwwroot\\Templates\\" + sTemplate;
+                    string sData = System.IO.File.ReadAllText(sPath);
+
                     MailMessage m = new MailMessage();
                     EmailNarr e = GetEmailFooter(p);
-
-                    string sNarr = "Dear " + sNotify + ",<br><br>User " + u.FirstName + " " + u.LastName + " has registered with e-mail address " + u.EmailAddress + ". "
-                        + "<br><br>Thank you.<br>" +"The "+ e.DomainName + " Team<br>";
-
-                    m.Subject = "[Transactional Message] Notification of Save User Record";
-                    m.Body = sNarr;
                     m.IsBodyHtml = true;
-                    m.To.Add(new MailAddress(sNotify));
+
+                    //string sNarr = "Dear " + u.FullUserName() + ",<br><br>Thank you for registering with our platform."
+                    //    + "<br><br>" + sData + "<br><br><br>" +"The "+ e.DomainName + " Team<br>";
+                    sData = sData.Replace("[FullUserName]", u.FullUserName());
+
+                    m.Subject = "[Transactional Message] Welcome to " + e.DomainName + "!";
+                    m.Body = sData;
+                    m.IsBodyHtml = true;
+                    m.To.Add(new MailAddress(u.EmailAddress, u.FullUserName()));
+
+
+                    string sNotifyExtra = Config("NotifyUser");
+                    if (sNotifyExtra != "")
+                    {
+                        m.Bcc.Add(new MailAddress(sNotifyExtra));
+                    }
                     m.Bcc.Add(new MailAddress("rob@biblepay.org"));
                    
                     DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(p), m, e.DomainName);
@@ -436,6 +459,8 @@ namespace Unchained
         public static DACResult SaveUserRecord(bool fTestNet, User u, Page p)
         {
             DACResult r = new DACResult();
+
+            bool fIsNew = false;
 
             BiblePayCommon.Entity.user1 o = ConvertUserToUserEntity(u);
             
@@ -478,6 +503,7 @@ namespace Unchained
                     MsgModal(p, "Error", r.Error, 400, 200, true);
                     return r;
                 }
+                fIsNew = true;
             }
 
             if (u.LoggedIn && u.EmailAddress != gUser(p).EmailAddress)
@@ -517,7 +543,8 @@ namespace Unchained
             else
             {
                 // With the user ID
-                NotifyOfNewUser(u, p);
+                if (fIsNew)
+                    NotifyOfNewUser(u, p);
                 u = gUser(p, u.EmailAddress);
                 // This is where we save the users session
                 BiblePayDLL.Sidechain.SetBiblePayAddressAndSignature(IsTestNet(p), sDomainName, ref u);

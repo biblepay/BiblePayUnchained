@@ -150,15 +150,6 @@ namespace Unchained
         protected global::System.Web.UI.WebControls.Button btnRegister;
 
         /// <summary>
-        /// btnSetAvatar control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSetAvatar;
-
-        /// <summary>
         /// btnModifyProfile control.
         /// </summary>
         /// <remarks>
@@ -220,5 +211,14 @@ namespace Unchained
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Image imgQrCode;
+
+        /// <summary>
+        /// btnSetAvatar control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSetAvatar;
     }
 }

@@ -1,4 +1,4 @@
-﻿using BiblePayCommon;
+using BiblePayCommon;
 using BiblePayCommonNET;
 using System;
 using System.Collections.Generic;
@@ -244,10 +244,10 @@ namespace Unchained
                 DACResult d = BiblePayUtilities.BuyNFT1(this, gUser(this).id, e.EventValue, myNFT.BuyItNowAmount, false, IsTestNet(this));
 
             }
-            else if (e.EventAction == "BoughtNFT")
+             else if (e.EventAction == "BoughtNFT")
             {
-                string sPin = BiblePayCommon.Encryption.Base64Decode((e.Extra.Output ?? "").ToString());
-                DACResult r30 = UICommon.BuySomething2(this, sPin);
+                string sPin = BiblePayCommon.Encryption.Base64DecodeWithFilter((e.Extra.Output ?? "").ToString());
+		DACResult r30 = UICommon.BuySomething2(this, sPin);
                 if (!r30.fError())
                 {
                     BiblePayCommon.Entity.NFT n = (BiblePayCommon.Entity.NFT)Session["pendingpurchasenft"];

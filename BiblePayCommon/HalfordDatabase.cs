@@ -29,11 +29,18 @@ namespace BiblePayCommon
         }
         public static object Read(string sKey)
         {
-            AppEntry e = new AppEntry();
-            bool f = dictAppCache.TryGetValue(sKey, out e);
-            if (System.DateTime.Now > e.Expiration)
-                e.Value = null;
-            return e.Value;
+            try
+            {
+                AppEntry e = new AppEntry();
+                bool f = dictAppCache.TryGetValue(sKey, out e);
+                if (System.DateTime.Now > e.Expiration)
+                    e.Value = null;
+                return e.Value;
+            }catch(Exception ex)
+            {
+                Log2("Unable to readhalfordcache::" + ex.Message);
+                return "";
+            }
         }
     }
 

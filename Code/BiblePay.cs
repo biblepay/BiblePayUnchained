@@ -23,6 +23,7 @@ namespace Unchained
             for (int i = 0; i < vTickers.Length; i++)
             {
                 BiblePayCommon.Entity.price1 p = GetCryptoPrice(vTickers[i]);
+                // Not signed... cant do insert (MISSION CRITICAL)
                 DataOps.InsertIntoTable(null, fTestNet, p, Common.CoerceUser(fTestNet));
             }
         }

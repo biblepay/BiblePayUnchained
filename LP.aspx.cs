@@ -108,7 +108,7 @@ namespace Unchained
 
                     bool fGot = UICommon.dictChats.TryGetValue(gUser(this).id, out myChat);
 
-                    string sDec = BiblePayCommon.Encryption.Base64Decode(sAct1);
+                    string sDec = BiblePayCommon.Encryption.Base64DecodeWithFilter(sAct1);
 
                     if (!fGot)
                     {

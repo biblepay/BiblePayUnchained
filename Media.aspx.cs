@@ -83,7 +83,7 @@ namespace Unchained
             else if (e.EventName == "Tipping_Click")
             {
                 string sPub = gUser(this).BiblePayAddress;
-                double nAmt = BiblePayCommon.Common.GetDouble(HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(e.Extra.Output.ToString())));
+                double nAmt = BiblePayCommon.Common.GetDouble(BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Output.ToString()));
                 string sTipTo = (Session["tipto"] ?? "").ToString();
                 User uTip = UICommon.GetUserRecord(IsTestNet(this), sTipTo);
                 string sChannelName = uTip.FullUserName();
@@ -112,7 +112,7 @@ namespace Unchained
             }
             else if (e.EventName=="Tipped_Click")
             {
-                string sPin = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(e.Extra.Output.ToString()));
+                string sPin = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Output.ToString()));
 
                 DACResult r30 = UICommon.BuySomething2(this, sPin);
                 if (r30.fError())
@@ -250,6 +250,7 @@ namespace Unchained
             }
             string sTranscript = dt.GetColValue("Transcript");
             sTranscript = sTranscript.Replace("\n", "<br>");
+            sTranscript = sTranscript.Replace("[br]", "<br>");
             bool fMobile = BiblePayCommonNET.UICommonNET.fBrowserIsMobile(this);
             if (fMobile)
                 sTranscript = ""; //Looks terrible on the cell phone; mask it

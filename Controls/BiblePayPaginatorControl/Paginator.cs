@@ -130,7 +130,7 @@ namespace BiblePayPaginator
             {
                 return;
             }
-            dynamic oEventInfo = JsonConvert.DeserializeObject<dynamic>(BiblePayCommon.Encryption.Base64Decode(hfPostback));
+            dynamic oEventInfo = JsonConvert.DeserializeObject<dynamic>(BiblePayCommon.Encryption.Base64Decode0(hfPostback));
 
             if (oEventInfo == null)
                 return;

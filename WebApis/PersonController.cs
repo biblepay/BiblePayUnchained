@@ -135,9 +135,10 @@ namespace Unchained.WebApis
                 return new { success = false, result = "You must log in to make a post." };
             }
             string decode = HttpUtility.UrlDecode(body.Content);
-            string base64 = BiblePayCommon.Encryption.Base64Decode(body.Content);
+            string base64 = BiblePayCommon.Encryption.Base64DecodeWithFilter(body.Content);
             Timeline t = new Timeline();
-            t.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64Decode(body.Content));
+            t.Body = BiblePayCommon.Encryption.Base64DecodeWithFilter(body.Content);
+
             t.UserID = user.id;
             BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(IsTestNet, t, user);
             if (r.fError())

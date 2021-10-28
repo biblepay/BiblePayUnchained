@@ -14,7 +14,7 @@ namespace Unchained
         {
             if (e.EventAction == "MakeServiceProviderPayment")
             {
-                string sPin = BiblePayCommon.Encryption.Base64Decode((e.Extra.Output ?? "").ToString());
+                string sPin = BiblePayCommon.Encryption.Base64DecodeWithFilter((e.Extra.Output ?? "").ToString());
                 DACResult r30 = UICommon.BuySomething2(this, sPin);
                 string sError = e.Extra.Error;
                 string sSumm = sError.IsEmpty() ? "Paid" : "Error";

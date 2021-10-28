@@ -15,7 +15,7 @@ namespace Unchained.Controllers
         /*
         public string Get()
         {
-            return "Welcome To Web API";
+            return "Web API";
         }
         */
 

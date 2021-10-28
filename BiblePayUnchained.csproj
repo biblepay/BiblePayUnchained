@@ -205,7 +205,8 @@
     <Content Include="Images\truthbook-clear.png" />
     <Content Include="Images\VideoRecordIcon.png" />
     <Content Include="LiveRecord.aspx" />
-    <Content Include="Person - Copy.aspx" />
+    <Content Include="ReportHoursByDeveloper.aspx" />
+    <Content Include="Reports.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -217,6 +218,7 @@
     <Content Include="Scripts\emoji\emojionearea.min.css" />
     <Content Include="Scripts\emoji\emojionearea.min.js" />
     <Content Include="Scripts\VideoRecord7.js" />
+    <Content Include="TelegramChat.aspx" />
     <Content Include="TicketAdd.aspx" />
     <Content Include="TicketList.aspx" />
     <Content Include="TicketView.aspx" />
@@ -279,7 +281,7 @@
     <Content Include="Content\themes\base\tooltip.css" />
     <Content Include="BibleViewer.aspx" />
     <Content Include="Chat.aspx" />
-    <Content Include="Scripts\core0.js" />
+    <Content Include="Scripts\core1.js" />
     <Content Include="ProposalAdd.aspx" />
     <Content Include="Leaderboard.aspx" />
     <Content Include="PortfolioBuilder.aspx" />
@@ -477,7 +479,7 @@
     <Content Include="PrayerAdd.aspx" />
     <Content Include="PrayerBlog.aspx" />
     <Content Include="Content\bootstrap.css" />
-    <Content Include="Content\Site.css" />
+    <Content Include="Content\Site0.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="LICENSE" />
@@ -548,6 +550,7 @@
     </Compile>
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Code\Report.cs" />
     <Compile Include="Friends.aspx.cs">
       <DependentUpon>Friends.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -576,12 +579,26 @@
     <Compile Include="LiveRecord.aspx.designer.cs">
       <DependentUpon>LiveRecord.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Person - Copy.aspx.cs">
-      <DependentUpon>Person - Copy.aspx</DependentUpon>
+    <Compile Include="ReportHoursByDeveloper.aspx.cs">
+      <DependentUpon>ReportHoursByDeveloper.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Person - Copy.aspx.designer.cs">
-      <DependentUpon>Person - Copy.aspx</DependentUpon>
+    <Compile Include="ReportHoursByDeveloper.aspx.designer.cs">
+      <DependentUpon>ReportHoursByDeveloper.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Reports.aspx.cs">
+      <DependentUpon>Reports.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Reports.aspx.designer.cs">
+      <DependentUpon>Reports.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="TelegramChat.aspx.cs">
+      <DependentUpon>TelegramChat.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TelegramChat.aspx.designer.cs">
+      <DependentUpon>TelegramChat.aspx</DependentUpon>
     </Compile>
     <Compile Include="TicketAdd.aspx.cs">
       <DependentUpon>TicketAdd.aspx</DependentUpon>

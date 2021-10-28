@@ -139,6 +139,31 @@ namespace BiblePayCommon
             return o.ToString();
         }
 
+        [Serializable]
+        public struct TelegramMessage
+        {
+            public long MessageID;
+            public long ChatID;
+            public string ChatRoomTitle;
+            public string ContentType;
+            public string Text;
+            public string Path;
+            public long Date;
+            public string Title;
+            public long NextMessageID;
+            public string WebPagePhotoPath;
+            public string WebPageDescription;
+            public string WebPageDisplayURL;
+            public string WebEmbedType;
+            public string WebEmbedURL;
+            public string WebURL;
+            public string WebPageTitle;
+            public string UserFirstName;
+            public string UserLastName;
+            public long UserID;
+            public string UserProfilePhoto;
+            
+        }
 
         public struct User
         {
@@ -182,7 +207,7 @@ namespace BiblePayCommon
 
             public int Tickets { get; set; }
             public int Administrator { get; set; }
-
+            public int Banned { get; set; }
 
             public string FullUserName()
             {
@@ -677,6 +702,9 @@ namespace BiblePayCommon
 
         public static string GetSha256HashI(string rawData)
         {
+            if (rawData == null){
+                rawData = String.Empty;
+            }
             // The I means inverted (IE to match a uint256)
             using (SHA256 sha256Hash = SHA256.Create())
             {
@@ -837,19 +865,39 @@ namespace BiblePayCommon
             var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
             return System.Convert.ToBase64String(plainTextBytes);
         }
+        public static string Base64DecodeWithFilter(string b)
+        {
+            return Base64Decode0(b, true);
+        }
 
-        public static string Base64Decode(string base64EncodedData)
+        public static string CleanseXSS(string d)
+        {
+            d = d.Replace("<br>", "[br]");
+            d = d.Replace("<script>", "[script]");
+            d = d.Replace("</script>", "[/script]");
+            d = d.Replace("<", "[lessthan]");
+            d = d.Replace(">", "[greaterthan]");
+            return d;
+        }
+        public static string Base64Decode0(string base64EncodedData, bool fApplyFilter = false)
         {
             try
             {
                 var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
-                return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+                string d = System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+                if (fApplyFilter)
+                {
+                    d = CleanseXSS(d);
+                }
+                return d;
+
             }
             catch (Exception)
             {
                 return String.Empty;
             }
         }
+
 
         public static string Base65Encode(string sData)
         {
@@ -861,7 +909,7 @@ namespace BiblePayCommon
         public static string Base65Decode(string sData)
         {
             string s1 = sData.Replace("[equal]", "=");
-            string s2 = Base64Decode(s1);
+            string s2 = Base64Decode0(s1);
             return s2;
         }
 

@@ -2,6 +2,7 @@
 using static BiblePayCommonNET.StringExtension;
 using System.Net;
 using System;
+using System.Text;
 
 namespace Unchained
 {
@@ -9,11 +10,20 @@ namespace Unchained
     {
         protected new void Page_Load(object sender, EventArgs e)
         {
-            string sPDFSource = BiblePayCommon.Encryption.Base64Decode(Request.QueryString["pdfsource"].ToNonNullString());
+            string sPDFSource = BiblePayCommon.Encryption.Base64Decode0(Request.QueryString["pdfsource"].ToNonNullString());
             if (sPDFSource != "")
             {
                 BiblePayCommon.BiblePayClient b = new BiblePayCommon.BiblePayClient();
                 byte[] b1 = BiblePayDLL.Sidechain.DownloadBytes(sPDFSource, "pdf.pdf");
+                /// Prevent JavaScript or XSS attacks:
+
+                string converted = Encoding.UTF8.GetString(b1, 0, b1.Length);
+                if (converted.ToLower().Contains("/javascript"))
+                {
+                    UICommon.MsgBox("Corrupt", "Sorry, this PDF is corrupt. ", this);
+                    return;
+                }
+
                 if (b1 != null)
                 {
                     Response.ContentType = "application/pdf";
