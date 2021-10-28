@@ -405,7 +405,7 @@
             if (body == '') {
                 return false;
             } else {
-                body = window.btoa(escape(body));
+                body = XSS(body);
                 var e = {};
                 e.Event = 'AddTimeline_Click';
                 e.Value = sID;
