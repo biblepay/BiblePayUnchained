@@ -428,7 +428,19 @@ namespace BiblePayCommon
         public class Timeline : BaseEntity, IBBPObject
         {
             public string Subject { get; set; }
+
             public string Body { get; set; }
+
+            public string Privacy { get; set; }
+
+            public string URL { get; set; }
+
+            public string URLTitle { get; set; }
+
+            public string URLDescription { get; set; }
+
+            public string URLPreviewImage { get; set; }
+
             public override string GetHash()
             {
                 return GetSha256HashI(Subject + Body + UserID);

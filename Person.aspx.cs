@@ -1,6 +1,8 @@
 using BiblePayCommonNET;
 using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Dynamic;
 using System.Net.Mail;
 using System.Web;
 using System.Web.UI;
@@ -21,17 +23,78 @@ namespace Unchained
         protected bool IsTestNet;
         protected bool fHomogenized;
         protected DACResult IsMyFriend;
+        protected User MySelf;
         protected new void Page_Load(object sender, EventArgs e)
         {
+            if (Request.Path.Contains("comment"))
+            {
+                string data = Request.Headers["headeraction"].ToNonNullString();
+                var comment = Newtonsoft.Json.JsonConvert.DeserializeObject<comment1>(data);
+                var status = SaveComment(comment);
+                Response.Write(Newtonsoft.Json.JsonConvert.SerializeObject(status));
+                Response.End();
+
+            }
+            if (Request.Path.Contains("voting"))
+            {
+                string s1 = Request.Headers["headeraction"].ToNonNullString();
+                string parentId = Common.GetElement(s1, "|", 1);
+                string voteType = Common.GetElement(s1, "|", 0);
+                var status = Voting(parentId, voteType);
+                VoteSums v = GetVoteSum(IsTestNet(this), parentId);
+                object o = new { status, nUpvotes = v.nUpvotes, nDownvotes = v.nDownvotes };
+                Response.Write(Newtonsoft.Json.JsonConvert.SerializeObject(o));
+                Response.End();
+            }
+            if (Request.Path.Contains("deletecomentbyid"))
+            {
+                string id = Request.Headers["headeraction"].ToNonNullString();
+                bool fDeleted = BiblePayDLL.Sidechain.DeleteObject(Common.IsTestNet(this), "comment1",
+                                          id, Common.gUser(this));
+                object o = new { status = fDeleted };
+                Response.Write(Newtonsoft.Json.JsonConvert.SerializeObject(o));
+                Response.End();
+            }
+            if (Request.Path.Contains("editcomentbyid"))
+            {
+                object result = new { status = true };
+
+                string data = Request.Headers["headeraction"].ToNonNullString();
+                var comment = Newtonsoft.Json.JsonConvert.DeserializeObject<comment1>(data);
+                comment1 comment2 = (comment1)Common.GetObject(Common.IsTestNet(this), "comment1", comment.id);
+                if (comment2 == null)
+                {
+                    result = new { status = true };
+                }
+                else
+                {
+                    comment2.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(comment.Body));
+                    //comment.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(_bbpevent.Extra.Output.ToString()));
+
+                    DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), 
+                        comment2, Common.gUser(this));
+                    if (!r.fError())
+                    {
+                        result = new { status = true, data = comment2.id };
+                    }
+                    else
+                    {
+                        result = new { status = false };
+                    }
+                }
+                Response.Write(Newtonsoft.Json.JsonConvert.SerializeObject(result));
+                Response.End();
+            }
             string sID = Request.QueryString["id"].ToNonNullString();
             string sFirstName = Request.QueryString["firstname"].ToNonNullString();
             string sLastName = Request.QueryString["lastname"].ToNonNullString();
             fHomogenized = Request.QueryString["homogenized"].ToNonNullString() == "1";
             string sUserID = Request.QueryString["id"].ToNonNullString();
 
+            MySelf = gUser(this);
             if (sUserID == "")
             {
-                sUserID = gUser(this).id;
+                sUserID = MySelf.id;
             }
             this.user = gUserById(this, sUserID);
 
@@ -111,6 +174,96 @@ namespace Unchained
             r.Result = "Friend Request";
             return r;
         }
+
+        #region new function for person
+        public object SaveComment(comment1 data)
+        {
+            if (!Common.gUser(this).LoggedIn)
+            {
+                return new { status = false, data = "You must login first to comment." };
+            }
+            object result = null;
+
+            try
+            {
+                BiblePayCommon.Entity.comment1 o = new BiblePayCommon.Entity.comment1();
+                o.UserID = Common.gUser(this).id;
+
+
+                o.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(data.Body));
+                o.ParentID = data.ParentID;
+
+                BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), o, Common.gUser(this));
+                if (!r.fError())
+                {
+                    result = new { status = true, data = o.id };
+                }
+                else
+                {
+                    result = new { status = false };
+                }
+
+            }
+            catch (Exception ex)
+            {
+                result = (new { status = false, data = ex.InnerException == null ? ex.Message : ex.InnerException.Message });
+            }
+            return result;
+        }
+
+        public object Voting(string parentID, string sVoteType)
+        {
+            if (!Common.gUser(this).LoggedIn)
+            {
+                return new { status = false, data = "You must login first to comment." };
+            }
+            object result = null;
+
+            try
+            {
+                if (!gUser(this).LoggedIn)
+                {
+                    return new { status = false };
+                }
+
+                BiblePayCommon.Entity.vote1 o = new BiblePayCommon.Entity.vote1();
+                o.UserID = gUser(this).id;
+                o.ParentID = parentID;
+                o.VoteType = sVoteType;
+                if (sVoteType == "upvote")
+                {
+                    o.VoteValue = 1;
+                }
+                else if (sVoteType == "downvote")
+                {
+                    o.VoteValue = -1;
+                }
+                else
+                {
+                    return new { status = false };
+                }
+
+                DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), o, gUser(this));
+                
+                if (!r.fError())
+                {
+                    result = new { status = true, data = o.id };
+                }
+                else
+                {
+                    result = new { status = false };
+                }
+
+            }
+            catch (Exception ex)
+            {
+                result = (new { status = false, data = ex.InnerException == null ? ex.Message : ex.InnerException.Message });
+            }
+            return result;
+        }
+
+
+        #endregion
         protected override void Event(BBPEvent e)
         {
             if (e.EventName == "AddTimeline_Click")
@@ -122,8 +275,34 @@ namespace Unchained
                 }
 
                 Timeline t = new Timeline();
-                //string b = e.Body;
-                t.Body = BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Body.ToString());
+
+                try
+                {
+                    t.Privacy = e.Extra.Privacy.ToString();
+                }
+                catch { }
+                try
+                {
+                    t.URL = e.Extra.URL.ToString();
+                }
+                catch { }
+                try
+                {
+                    t.URLTitle = BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.URLTitle.ToString());
+                }
+                catch { }
+                try
+                {
+                    t.URLDescription = BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.URLDescription.ToString());
+                }
+                catch { }
+                try
+                {
+                    t.URLPreviewImage = e.Extra.URLPreviewImage?.ToString();
+                }
+                catch { }
+
+                t.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Body.ToString()));
                 t.UserID = gUser(this).id;
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), t, gUser(this));
                 if (r.fError())
@@ -148,7 +327,7 @@ namespace Unchained
 
                 Timeline t = new Timeline();
                 string sData = BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Body.ToString());
-                
+
                 t.Body = UICommon.MakeShareableLink(sData, "");
                 t.UserID = gUser(this).id;
                 if (t.Body == "")
@@ -223,14 +402,14 @@ namespace Unchained
                 BiblePayCommon.Entity.FriendRequest f = new FriendRequest();
                 f.RequesterID = gUser(this).id;
                 f.UserID = e.EventValue;
-                if (e.EventValue == "" ||  f.UserID == f.RequesterID)
+                if (e.EventValue == "" || f.UserID == f.RequesterID)
                 {
                     UICommon.MsgBox("Error", "Sorry, you cannot be friends with yourself. ", this);
                     return;
                 }
                 DACResult r = AmIFriend(this.Page, f.UserID, f.RequesterID);
                 if (r.fError())
-                { 
+                {
                     UICommon.MsgBox("Error", r.Error, this);
                     return;
                 }
@@ -249,7 +428,7 @@ namespace Unchained
             else if (e.EventName == "AddTimelineComment_Click")
             {
                 UICommon.MsgInput(this, "AddedTimelineComment_Click", "Add a timeline comment", "Type your comment:"
-                              , 700,  "", "", UICommon.InputType.multiline, false, e.EventValue);
+                              , 700, "", "", UICommon.InputType.multiline, false, e.EventValue);
 
             }
             else if (e.EventName == "DeleteTimeline_Click")
@@ -296,7 +475,7 @@ namespace Unchained
                     return;
                 }
                 t.Body = BiblePayCommon.Encryption.Base64DecodeWithFilter(_bbpevent.Extra.Output.ToString());
-                
+
 
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), t, Common.gUser(this));
                 if (!r.fError())
@@ -494,7 +673,6 @@ namespace Unchained
             return html;
         }
 
-        
         protected string GetPerson()
         {
             BiblePayPaginator.Paginator _paginator = new BiblePayPaginator.Paginator();

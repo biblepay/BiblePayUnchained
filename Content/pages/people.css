@@ -3,7 +3,7 @@ body {
     margin-top: 20px;
 }
 .profile-page{
-    margin-top:40px;
+    margin-top:70px;
 }
     .post-container a{
         color:#000;
@@ -271,4 +271,91 @@ textarea.newpost {
 }
 textarea.newpost:focus{
     outline:none !important;
+}
+.posturl-content {
+    /*max-height: 100px;*/
+}
+    .posturl-content img{
+        /*max-height:100px;*/
+    }
+    .posturl-content h3 {
+        font-size: 18px;
+        max-height: 22px;
+        overflow: clip;
+    }
+.posturl-content p {
+    font-size: 12px;
+    line-height: 14px;
+    max-height: 85px;
+    overflow: clip;
+}
+
+.commentview {
+    background-color: #D3D3D3;
+    padding: 5px;
+    border-radius: 10px;
+}
+    .commentview .emojionearea.commentbody.emojionearea-disable {
+        background-color: #D3D3D3 !important;
+        border-color: transparent !important;
+        border: none !important;
+        position: initial !important;
+        box-shadow: none;
+    }
+        .commentview .emojionearea.commentbody.emojionearea-disable
+        .emojionearea-editor {
+            color: initial !important;
+        }
+#post-container
+.emojionearea .emojionearea-editor {
+    min-height: 1em;
+    max-height: none;
+}
+
+#post-container .emojionearea .emojionearea-picker.emojionearea-picker-position-bottom {
+}
+.saving .saving-comment {
+display:initial;
+}
+.saving-comment {
+    position: absolute;
+    right: 13px;
+    top: 10px;
+    font-size: 21px;
+    display:none;
+}
+.likebox {
+    position: absolute;
+    right: 10px;
+    bottom: -13px;
+    border: 1px solid #bababa;
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 1px 3px;
+    padding-right: 3px;
+    font-size: 12px;
+    font-weight: bold;
+    padding-right: 5px;
+}
+    .likebox.likecount {
+        right: 60px;
+    }
+        .likebox.likecount.no-dislike {
+            right: 10px !important;
+        }
+        .likebox .fa {
+            background-color: blue;
+            border-radius: 100%;
+            padding: 2px;
+            padding-top: 2px;
+            width: 17px;
+            height: 17px;
+            padding-top: 4px;
+            text-align: center;
+            color: #fff;
+            font-size: 10px;
+        }
+.comment-actions .fa{
+    font-size:12px !important;
+    margin-right:4px;
 }
