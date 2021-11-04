@@ -272,6 +272,10 @@
                         </div>
                     </div>
                     <%} %>
+
+                    <div class="row" id="post-container">
+                    </div>
+
                     <div class="card" id="no-post">
                         <div class="card-body">
                             <% if (IsMe)
@@ -285,8 +289,7 @@
                         </div>
                     </div>
 
-                    <div class="row" id="post-container">
-                    </div>
+                    
                 </div>
                 <!-- middle wrapper end -->
                 <!-- right wrapper start -->
@@ -483,6 +486,8 @@
                 <a href="/Person?id={{userid}}" class="stretched-link"></a>
             </div>
         </div>
+        <script src="Scripts/waypoint/jquery.waypoints.min.js"></script>
+        <script src="Scripts/waypoint/shortcuts/infinite.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="Scripts/emoji/emojionearea.min.js"></script>
         <script>
@@ -596,18 +601,31 @@
             <%}%>
 
 
-            let pno;
+            let pno = 0;
             let me = '<%= IsMe %>';
             let homogenized = '<%= fHomogenized %>';
             let isTestNet = '<%= IsTestNet %>';
             let sID = '<%=MySelf.id%>';
-            $(function () {
-                $.get(`api/post/posts?sID=${sID}&fHomogenized=${homogenized}&me=${me}&IsTestNet=${isTestNet}`, function (response) {
+            let userId = '<%=user.id%>';
+
+            let postfinished = false;
+            let loadingpost = false;
+            function getpost() {
+                if (loadingpost || postfinished)
+                    return false;
+
+                loadingpost = true;
+                $.get(`api/post/posts?sID=${userId}&fHomogenized=${homogenized}&me=${me}&IsTestNet=${isTestNet}&pno=${pno}`, function (response) {
                     if (response.length == 0) {
                         $('#no-post').show();
+                        postfinished = true;
+                        if (waypoint) {
+                            waypoint.destroy();
+                        }
                     }
                     else {
                         $('#no-post').hide();
+                        pno += 1;
                     }
                     $.each(response, function (i, v, a) {
                         let template = $('#post-template').html().toString();
@@ -664,7 +682,7 @@
                             emojin.data("emojioneArea").setFocus();
                         });
                         html.find('.singlecomment').attr('id', commentid);
-                      let emojin =  html.find('.writecomment').emojioneArea({
+                        let emojin = html.find('.writecomment').emojioneArea({
                             autoHideFilters: true,
                             useSprite: true,
                             pickerPosition: "bottom",
@@ -679,40 +697,40 @@
                                                 let ctemplate = $('#comment-template').html().toString();
                                                 var chtml = $(ctemplate);
                                                 let pic = $('.new-comment .commenterpic').attr('src')
-                                                
+
                                                 chtml.find('.commenterpic').attr('src', pic);
                                                 chtml.find('.commentername').html('<%= user.FullUserName()  %>');
-                                                chtml.find('.commenttime').html(PrepareTime(new Date()));
-                                                chtml.find('.commentbody').html(body.replaceAll('\n', '<br\>'));
-                                                html.find('.postcommentscontainer').append(chtml);
-                                                chtml.addClass('saving');
-                                                console.log(body);
-                                                let data1 = JSON.stringify({ Body: XSS(escape(body)), ParentID: v.id });
-                                                $.ajax({
-                                                    type: "POST",
-                                                    url: "Person.aspx/comment",
-                                                    data: {data: data1 },
-                                                    headers: { headeraction: data1 },
-                                                    success: function (response) {
-                                                        var result = JSON.parse(response);
-                                                        if (result.status) {
-                                                            $(chtml[0]).attr('id', 'comment' + result.data);
-                                                            chtml.removeClass('saving')
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                            return false;
-                                            
-                                        }
-                                        else {
-                                            
-                                        }
-                                    }
+                                              chtml.find('.commenttime').html(PrepareTime(new Date()));
+                                              chtml.find('.commentbody').html(body.replaceAll('\n', '<br\>'));
+                                              html.find('.postcommentscontainer').append(chtml);
+                                              chtml.addClass('saving');
+                                              console.log(body);
+                                              let data1 = JSON.stringify({ Body: XSS(escape(body)), ParentID: v.id });
+                                              $.ajax({
+                                                  type: "POST",
+                                                  url: "Person.aspx/comment",
+                                                  data: { data: data1 },
+                                                  headers: { headeraction: data1 },
+                                                  success: function (response) {
+                                                      var result = JSON.parse(response);
+                                                      if (result.status) {
+                                                          $(chtml[0]).attr('id', 'comment' + result.data);
+                                                          chtml.removeClass('saving')
+                                                      }
+                                                  }
+                                              });
+                                          }
+                                          return false;
 
-                                }
-                            }
-                        });
+                                      }
+                                      else {
+
+                                      }
+                                  }
+
+                              }
+                          }
+                      });
 
 
                         //writecomment
@@ -740,7 +758,7 @@
                                 chtml.find('.commentername').html(v1.FullName);
                                 chtml.find('.commenttime').html(PrepareTime(v1.PostedOn));
                                 chtml.find('.commentbody').html(v1.Body.replaceAll('\n', '<br\>'));
-                                
+
                                 //Count.nUpvotes nDownvotes
                                 chtml.find('.commentview .likecount .count').html(v1.Count.nUpvotes);
                                 if (v1.Count.nUpvotes > 0) {
@@ -898,12 +916,12 @@
                                     chtml.find('.commentedit').remove()
                                 }
                                 html.find('.postcommentscontainer').append(chtml);
-                                
+
                             });
                         }
 
                         //template = template.replaceAll('{{postimage}}', '');
-                        
+
                         if (v.UserId == sID) {
                             html.find('.editpost').on('click', function () {
                                 var e = {};
@@ -927,15 +945,32 @@
 
                         $('#post-container').append(html);
                     })
+                    loadingpost = false;
+
+                    if (waypoint) {
+                        waypoint.destroy();
+                    }
+                    var waypoint = new Waypoint({
+                        element: document.getElementsByTagName('body'),
+                        handler: function () {
+                            if (!loadingpost & !postfinished)
+                                getpost();
+                        },
+                        offset: 'bottom-in-view'
+                    })
                 });
 
-                $.get(`api/media/images?sID=${sID}&isTestNet=${isTestNet}`, function (response) {
+            }
+
+            $(function () {
+                getpost();
+                $.get(`api/media/images?sID=${userId}&isTestNet=${isTestNet}`, function (response) {
                     $.each(response, function (i, v) {
                         let temp = '<div class="col-md-4" ><figure><img class="img-fluid" src="' + v.URL + '" alt="' + v.Title + '"></figure></div>'
                         $('#latest-images').append(temp);
                     })
                 })
-                $.get(`api/people/friends?sID=${sID}&isTestNet=${isTestNet}`, function (response) {
+                $.get(`api/people/friends?sID=${userId}&isTestNet=${isTestNet}`, function (response) {
                     $('#friendscount').html(response.total);
                     $.each(response.result, function (i, v, a) {
                         let template = $('#friend-template').html().toString();

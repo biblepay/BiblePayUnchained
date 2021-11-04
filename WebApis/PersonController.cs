@@ -41,7 +41,7 @@ namespace Unchained.WebApis
         }
         #endregion
         [Route("api/post/posts")]
-        public object GetPosts(string sID, bool fHomogenized, bool me, bool IsTestNet)
+        public object GetPosts(string sID, bool fHomogenized, bool me, bool IsTestNet, int pno)
         {
             // For each timeline entry...
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "Timeline");
@@ -64,46 +64,47 @@ namespace Unchained.WebApis
             {
                 DataOps.FilterDataTable(ref dt, "userid='" + sID + "'");
             }
-
+            int take = 5;
+            int skip = pno * take;
             // Default Sort, time desc:
             // TODO: Figure out why this line doesnt work, but the OrderBy works: dt= dt.SortBy("time desc");
 
             dt = dt.OrderBy("time desc");
-            dt.Columns.Add("ProfilePicture");
-            dt.Columns.Add("FullName");
-            dt.Columns.Add("PostedOn");
+            var data = dt.AsEnumerable().Skip(skip).Take(take);
+            //dt.Columns.Add("ProfilePicture");
+            //dt.Columns.Add("FullName");
+            //dt.Columns.Add("PostedOn");
 
             List<object> posts = new List<object>();
-            for (int i = 0; i < dt.Rows.Count; i++)
+            for (int i = 0; i < data.Count(); i++)
             {
-                var user = UICommon.GetUserRecord(IsTestNet, dt.Rows[i]["userid"].ToString());
-                dt.Rows[i]["ProfilePicture"] = string.IsNullOrEmpty(user.AvatarURL) ? "" : user.AvatarURL;
-                dt.Rows[i]["FullName"] = user.FullUserName();
-                dt.Rows[i]["PostedOn"] = dt.GetColDateTime(i, "time");
-
+                var fields = data.ElementAt(i);
+                string userId = data.ElementAt(i).Field<string>("userid");
+                var user = UICommon.GetUserRecord(IsTestNet, userId);
+                var p = new
+                {
+                    id = fields.Field<string>("id"),// dt.Rows[i]["id"],
+                    ProfilePicture = string.IsNullOrEmpty(user.AvatarURL) ? "" : user.AvatarURL,
+                    FullName = user.FullUserName(),
+                    PostedOn = Encryption.UnixTimeStampToDateTime(BiblePayCommon.Common.GetDouble(fields.Field<object>("time"))),
+                    Body = fields.Field<string>("Body"),// dt.Rows[i]["Body"],
+                    URL = fields.Field<string>("URL"),//dt.Rows[i]["URL"],
+                    URLPreviewImage = fields.Field<string>("URLPreviewImage"),//dt.Rows[i]["URLPreviewImage"],
+                    URLTitle = fields.Field<string>("URLTitle"),//dt.Rows[i]["URLTitle"],
+                    UserId = user.id,
+                    URLDescription = fields.Field<string>("URLDescription"),//dt.Rows[i]["URLDescription"],
+                    Likes = GetVoteSum(IsTestNet, fields.Field<string>("id")),
+                    Comments = new List<object>()
+                };
+                 
                 //sTimeline += UICommon.GetAttachments(this, dt.Rows[i]["id"].ToString(), "", "Timeline Attachments", "style='background-color:white;padding-left:30px;'");
                 DataTable dt2 = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "comment1");
 
                 dt2 = dt2.FilterDataTable("parentid='" + dt.Rows[i]["id"].ToString() + "'");
                 dt2 = dt2.OrderBy("time asc");
-                var p = new
-                {
-                    id = dt.Rows[i]["id"],
-                    ProfilePicture = string.IsNullOrEmpty(user.AvatarURL) ? "" : user.AvatarURL,
-                    FullName = user.FullUserName(),
-                    PostedOn = dt.GetColDateTime(i, "time"),
-                    Body = dt.Rows[i]["Body"],
-                    URL = dt.Rows[i]["URL"],
-                    URLPreviewImage = dt.Rows[i]["URLPreviewImage"],
-                    URLTitle = dt.Rows[i]["URLTitle"],
-                    UserId = user.id,
-                    URLDescription = dt.Rows[i]["URLDescription"],
-                    Likes = GetVoteSum(IsTestNet, dt.Rows[i]["id"].ToString()),
-                    Comments = new List<object>()
-                };
+
                 for (int c = 0; c < dt2.Rows.Count; c++)
                 {
-
                     var userc = UICommon.GetUserRecord(IsTestNet, dt2.Rows[c]["userid"].ToString());
                     p.Comments.Add(new
                     {
@@ -114,7 +115,7 @@ namespace Unchained.WebApis
                         UserId = userc.id,
                         PostedOn = dt2.GetColDateTime(c, "time"),
                         Count = GetVoteSum(IsTestNet, dt2.Rows[c]["Id"].ToString())
-                });
+                    });
                 }
                 posts.Add(p);
             }

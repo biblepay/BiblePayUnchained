@@ -213,7 +213,8 @@ namespace Unchained
 
         public object Voting(string parentID, string sVoteType)
         {
-            if (!Common.gUser(this).LoggedIn)
+            var user = gUser(this);
+            if (!user.LoggedIn)
             {
                 return new { status = false, data = "You must login first to comment." };
             }
@@ -221,12 +222,8 @@ namespace Unchained
 
             try
             {
-                if (!gUser(this).LoggedIn)
-                {
-                    return new { status = false };
-                }
-
-                BiblePayCommon.Entity.vote1 o = new BiblePayCommon.Entity.vote1();
+                BiblePayCommon.Entity.vote1 o = (BiblePayCommon.Entity.vote1)GetObjectWithFilter(IsTestNet(this), "vote1", "userid='" + user.id
+                + "' and parentid='" + parentID + "'");
                 o.UserID = gUser(this).id;
                 o.ParentID = parentID;
                 o.VoteType = sVoteType;
