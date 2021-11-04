@@ -16,7 +16,7 @@ namespace Unchained
             string sFilterType = Request.QueryString["filtertype"] ?? "";
             bool fIncDeleted = (Request.QueryString["includedeleted"] ?? "") == "1";
 
-            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), sTable, fIncDeleted);
+            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), sTable, fIncDeleted);
 
             if (sFilterType == "mine" && sTable=="invoice1")
             {

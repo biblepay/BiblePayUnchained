@@ -109,7 +109,7 @@ namespace Unchained
         {
             DACResult r = new DACResult();
             
-            DataTable dtOriginal = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "FriendRequest");
+            DataTable dtOriginal = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "FriendRequest");
             string sSnippet1 = "userid='" + sFriendUserGuid + "' and requesterid='" + sMyUserGuid + "'";
             DataTable dt1 = dtOriginal.FilterDataTable(sSnippet1);
             if (sMyUserGuid == sFriendUserGuid)
@@ -131,7 +131,7 @@ namespace Unchained
                 return r;
             }
             string sSnippet2 = "requesterid='" + sFriendUserGuid + "' and userid='" + sMyUserGuid + "'";
-            dtOriginal = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "FriendRequest");
+            dtOriginal = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "FriendRequest");
 
             dt1 = dtOriginal.FilterDataTable(sSnippet2);
             if (dt1.Rows.Count > 0)
@@ -144,7 +144,7 @@ namespace Unchained
                 return r;
             }
 
-            dtOriginal = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "Friend");
+            dtOriginal = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "Friend");
             dt1 = dtOriginal.FilterDataTable(sSnippet1);
             if (dt1.Rows.Count > 0)
             {
@@ -155,7 +155,7 @@ namespace Unchained
                 r.Error = "Sorry, this person is already friends with you.";
                 return r;
             }
-            dtOriginal = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "Friend");
+            dtOriginal = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "Friend");
 
             dt1 = dtOriginal.FilterDataTable(sSnippet2);
             if (dt1.Rows.Count > 0)
@@ -288,17 +288,19 @@ namespace Unchained
                 catch { }
                 try
                 {
-                    t.URLTitle = BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.URLTitle.ToString());
+                    string data = BiblePayCommon.Encryption.Base64Decode0(e.Extra.URLTitle.ToString(), true);
+                    string decoded = HttpUtility.UrlDecode(data);
+                    t.URLTitle = decoded;
                 }
                 catch { }
                 try
                 {
-                    t.URLDescription = BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.URLDescription.ToString());
+                    t.URLDescription = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.URLDescription.ToString()));
                 }
                 catch { }
                 try
                 {
-                    t.URLPreviewImage = e.Extra.URLPreviewImage?.ToString();
+                    t.URLPreviewImage = HttpUtility.UrlDecode(e.Extra.URLPreviewImage?.ToString());
                 }
                 catch { }
 
@@ -526,7 +528,7 @@ namespace Unchained
 
         public static string GetFriendsList(bool fTestNet, string sUserID)
         {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "Friend");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "Friend");
             dt = dt.FilterDataTable("RequesterID='" + sUserID + "' or UserID='" + sUserID + "'");
             string sList = "userid in ('" + sUserID + "',";
 
@@ -560,7 +562,7 @@ namespace Unchained
                 {
                     sMyFriendsList = sMyFriendsList.Replace("userid in", "id in");
                 }
-                DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "user1");
+                DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "user1");
                 dt = dt.FilterDataTable(sMyFriendsList);
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
@@ -720,7 +722,7 @@ namespace Unchained
             }
 
             // For each timeline entry...
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "Timeline");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), "Timeline");
             if (fHomogenized)
             {
                 string sMyFriendsList = GetFriendsList(IsTestNet(this), gUser(this).id);
@@ -731,7 +733,7 @@ namespace Unchained
                     if (dt.Rows.Count == 0)
                     {
                         // Show homogenized view with everyones posts (since I have no friends yet, and no timeline posts yet):
-                        dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "Timeline");
+                        dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), "Timeline");
                     }
                 }
             }

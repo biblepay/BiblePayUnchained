@@ -60,7 +60,7 @@ namespace Unchained
             string html = "<table class=saved>";
             string sRow = "<tr><th>Name<th>Avatar<th>Since<th>Unfriend</tr>";
             html += sRow;
-            DataTable dtFriends = RetrieveDataTable2(IsTestNet(this), "Friend");
+            DataTable dtFriends = RetrieveDataTable3(IsTestNet(this), "Friend");
             dtFriends = dtFriends.FilterDataTable("UserID='" + gUser(this).id + "' or RequesterID='" + gUser(this).id + "'");
 
             if (dtFriends.Rows.Count == 0)

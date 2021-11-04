@@ -37,7 +37,7 @@ namespace Unchained
         }
         protected void Run_Click(object sender, System.EventArgs e)
         {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "TicketHistory");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), "TicketHistory");
             string sDevID = Request.Form["ddDevelopers"].ToNonNullString();
             if (sDevID == "")
             {

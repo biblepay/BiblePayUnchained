@@ -133,6 +133,42 @@ namespace BiblePayCommonNET
         }
 
 
+        public static void MsgModalWithLinks(Page p, string sTitle, string sNarrative, int nWidth, int nHeight, bool fUseScriptManager = false, bool fShowCancelButton = false)
+        {
+            sTitle = BiblePayCommon.Encryption.CleanModalString(sTitle);
+            sNarrative = sNarrative.Replace("\r\n", "<br>");
+            string sJavascript = "";
+            if (fShowCancelButton)
+            {
+                sJavascript = "function closeModalDialog() { $('#divdialog').dialog('close');  }"
+                + "showModalDialogWithCancel(\"" + sTitle + "\",\"" + sNarrative + "\", " + nWidth.ToString() + ", " + nHeight.ToString() + ");";
+            }
+            else
+            {
+                sJavascript = "function closeModalDialog() { $('#divdialog').dialog('close');  }"
+                    + "showModalDialog(\"" + sTitle + "\",\"" + sNarrative + "\", " + nWidth.ToString() + ", " + nHeight.ToString() + ",\"\");";
+            }
+            if (fUseScriptManager)
+                ScriptManager.RegisterStartupScript(p, p.GetType(), "modalid1" + Guid.NewGuid().ToString(), sJavascript, true);
+            else
+                p.ClientScript.RegisterStartupScript(p.GetType(), "modalid1" + Guid.NewGuid().ToString(), sJavascript, true);
+        }
+
+        public static void ModalEmpty(Page p, string sCallerDivID,  string sTitle, string sHTML, int nWidth, int nHeight, bool fUseScriptManager = false)
+        {
+            string sJavascript = "";
+            sHTML = sHTML.Replace("'", "\\'");
+            sHTML = sHTML.Replace("\"", "\\\"");
+
+            sJavascript = "function closeModalDialog() { $('#divdialog').dialog('close');  }"
+                    + "showModalEmptyDialog(\"" + sCallerDivID + "\",\"" + sTitle + "\",\"" + sHTML + "\", " + nWidth.ToString() + ", " + nHeight.ToString() + ",\"\");";
+            if (fUseScriptManager)
+                ScriptManager.RegisterStartupScript(p, p.GetType(), "modalid1" + Guid.NewGuid().ToString(), sJavascript, true);
+            else
+                p.ClientScript.RegisterStartupScript(p.GetType(), "modalid1" + Guid.NewGuid().ToString(), sJavascript, true);
+        }
+
+
         public static string Toast(string sTitle, string sBody)
         {
             string sJavascript = "$.toast({  heading: '" + sTitle + "',"
@@ -146,7 +182,7 @@ namespace BiblePayCommonNET
         {
             string sToast = Toast(sTitle, sBody);
             RunScriptSM(p, sToast);
-           // p.Session["stack"] = Toast(sTitle, sBody);
+            // p.Session["stack"] = Toast(sTitle, sBody);
         }
 
         public static void ToastLater(Page p, string sTitle, string sBody)

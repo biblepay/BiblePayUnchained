@@ -27,7 +27,7 @@ namespace Unchained
         {
             // For each chain
             List<string> lEntities = BiblePayCommon.EntityCommon.GetBiblePayEntities();
-            string sTable = "<table class='saved'><tr><th>Object<th>Hash<th>Height</tr>";
+            string sTable = "Status v1.0.12<br><table class='saved'><tr><th>Object<th>Hash<th>Height</tr>";
             string sChainPrefix = IsTestNet(this) ? "testnet_" : "";
             for (int i = 0; i < lEntities.Count; i++)
             {
@@ -66,7 +66,7 @@ namespace Unchained
 
                 for (int i = 0; i < lEntities.Count; i++)
                 {
-                    DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(z==0, lEntities[i]);
+                    DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(z==0, lEntities[i]);
 
                     if (dt.Rows.Count > 0)
                     {

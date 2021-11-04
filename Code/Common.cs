@@ -16,6 +16,8 @@ using static BiblePayCommonNET.DataTableExtensions;
 using System.Dynamic;
 using System.Net.Mail;
 using static Unchained.UICommon;
+using MongoDB.Driver;
+using static BiblePayCommon.EntityCommon;
 
 namespace Unchained
 {
@@ -231,15 +233,13 @@ namespace Unchained
             return sPrefix;
         }
 
-        public static User RetrieveUser(Page p, string sFilter)
+        public static User RetrieveUser(Page p, FilterDefinition<dynamic> oFilter)
         {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "user1");
-            dt = dt.FilterDataTable(sFilter);
+            IList<dynamic> dt = BiblePayDLL.Sidechain.GetChainObjects<dynamic>(false, "user1", oFilter, SERVICE_TYPE.PUBLIC_CHAIN);
             Object o = new User();
-            if (dt.Rows.Count < 1)
+            if (dt.Count < 1)
                 return (User)o;
-            ExpandoObject oExpandoUser = CastDataTableRowToExpando(dt.Rows[0], "user1");
-            BiblePayCommon.EntityCommon.CastExpandoToBiblePayObject(oExpandoUser, ref o);
+            BiblePayCommon.EntityCommon.CastExpandoToBiblePayObject(dt[0], ref o);
             return (User)o;
         }
 
@@ -304,18 +304,24 @@ namespace Unchained
 
         public static User gUser(Page p, string sEmailAddress)
         {
-            User u = RetrieveUser(p, "emailaddress='" + sEmailAddress + "'");
+            var builder = Builders<dynamic>.Filter;
+            var filter = builder.Eq("EmailAddress", sEmailAddress);
+            User u = RetrieveUser(p, filter);
             return u;
         }
 
         public static User gUser(Page p, string sFirstName, string sLastName)
         {
-            User u = RetrieveUser(p, "firstname='" + sFirstName + "' and lastname='" + sLastName + "'");
+            var builder = Builders<dynamic>.Filter;
+            var filter = builder.Eq("firstname", sFirstName) & builder.Eq("lastname", sLastName);
+            User u = RetrieveUser(p, filter);
             return u;
         }
         public static User gUserById(Page p, string id)
         {
-            User u = RetrieveUser(p, "id='" + id + "'");
+            var builder = Builders<dynamic>.Filter;
+            var filter = builder.Eq("_id", id);
+            User u = RetrieveUser(p, filter);
             return u;
         }
 
@@ -357,7 +363,7 @@ namespace Unchained
             return sHTML;
         }
 
-/*
+       /*
         public static string TriggerFormSubmit(Page p, string sURL, bool fWrite = true, string sOptData = "")
         {
             string sPA = "document.forms[0].action=\"" + sURL
@@ -385,8 +391,8 @@ namespace Unchained
         {
             VoteSums v = new VoteSums();
 
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "vote1");
-            dt = dt.FilterDataTable("parentid='" + sParentID + "'");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "vote1");
+            dt = dt.FilterDataTable("parentid='" + sParentID + "' and deleted=0");
             if (dt.Rows.Count == 0)
                 return v;
             for (int i = 0; i < dt.Rows.Count; i++)
@@ -412,13 +418,13 @@ namespace Unchained
             try
             {
 
-                double nReplay = BiblePayCommon.Common.GetDouble(BiblePayCommon.HalfordDatabase.GetKVWithExpiration("NotifyOfNewUser" + u.EmailAddress));
+                double nReplay = BiblePayCommon.Common.GetDouble(BiblePayCommon.HalfordDatabase.GetKVDWX("NotifyOfNewUser" + u.EmailAddress));
                 if (nReplay == 1)
                 {
                     // already notified
                     return;
                 }
-                BiblePayCommon.HalfordDatabase.SetKV("1", "NotifyOfNewUser" + u.EmailAddress, 60 * 60 * 24 * 30);
+                BiblePayCommon.HalfordDatabase.SetKVDWX("NotifyOfNewUser" + u.EmailAddress, 1, 60 * 60 * 24 * 30);
 
                 string sTemplate = Config("TemplateNewUser");
                 if (sTemplate != "")
@@ -429,7 +435,6 @@ namespace Unchained
                     MailMessage m = new MailMessage();
                     EmailNarr e = GetEmailFooter(p);
                     m.IsBodyHtml = true;
-
                     //string sNarr = "Dear " + u.FullUserName() + ",<br><br>Thank you for registering with our platform."
                     //    + "<br><br>" + sData + "<br><br><br>" +"The "+ e.DomainName + " Team<br>";
                     sData = sData.Replace("[FullUserName]", u.FullUserName());
@@ -552,24 +557,23 @@ namespace Unchained
             }
             return r;
         }
-        public static bool DataExists(bool fTestNet, string sTable, string sFilter)
-        {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, sTable);
-            DataOps.FilterDataTable(ref dt, sFilter);
-            return dt.Rows.Count > 0;
-        }
 
         public static BiblePayCommon.IBBPObject GetObject(bool fTestNet, string sTable, string sID)
         {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, sTable);
-            dt = dt.FilterDataTable("id='" + sID + "'");
-            BiblePayCommon.IBBPObject o = BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, sTable, 0);
+            var builder = Builders<dynamic>.Filter;
+            var filter = builder.Eq("_id", sID) | builder.Eq("id", sID);
+
+            IList<dynamic> l1 = BiblePayDLL.Sidechain.GetChainObjects<dynamic>(fTestNet, sTable, filter,
+                SERVICE_TYPE.PUBLIC_CHAIN);
+            //DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2Retired(fTestNet, sTable);
+            //BiblePayCommon.IBBPObject o = BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, sTable, 0);
+            BiblePayCommon.IBBPObject o = ExpandoToStronglyCastObject(l1[0], sTable);
             return o;
         }
 
         public static BiblePayCommon.IBBPObject GetObjectWithFilter(bool fTestNet, string sTable, string sFilter)
         {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, sTable);
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, sTable);
             dt = dt.FilterDataTable(sFilter);
             BiblePayCommon.IBBPObject o = BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, sTable, 0);
             return o;
@@ -582,7 +586,7 @@ namespace Unchained
 
             if (sUserID == null || sUserID == "")
                 return false;
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, sTable);
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, sTable);
             DataOps.FilterDataTable(ref dt, "id='" + sObjectID + "'");
             if (dt.Rows.Count < 1)
                 return false;
@@ -592,6 +596,7 @@ namespace Unchained
             return false;
         }
 
+        /*
         public static double GetSumOf(bool fTestNet, string sFilter, string sTable, string sField)
         {
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, sTable);
@@ -604,5 +609,7 @@ namespace Unchained
             }
             return nTotal;
         }
+        */
+
     }
 }

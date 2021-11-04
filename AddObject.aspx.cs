@@ -13,6 +13,8 @@ using System.Reflection;
 using static BiblePayCommonNET.StringExtension;
 using static BiblePayCommon.DataTableExtensions;
 using static BiblePayCommonNET.CommonNET;
+using static BiblePayCommon.EntityCommon;
+using MongoDB.Driver;
 
 namespace Unchained
 {
@@ -26,10 +28,12 @@ namespace Unchained
                 string sID = Request.QueryString["id"] ?? "";
                 string sMode = Request.QueryString["action"] ?? "";
                 string sTable = Request.QueryString["table"] ?? "";
-                DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), sTable);
+                DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), sTable);
                 dt = dt.FilterDataTable("id='" + sID + "'");
+
                 if (dt.Rows.Count < 1)
                     return;
+
                 BiblePayCommon.IBBPObject o = (BiblePayCommon.IBBPObject)BiblePayCommon.EntityCommon.GetInstance("BiblePayCommon.Entity+" + sTable);
                 for (int i = 0; i < dt.Columns.Count; i++)
                 {
@@ -59,7 +63,7 @@ namespace Unchained
             string sTable = Request.QueryString["table"] ?? "";
             string sID = Request.QueryString["id"] ?? "";
             string sMode = Request.QueryString["action"] ?? "";
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), sTable);
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), sTable);
             dt = dt.FilterDataTable("id='" + sID + "'");
             string html = "<fieldset><legend>" + sTable + " - Object " + sID + ":</legend>";
             html += "<table width=90%>";

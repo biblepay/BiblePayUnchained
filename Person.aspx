@@ -567,10 +567,23 @@
                     var e = {};
                     if (url != '') {
                         e.URL = encodeURIComponent(url);
-                        e.URLTitle = XSS($('#url-content h3').html());
-                        e.URLDescription = XSS($('#url-content p').html());
+                        console.log('url ' + e.URL);
+
+                        // This is where the error is thrown - possibly need to escape this
+
+                        e.URLTitle = XSS(escape($('#url-content h3').html()));
+
+                        console.log('url title ' + e.URLTitle);
+
+                        
+                        e.URLDescription = XSS(escape($('#url-content p').html()));
+                        console.log('desc ' + e.URLDescription);
+
+
                         //decodeURIComponent
                         e.URLPreviewImage = encodeURIComponent($('#url-content img').attr('src'));
+                        console.log('preview image ' + e.URLPreviewImage);
+
                     }
                     e.Event = 'AddTimeline_Click';
                     e.Value = sID;

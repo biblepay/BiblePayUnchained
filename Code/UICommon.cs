@@ -1,5 +1,7 @@
 ﻿using BiblePayCommon;
 using BiblePayCommonNET;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -14,6 +16,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using static BiblePayCommon.Common;
 using static BiblePayCommon.DataTableExtensions;
+using static BiblePayCommon.EntityCommon;
 using static BiblePayCommonNET.StringExtension;
 using static Unchained.Common;
 
@@ -21,7 +24,6 @@ namespace Unchained
 {
     public static class UICommon
     {
-
 
         public static string GetCurrentThemeName(Page p)
         {
@@ -104,8 +106,6 @@ namespace Unchained
             var js3 = "   var xp = parseFloat(localStorage.getItem('bbpdd" + item.ToString() + "')); "
              + "   var xe = xp==0?1:0; var disp = xe == 0 ? 'none' : 'block';";
 
-            //string sOldJs = "myfunc();";
-
             string menu = "<li id ='button_" + MenuName + "' class='dropdown'>"
              + "	<a class='dropdown-toggle' href='#' data-toggle='dropdown' onclick=\" myfunc(" + item.ToString() + "); "
              + js2 + " $('#bbpdd" + item.ToString() + "').attr('expanded', xe); "
@@ -183,11 +183,9 @@ namespace Unchained
                 + "  var Extra={};Extra.Value='" + sEventValue + "';Extra.Address='" + sAddress + "';Extra.Amount='" + sAmt + "';"
                 + "Extra.Output=XSS(v);Extra.Event='" + sCallBackEvent + "';" + sClear + "BBPPostBack2(this, Extra);"
                 + "$(this).dialog('close');"
-                + "  },     'Cancel': function() {       $(this).dialog('close');                 }            }        });";
+                + " },     'Cancel': function() {       $(this).dialog('close');                 }            }        });";
             //p.ClientScript.RegisterStartupScript(p.GetType(), "msginput1", sJavascript, true);
             ScriptManager.RegisterStartupScript(p,p.GetType(), "msginput1", sJavascript, true);
-
-
         }
 
         public static void GenerateJsTag(Page page, string jsCode)
@@ -260,14 +258,6 @@ namespace Unchained
             command.Parameters.AddWithValue("@orphanid", orphanid);
             string bio = gData.GetScalarString(command, "URL", false);
             return bio;
-        }
-
-        public static string GetTd(DataRow dr, string colname, string sDestination, string sExtra = "")
-        {
-            string sAnchor = "<a href='" + sDestination + ".aspx?id=" + dr["id"].ToString() + sExtra + "'>";
-            string val = dr[colname].ToString();
-            string td = "<td>" + sAnchor + val + "</a></td>";
-            return td;
         }
 
         public static string RenderControlToHtml(Control ControlToRender)
@@ -373,6 +363,8 @@ namespace Unchained
             public string startedByUser;
             public string chattingWithUser;
             public string chatGuid;
+            public bool NotifiedOfChatRequest;
+            public bool NotifiedOfEntry;
         }
 
         public static Dictionary<string, List<string>> dictChatHistory = new Dictionary<string, List<string>>();
@@ -407,6 +399,56 @@ namespace Unchained
             sScreen += "</div>";
             return sScreen;
         }
+
+        public static string GetNotificationConsole(Page p)
+        {
+            string sNotify = Config("notifications");
+            if (sNotify == "")
+                return "";
+
+            string sHTML = "";
+            string sIcon  = "<i id='iconBell' class='facircle fa fa-bell'></i>";
+            string sAnchor = GetStandardAnchor("ancNotificationBell", "GetNotifications", "GN", sIcon, "Get my Notifications", "", "");
+            sHTML = sAnchor;
+            return sHTML;
+        }
+
+        public static string GetChatBox2(Page p)
+        {
+            // Check for Paging
+
+            if (gUser(p).LoggedIn == false)
+                return "";
+
+            UICommon.ChatStructure myChat;
+
+            bool fGot = dictChats.TryGetValue(gUser(p).id, out myChat);
+
+            if (!fGot)
+                return "";
+
+            if (myChat.startedByUser == gUser(p).id)
+            {
+                // This chat was started by me...
+                return "";
+            }
+            if (myChat.NotifiedOfChatRequest == true)
+                return "";
+
+            string sURL = "Meeting?type=private&chat=" + myChat.chatGuid;
+            string sTheOtherUser = myChat.chattingWithUser == gUser(p).id ? myChat.startedByUser : myChat.chattingWithUser;
+            User u = gUserById(p, sTheOtherUser);
+            string sClose = "onclick='closeDialog();'";
+            string sNarrative = "Hi " + gUser(p).FirstName + ", " + u.FullUserName() 
+                + " is calling you into a chat.  <a " + sClose + " href='" + sURL + "'><br><b>Click here if you would like to go. </b></a>";
+
+            BiblePayCommonNET.UICommonNET.MsgModalWithLinks(p, "Chat Request", sNarrative, 600, 300, false, true);
+            myChat.NotifiedOfChatRequest = true;
+            dictChats[gUser(p).id] = myChat;
+            return "";
+        }
+
+
 
         public static string GetChatBox(Page p)
         {
@@ -458,15 +500,15 @@ namespace Unchained
             string sChain = IsTestNet(p) ? "TESTNET" : "MAINNET";
             string sDecoratedChain = IsTestNet(p) ? "<font color=lime>TESTNET</font>" : "<font color=silver>MAINNET</font>";
             string sChainAnchor = GetStandardAnchor("ancChain", "btnChangeChain", sChain, sDecoratedChain, "Change your Chain");
-            string sKeys = gUser(p).FirstName.ToNonNullString().Length > 0 ? sWallet + " • " + sChainAnchor : "";
+            string sKeys = gUser(p).FirstName.ToNonNullString().Length > 0 ? sWallet + " • <small>" + sChainAnchor  + "</small>" : "";
             string sChangeProfileAction = gUser(p).LoggedIn ? "UnchainedUpload?action=setavatar&parentid=" + gUser(p).id : "";
 
             string sChangeProfileLink = "<a href='" + sChangeProfileAction + "'>" + gUser(p).GetAvatarImage() + "</a>";
 
             string html = "<div id='entireleftmenu'><aside class='main-sidebar' id='mySidenav'>";
             html += "<section class='sidebar'><div class='user-panel' class='trump'>"
-              + "<a onclick='closeNav();' href = '#' class='sidebar-toggle' data-toggle='offcanvas' role='button'>"
-              + "<i class='fa fa-close'></i></a>"
+              + "<a style='padding-left:20px;z-index:9999;font-size:150%;background-color:transparent;' onclick='closeNav();' class='sidebar-toggle' data-toggle='offcanvas' role='button'>"
+              + "<b><i class='fa fa-close'></i></b></a>"
               + "<div class='pull-left myavatar'>" + sChangeProfileLink + "</div>"
               + "<div class='pull-left info'><p><small>" + gUser(p).FirstName.ToNonNullString() + "</small></p><small><p>" + sKeys + "</p></small>" + "</div>"
               + "</div><div id='divsidebar-menu' class='divsidebar'><ul class='sidebar-menu'>";
@@ -480,9 +522,9 @@ namespace Unchained
             return html;
         }
 
-        public static bool RecordExists(bool fTestNet, string sTable, string sClause)
+        public static bool UTXORecordExists(bool fTestNet, string sTable, string sClause)
         {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, sTable);
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, sTable);
             dt = dt.FilterDataTable(sClause);
             if (dt.Rows.Count < 1)
                 return false;
@@ -491,10 +533,9 @@ namespace Unchained
 
         public static User GetUserRecord(bool fTestNet, string id)
         {
-            DataTable dtUsers = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "user1");
+            DataTable dtUsers = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "user1");
             dtUsers = dtUsers.FilterDataTable("BiblePayAddress='" + id + "' or id='" + id + "'");
             User u = new User();
-
             if (dtUsers.Rows.Count < 1 || id == null || id=="")
             {
                 u.AvatarURL = EmptyAvatar();
@@ -502,31 +543,33 @@ namespace Unchained
                 return u;
             }
 
-            u.BiblePayAddress = dtUsers.GetColValue("BiblePayAddress");
-            u.AvatarURL = dtUsers.GetColValue("AvatarURL");
+            u.BiblePayAddress = dtUsers.Rows[0]["BiblePayAddress"].ToString();
+            u.AvatarURL = dtUsers.Rows[0]["AvatarURL"].ToString();
             if (u.AvatarURL == String.Empty)
                 u.AvatarURL = EmptyAvatar();
 
-            u.EmailAddress = dtUsers.GetColValue("EmailAddress");
-            u.UserName = dtUsers.GetColValue("UserName");
-            u.FirstName = dtUsers.GetColValue("FirstName");
-            u.LastName = dtUsers.GetColValue("LastName");
+            u.EmailAddress = dtUsers.Rows[0]["EmailAddress"].ToString();
+            u.UserName = dtUsers.Rows[0]["UserName"].ToString();
+            u.FirstName = dtUsers.Rows[0]["FirstName"].ToString();
+            u.LastName = dtUsers.Rows[0]["LastName"].ToString();
             u.Verified = dtUsers.GetColInt("Verified");
-            u.id = dtUsers.GetColValue("id");
-            u.Gender = dtUsers.GetColValue("Gender");
-            u.BirthDate = (int)dtUsers.GetColDouble("BirthDate");
-            u.TelegramLinkName = dtUsers.GetColValue("TelegramLinkName");
-            u.TelegramLinkURL = dtUsers.GetColValue("TelegramLinkURL");
-            u.TelegramLinkDescription = dtUsers.GetColValue("TelegramLinkDescription");
-            u.PublicText = dtUsers.GetColValue("PublicText");
-            u.PrivateText = dtUsers.GetColValue("PrivateText");
-            u.ReligiousText = dtUsers.GetColValue("ReligiousText");
-
+            u.id = dtUsers.Rows[0]["id"].ToString();
+            u.Gender = dtUsers.Rows[0]["Gender"].ToString();
+            u.BirthDate = dtUsers.GetColInt("BirthDate");
+            u.TelegramLinkName = dtUsers.Rows[0]["TelegramLinkName"].ToString();
+            u.TelegramLinkURL = dtUsers.Rows[0]["TelegramLinkURL"].ToString();
+            u.TelegramLinkDescription = dtUsers.Rows[0]["TelegramLinkDescription"].ToString();
+            u.PublicText = dtUsers.Rows[0]["PublicText"].ToString();
+            u.PrivateText = dtUsers.Rows[0]["PrivateText"].ToString();
+            u.ReligiousText = dtUsers.Rows[0]["ReligiousText"].ToString();
             return u;
         }
 
         private static string GetInnerPoster(string sFID, string sURL2, int nWidth)
         {
+            if (sFID == null)
+                return "";
+
             if (sFID.Length < 10)
                 return "";
             string sURL1 = (sURL2 == null || sURL2 == "") ? "/images/jc2.png" : sURL2.Replace("/data", "/thumbnails/video.jpg");
@@ -668,11 +711,15 @@ namespace Unchained
 
         public static string GetAttachments(Page p, string sParentID, string sFilter, string sHeaderName, string sStyle)
         {
-            DataTable dtAttachments = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "video1");
-            dtAttachments = dtAttachments.FilterAndSort("attachment=1 and parentid='" + sParentID + "' " + sFilter, "Order");
+            //DataTable dtAttachments = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "video1");
+            var builder = Builders<BiblePayCommon.Entity.video1>.Filter;
+            var filter = builder.Eq("attachment", 1) & builder.Eq("parentid", sParentID);
+            //mission critical check the Optional Filter (sFilter) and tack that on...
+            IList<BiblePayCommon.Entity.video1> dtAttachments = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(false, "video1",
+                filter, SERVICE_TYPE.PUBLIC_CHAIN);
+            //dtAttachments = dtAttachments.FilterAndSort("attachment=1 and parentid='" + sParentID + "' " + sFilter, "Order");
             string sSnip = sFilter.Contains("Profile") ? "profile" : "";
-
-            if (dtAttachments.Rows.Count > 0)
+            if (dtAttachments.Count > 0)
             {
                 string sGallery = "<br><div " + sStyle + " class='tab'>&nbsp;&nbsp;" + sHeaderName + "</div><div style='overflow-y:scroll;max-height:300px;' class='border'>"
                     + UICommon.GetGallery(p, dtAttachments, null, "any", 25, 250, 250, false, true, sSnip) + "</div>";
@@ -681,7 +728,7 @@ namespace Unchained
             return String.Empty;
         }
 
-        public static string GetGallery(Page p, DataTable dt, BiblePayPaginator.Paginator pag, string sViewType,
+        public static string GetGallery(Page p, IList<Entity.video1> dt, BiblePayPaginator.Paginator pag, string sViewType,
             int nWidthPct, int nHeight, int nWidth, bool fVideoContainer, bool fShowRearrangeOption, string sOptSnippet)
         {
             string html = "<table width='100%'><tr>";
@@ -690,7 +737,7 @@ namespace Unchained
             sClass = "gallerycontainer";
 
             int iCol = 0;
-            if (dt.Rows.Count < 1)
+            if (dt.Count < 1)
             {
                 html = "";
                 return html;
@@ -703,9 +750,9 @@ namespace Unchained
 
             int iItem = 0;
             double nPag = GetDouble(p.Request.QueryString["pag"] ?? "");
-            if (nPag > dt.Rows.Count)
+            if (nPag > dt.Count)
             {
-                nPag = dt.Rows.Count - 30;
+                nPag = dt.Count - 30;
             }
             if (nPag < 0)
                 nPag = 0;
@@ -713,26 +760,29 @@ namespace Unchained
             double nEnd = nStart + 30;
             int iRowNumber = 0;
             
-            foreach (DataRowView drv in dt.DefaultView)
+            foreach (Entity.video1 v in dt)
             {
 
                 if (iRowNumber >= nStart && iRowNumber <= nEnd)
                 {
-                    string sURL = drv["URL"].ToNonNullString();
-                    string sValue = drv["Order"].ToString();
+                    string sURL = v.URL;
 
+                    if (fVideoContainer && v.SVID == null)
+                    {
+                        sURL = "";
+                    }
                     if (sURL != "")
                     {
-                        User u = UICommon.GetUserRecord(IsTestNet(p), drv["UserID"].ToNonNullString());
+                        User u = UICommon.GetUserRecord(IsTestNet(p), v.UserID);
                         string sUserName = u.FullUserName();
                         string sElement = "";
                         if ((sViewType == "video" || sViewType == "any") && (sURL.ToLower().Contains(".mp4") || sURL.ToLower().Contains(".webm")))
                         {
-                            sElement = CurateVideo(p, nWidth, drv["id"].ToNonNullString(), u, drv["URL2"].ToNonNullString(),
-                                drv["SVID"].ToNonNullString(),
-                                drv["FID"].ToNonNullString(), (int)drv.GetColDouble("time"),
-                                drv["Title"].ToNonNullString(), drv["Body"].ToNonNullString(), fShowRearrangeOption,
-                                GetDouble(drv["Order"].ToNonNullString()), sOptSnippet);
+                            sElement = CurateVideo(p, nWidth, v.id, u,v.URL2,
+                                v.SVID,
+                                v.FID, (int)v.time,
+                                v.Title,v.Body.ToNonNullString(), fShowRearrangeOption,
+                                v.Order, sOptSnippet);
 
                         }
                         else if ((sViewType == "pdf" || sViewType == "any") && sURL.Contains(".pdf"))
@@ -741,26 +791,27 @@ namespace Unchained
                             string sAsset = "<a target='_blank' href='" + sPDFLink + "'>"
                                 + "<img class='gallerypdf' src='https://foundation.biblepay.org/images/pdf_icon.png'></a>";
                             string sDiv = "<div class='gallery'>" + sAsset + "</div>";
-                            sDiv += "<div class='gallery-description'>" + drv["Title"].ToNonNullString() + " • Uploaded by " + sUserName + "</div>";
+                            sDiv += "<div class='gallery-description'>" + v.Title.ToNonNullString() + " • Uploaded by " + sUserName + "</div>";
                             sElement = sDiv;
                         }
                         else if ((sViewType == "wiki" || sViewType == "any") && sURL.Contains(".htm"))
                         {
                             string sAsset = "<a href='" + sURL + "'><iframe class='gallery' src='" + sURL + "'></iframe></a>";
                             string sDiv = "<div class='gallery'>" + sAsset;
-                            sDiv += "<br>" + drv["Subject"].ToNonNullString() + " • Uploaded by "
+                            sDiv += "<br>" + v.Subject.ToNonNullString() + " • Uploaded by "
                                 + sUserName + "</div>";
-                            string sEdit = "<input type='button' onclick=\"location.href='CreateNewDocument?file=" + sURL + "';\" id='w" + drv["id"].ToString() + "' value='Edit' />";
+                            string sEdit = "<input type='button' onclick=\"location.href='CreateNewDocument?file=" + sURL + "';\" id='w"
+                                + v.id + "' value='Edit' />";
                             sElement = sDiv;
                         }
                         else if ((sViewType == "image" || sViewType == "any"))
                         {
                             if (sURL.ToLower().Contains(".png") || sURL.ToLower().Contains(".jpg") || sURL.ToLower().Contains(".jpeg") || sURL.ToLower().Contains(".bmp") || sURL.ToLower().Contains(".gif"))
                             {
-                                sElement = CurateImage(p, nWidth, drv["id"].ToNonNullString(), u, drv["URL"].ToNonNullString(),
-                                     (int)drv.GetColDouble("time"), drv["Title"].ToNonNullString(),
-                                     drv["Body"].ToNonNullString(), fShowRearrangeOption,
-                                     GetDouble(drv["Order"].ToNonNullString()), sOptSnippet);
+                                sElement = CurateImage(p, nWidth, v.id, u, v.URL.ToNonNullString(),
+                                     (int)v.time, v.Title.ToNonNullString(),
+                                     v.Body.ToNonNullString(), fShowRearrangeOption,
+                                     v.Order, sOptSnippet);
                             }
                         }
 
@@ -791,6 +842,7 @@ namespace Unchained
             return html;
         }
 
+        /*
         public static string GetTopOneByTime(Page p, string table, string sFilter, string sColName)
         {
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), table);
@@ -802,8 +854,10 @@ namespace Unchained
             string sVal = dt.Rows[0][sColName].ToString();
             return sVal;
         }
+        */
 
 
+            /*
         public static BiblePayCommon.BBPDataTable GetGroup(bool fTestNet, string table, string sFilter, string groupbycolumn)
         {
             // SQL Equivalent of : Select id,max(maxcolumn) group by groupbycolumn
@@ -837,6 +891,7 @@ namespace Unchained
                 return dt;
             }
         }
+        */
 
         public static string GetStandardButton(string sID, string sCaption, string sEvent, string sAltText, string sOptJS = "", string sOptClass = "")
         {
@@ -879,7 +934,7 @@ namespace Unchained
 
             if (sDecoded.ToLower().Contains("script"))
                 fOK = false;
-            if (fOK)
+            if (!fOK)
             {
                 return "N/A";
             }
@@ -887,12 +942,12 @@ namespace Unchained
             return sData;
         }
 
-        public static string GetUserGallery(Page p, DataTable dt, BiblePayPaginator.Paginator pag, int nCols)
+        public static string GetUserGallery(Page p, IList<BiblePayCommon.Entity.user1> dt, BiblePayPaginator.Paginator pag, int nCols)
         {
             
             string html = "<table width='100%'><tr>";
             int iCol = 0;
-            if (dt.Rows.Count < 1)
+            if (dt.Count < 1)
             {
                 html += "</table>";
                 return html;
@@ -901,33 +956,28 @@ namespace Unchained
             {
                 bool fMobile = BiblePayCommonNET.UICommonNET.fBrowserIsMobile(p);
                 pag.ColumnsPerRow = fMobile ? 1 : 3;
-                
-                pag.Rows = dt.Rows.Count;
+                pag.Rows = dt.Count;
                 pag.RowsPerPage = 3;
                 double nWidthPct = 33;
 
                 for (int y = pag.StartRow; y <= pag.EndRow; y++)
                 {
-                    User u = UICommon.GetUserRecord(IsTestNet(p), dt.GetColValue(y, "id"));
+                    User u = UICommon.GetUserRecord(IsTestNet(p), dt[y].id);
                     string sURL = "Person?id=" + u.id;
-
                     string sUserName = u.FullUserName();
-
                     string sAnchor = "<a href='" + sURL + "'>"
                         + u.GetAvatarImageNoDims("gallerypdf") + "'</a>";
-
                     string sDiv = "<div class='gallery'>" + sAnchor + "</div>";
                     sDiv += "<div class='gallery-description'>" + u.FullUserName() + " • Since "
-                        + dt.GetColDateTime(y, "time").ToShortDateString()
-                        + "<br>" + dt.Rows[y]["domain"].ToNonNullString() + "";
+                        + BiblePayCommon.Common.UnixTimeStampToDateControl(dt[y].time)
+                        + "<br>" + dt[y].domain;
 
                     string sTelegram = " • <a target='_blank' href='" + CleanseURL(u.TelegramLinkURL.ToNonNullString()) + "'>" 
                         + BiblePayCommon.Encryption.CleanseXSS(u.TelegramLinkName.ToNonNullString()) + "</a>"
                         + "<br>" + BiblePayCommon.Encryption.CleanseXSS(u.TelegramLinkDescription.ToNonNullString());
                     string sChatAnchor = GetStandardAnchor("ancChat", "ChatNow", u.id.ToString(),
-                            " • Chat Now <i class='fa fa-chat'></i>", "Chat with this user Now", "");
+                            " • Chat <i class='fa fa-chat'></i>", "Chat with this user Now", "");
                     string sBanAnchor = GetStandardAnchor("ancBan", "BanUser", u.id.ToString(), "<i class='fa fa-ban'></i>", "Ban this User", "user1");
-
 
                     if (u.TelegramLinkURL.ToNonNullString().Length > 1)
                     {
@@ -960,15 +1010,21 @@ namespace Unchained
             {
                 Log("GetUserGallery: " + ex.Message);
                 return "";
-
             }
         }
 
         public static string GetComments(bool fTestNet, string id, Page z, bool fMaskIfNone = false)
         {
             // Shows the comments section for the object.  Also shows the replies to the comments.
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "comment1");
-            dt = dt.FilterDataTable("parentid='" + id + "'");
+            
+            var builder = Builders<BiblePayCommon.Entity.comment1>.Filter;
+            var filter = builder.Eq("ParentID", id);
+            filter &= builder.Regex("ParentID", new BsonRegularExpression(".*" + id + "*", "i"));
+            filter &= builder.Ne("deleted", 1);
+
+            IList<BiblePayCommon.Entity.comment1> dt = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.comment1>(false, "comment1", 
+                filter, SERVICE_TYPE.PUBLIC_CHAIN, "time", false);
+
             string sHTML = "";
 
             if (!fMaskIfNone)
@@ -979,29 +1035,29 @@ namespace Unchained
             sHTML += "<table class='saved2' width=100%>"
                 + "<tr><th width=4%><th width=14%>User</th><th width=10%>Added</th><th width=11%>Rating</th><th width=64%>Comment</th><th width=1%>Actions</th></tr>";
 
-            if (dt.Rows.Count == 0 && fMaskIfNone)
+            if (dt.Count == 0 && fMaskIfNone)
             {
                 return "";
             }
-            for (int i = 0; i < dt.Rows.Count; i++)
+            for (int i = 0; i < dt.Count; i++)
             {
-                string sBody = "<div class='comments'>" + ReplaceURLs(dt.Rows[i]["Body"].ToString()) + "</div>";
+                string sBody = "<div class='comments'>" + ReplaceURLs(dt[i].Body) + "</div>";
 
                 // Edit comment and delete comment options
                 string sCluster = String.Empty;
-                if (HasOwnership(IsTestNet(z), dt.Rows[i]["id"].ToString(), "comment1", gUser(z).id))
+                if (HasOwnership(IsTestNet(z), dt[i].id, "comment1", gUser(z).id))
                 {
-                    string sTrashAnchor = GetStandardAnchor("ancDelete", "DeleteObject", dt.Rows[i]["id"].ToString(),
+                    string sTrashAnchor = GetStandardAnchor("ancDelete", "DeleteObject", dt[i].id,
                         "<i class='fa fa-trash'></i>", "Delete Comment", "comment1");
-                    string sEditAnchor = GetStandardAnchor("ancEdit", "EditObject", dt.Rows[i]["id"].ToString(),
+                    string sEditAnchor = GetStandardAnchor("ancEdit", "EditObject", dt[i].id,
                         "<i class='fa fa-edit'></i>", "Edit Comment", "comment1");
 
                     sCluster = sEditAnchor + "&nbsp;" + sTrashAnchor;
                 }
 
-                string div = "<tr><td><td>" + UICommon.GetUserAvatarAndName(z, dt.GetColValue(i, "UserID"))
-                    + "</td><td>" + dt.GetColDateTime(i, "time").ToString()
-                    + "</td><td>" + GetObjectRating(fTestNet, dt.Rows[i]["id"].ToString(), "comment1", gUser(z))
+                string div = "<tr><td><td>" + UICommon.GetUserAvatarAndName(z, dt[i].UserID)
+                    + "</td><td>" + BiblePayCommon.Common.UnixTimeStampToDateControl(dt[i].time)
+                    + "</td><td>" + GetObjectRating(fTestNet, dt[i].id, "comment1", gUser(z))
                     + "</td><td>" + sBody + "</td><td>"  + sCluster + "</td></tr>";
                 sHTML += div;
 
@@ -1047,10 +1103,10 @@ namespace Unchained
         }
         public static string GetDropDownUser(Page p, string sHTMLID, string sSelectedValue, string sOriginatorID, bool fAdminOnly)
         {
-            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "user1");
+            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "user1");
             if (fAdminOnly)
             {
-                dt = dt.FilterBBPDataTable("administrator=1 or userid='" + gUser(p).id + "' or userid='" + sOriginatorID + "'");
+                dt = dt.FilterBBPDataTable("administrator=1 or id='" + gUser(p).id + "' or id='" + sOriginatorID + "'");
                 dt = dt.OrderBy0("lastname,firstname desc");
             }
             string sOptions = "";
@@ -1088,6 +1144,7 @@ namespace Unchained
             return sDD;
         }
 
+        /*
         public static string GetDropDownOrganization(Page p, string sHTMLID, string sSelectedValue)
         {
             BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "Organization");
@@ -1101,6 +1158,8 @@ namespace Unchained
             string dd = GetDropDownFromDataTable(dt, "name", sHTMLID, sSelectedValue);
             return dd;
         }
+        */
+
 
         public static string GetDispositions(string HTMLID, string sSelectedValue)
         {
@@ -1122,6 +1181,7 @@ namespace Unchained
         }
 
 
+        /*
         public static string GetStandardDropDown(Page p, string sID, string sTable, string sColumn, string sSelectedValue)
         {
             DataTable dtGroup = UICommon.GetGroup(IsTestNet(p), "video1", "url like '%mp4%'", "Category");
@@ -1140,6 +1200,8 @@ namespace Unchained
             sDD += "</select>";
             return sDD;
         }
+        */
+
 
         public static void NotifyOfSale(Page p, bool fTestNet, User u, BiblePayCommon.Entity.NFT n, double nOfferPrice, string sTXID)
         {
@@ -1181,9 +1243,7 @@ namespace Unchained
             EmailNarr e = GetEmailFooter(p);
 
             BiblePayDLL.Sidechain.SendMail(fTestNet, m, e.DomainName);
-
         }
-
 
 
         public static bool LogIn(Page p, User u)
@@ -1369,7 +1429,7 @@ namespace Unchained
 
         public static string GetFollowStatus(bool fTestNet, string sFollowedID, string sMyUserID)
         {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "follow1");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "follow1");
             dt = dt.FilterDataTable("followedid='" + sFollowedID + "' and userid='" + sMyUserID + "' and deleted=0");
             if (dt.Rows.Count < 1)
                 return "Follow";
@@ -1378,7 +1438,7 @@ namespace Unchained
 
         public static double GetWatchSum(bool fTestNet, string sParentID)
         {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "objectcount1");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "objectcount1");
             dt = dt.FilterDataTable("parentid='" + sParentID + "'");
             double nTotal = 0;
             for (int i = 0; i < dt.Rows.Count; i++)
@@ -1391,7 +1451,7 @@ namespace Unchained
 
         public static double GetWatchSumUser(bool fTestNet, string sParentID, string sUserId)
         {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "objectcount1");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "objectcount1");
             dt = dt.FilterDataTable("parentid='" + sParentID + "' and userid='" + sUserId + "'");
             double nTotal = 0;
             for (int i = 0; i < dt.Rows.Count; i++)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -25,7 +25,7 @@ namespace Unchained.WebApis
         {
             VoteSums v = new VoteSums();
 
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "vote1");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "vote1");
             dt = dt.FilterDataTable("parentid='" + sParentID + "'");
             if (dt.Rows.Count == 0)
                 return v;
@@ -44,7 +44,7 @@ namespace Unchained.WebApis
         public object GetPosts(string sID, bool fHomogenized, bool me, bool IsTestNet)
         {
             // For each timeline entry...
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet, "Timeline");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "Timeline");
 
             if (fHomogenized)
             {
@@ -82,7 +82,7 @@ namespace Unchained.WebApis
                 dt.Rows[i]["PostedOn"] = dt.GetColDateTime(i, "time");
 
                 //sTimeline += UICommon.GetAttachments(this, dt.Rows[i]["id"].ToString(), "", "Timeline Attachments", "style='background-color:white;padding-left:30px;'");
-                DataTable dt2 = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet, "comment1");
+                DataTable dt2 = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "comment1");
 
                 dt2 = dt2.FilterDataTable("parentid='" + dt.Rows[i]["id"].ToString() + "'");
                 dt2 = dt2.OrderBy("time asc");
@@ -125,7 +125,7 @@ namespace Unchained.WebApis
         public object GetFriendsList(string sID, bool isTestNet)
         {
             string id = sID;
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(isTestNet, "Friend");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(isTestNet, "Friend");
             dt = dt.FilterDataTable("UserID='" + sID + "' or RequesterID='" + sID + "'");
             List<object> o = new List<object>();
 
@@ -176,7 +176,7 @@ namespace Unchained.WebApis
         public object GetImages(string sID, bool isTestNet)
         {
 
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(isTestNet, "video1");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(isTestNet, "video1");
 
             dt = dt.FilterDataTable("userid='" + sID + "'");
             dt = dt.FilterDataTable("URL like '%.png%' or URL like '%.gif' or URL Like '%.jpeg' or URL like '%.jpg%' or URL like '%.jpeg%' or URL like '%.gif%'");
@@ -219,7 +219,7 @@ namespace Unchained.WebApis
         public object Post(bool IsTestNet, string userId, PostRequest body)
         {
             var user = UICommon.GetUserRecord(IsTestNet, userId);
-            if (user.FirstName == "Guest")
+            if (!user.LoggedIn)
             {
                 return new { success = false, result = "You must log in to make a post." };
             }

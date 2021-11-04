@@ -23,7 +23,7 @@ namespace Unchained
             // Column headers
             string sRow = "<tr><th>NFT ID<th>Type<th>NFT Name<th>Description<th>Buy It Now Amount<th>Low Quality URL</tr>";
             html += sRow;
-            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "NFT");
+            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), "NFT");
             dt = dt.FilterBBPDataTable("isnull(fDeleted,'false')='false' and UserID='" + gUser(this).BiblePayAddress + "'");
 
             for (int i = 0; i < dt.Rows.Count; i++)

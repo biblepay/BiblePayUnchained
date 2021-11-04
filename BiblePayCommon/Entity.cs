@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using static BiblePayCommon.Common;
 using static BiblePayCommon.Encryption;
 
-
 namespace BiblePayCommon
 {
 
@@ -28,7 +27,6 @@ namespace BiblePayCommon
             return ECO;
         }
 
-
         public static void AddProperty(ExpandoObject SavedExpandableObject, string propertyName, object propertyValue)
         {
             var eDict = SavedExpandableObject as IDictionary<string, object>;
@@ -40,11 +38,40 @@ namespace BiblePayCommon
     }
 
 
-
     public static class EntityCommon
     {
-        public static Dictionary<string, bool> dictTableDirty = new Dictionary<string, bool>();
 
+        public enum SERVICE_TYPE
+        {
+            PUBLIC_CHAIN,
+            PRIVATE_CHAIN,
+            PUBLIC_CACHE,
+            PRIVATE_CACHE
+        };
+
+        public static Dictionary<string, bool> dictTableDirty = new Dictionary<string, bool>();
+        public static Dictionary<string, List<dynamic>> dictCache = new Dictionary<string, List<dynamic>>();
+
+        public static void EvictAllCachedTables(string sTable)
+        {
+            if (sTable == null)
+                return;
+
+            List<string> sKeys = new List<string>();
+
+            foreach (KeyValuePair<string, List<dynamic>> entry in dictCache)
+            {
+                if (entry.Key.Contains(sTable))
+                {
+                    sKeys.Add(entry.Key);
+                }
+            }
+            for (int i = 0; i < sKeys.Count; i++)
+            {
+                dictCache.Remove(sKeys[i]);
+            }
+            dictCache.Clear();
+        }
         public static string GetFQTableName(bool fTestNet, string sTable)
         {
             if (sTable.Contains("testnet_"))
@@ -99,7 +126,8 @@ namespace BiblePayCommon
             {
                 Type t = Type.GetType(strFullyQualifiedName);
                 return Activator.CreateInstance(t);
-            }catch(Exception ex)
+            }
+            catch(Exception ex)
             {
                 return null;
             }
@@ -194,7 +222,7 @@ namespace BiblePayCommon
                 }
                 return o;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return o;
             }
@@ -277,13 +305,25 @@ namespace BiblePayCommon
             string[] vRestricted = RESTRICTED_FIELDS.Split(new string[] { "," }, StringSplitOptions.None);
             return InList(vRestricted, sName);
         }
-        public static bool IsHidden(string sEntityName, string sName)
+        public static string GetEntityStaticProp(string sEntityName, string sPropName)
         {
             try
             {
                 BiblePayCommon.IBBPObject o = (BiblePayCommon.IBBPObject)BiblePayCommon.EntityCommon.GetInstance("BiblePayCommon.Entity+" + sEntityName);
+
                 Dictionary<string, string> _oDict = BiblePayCommon.EntityCommon.GetStaticFieldValues(o);
-                string sHF = _oDict["HIDDEN_FIELDS"].ToString() + "," + HIDDEN_FIELDS;
+                string sHF = _oDict[sPropName].ToString();
+                return sHF;
+            }catch(Exception ex)
+            {
+                return "";
+            }
+        }
+        public static bool IsHidden(string sEntityName, string sName)
+        {
+            try
+            {
+                string sHF = GetEntityStaticProp(sEntityName, "HIDDEN_FIELDS") + "," + HIDDEN_FIELDS;
                 string[] vHidden = sHF.Split(new string[] { "," }, StringSplitOptions.None);
                 return InList(vHidden, sName);
             }
@@ -294,9 +334,11 @@ namespace BiblePayCommon
                 return false;
             }
         }
-        public static bool IsReadOnly(string sName)
+        public static bool IsReadOnly(string sEntityName, string sName)
         {
-            string[] vRO = READONLY_FIELDS.Split(new string[] { "," }, StringSplitOptions.None);
+            string sHF = GetEntityStaticProp(sEntityName, "READ_ONLY_FIELDS") + "," + READONLY_FIELDS;
+
+            string[] vRO = sHF.Split(new string[] { "," }, StringSplitOptions.None);
             return InList(vRO, sName);
         }
     }
@@ -323,6 +365,7 @@ namespace BiblePayCommon
         string organization { get; set; }
 
         string lastblockhash { get; set; }
+        string nextblockhash { get; set; }
         string hash { get; set; }
         string chain { get; set; }
         string extrakey { get; set; }
@@ -340,6 +383,8 @@ namespace BiblePayCommon
             public string extrakey { get; set; }
             public long time { get; set; }
             public string lastblockhash { get; set; }
+            public string nextblockhash { get; set; }
+
             public int Attachment { get; set; }
             public string organization { get; set; }
             public string guid { get; set; }
@@ -375,6 +420,9 @@ namespace BiblePayCommon
 
         public class video1 : BaseEntity, IBBPObject
         {
+            public static string HIDDEN_FIELDS = "nextblockhash,Attachment,organization,FileName,FID,URL,URL2,Transcript,TranscriptJobID,Transcripted2,VoteSum,WatchSum,SVID,Size,Order";
+            public static string READ_ONLY_FIELDS = "Duration,Size";
+
             public string Body { get; set; }
             public string Title { get; set; }
             public string FileName { get; set; }
@@ -428,19 +476,13 @@ namespace BiblePayCommon
         public class Timeline : BaseEntity, IBBPObject
         {
             public string Subject { get; set; }
-
             public string Body { get; set; }
-
             public string Privacy { get; set; }
-
             public string URL { get; set; }
-
             public string URLTitle { get; set; }
-
             public string URLDescription { get; set; }
-
             public string URLPreviewImage { get; set; }
-
+            
             public override string GetHash()
             {
                 return GetSha256HashI(Subject + Body + UserID);
@@ -579,6 +621,7 @@ namespace BiblePayCommon
             public long Size { get; set; }
             public string Category { get; set; }
             public string URL { get; set; }
+            public int ExpirationTime { get; set; }
             public override string GetHash()
             {
                 return GetSha256HashI(UserID + DirectoryName + FileName + Title + Body + Subject);
@@ -799,8 +842,6 @@ namespace BiblePayCommon
             public string field1 { get; set; }
             public string field2 { get; set; }
             public string field3 { get; set; }
-
-
         }
 
 
@@ -817,7 +858,6 @@ namespace BiblePayCommon
             public double ReserveAmount { get; set; }
             public double BuyItNowAmount { get; set; }
             public string OwnerUserID { get; set; }
-
             public int nIteration { get; set; }
             public bool Marketable { get; set; }
             public bool fDeleted { get; set; }

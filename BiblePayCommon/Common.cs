@@ -410,6 +410,8 @@ namespace BiblePayCommon
             return s2;
         }
 
+        private static string sLastLog = "";
+
         public static void Log2(string sData, bool fQuiet = false)
         {
             try
@@ -417,6 +419,10 @@ namespace BiblePayCommon
                 string sPath = GetFolderUnchained("unchained.log");
                 System.IO.StreamWriter sw = new System.IO.StreamWriter(sPath, true);
                 string Timestamp = DateTime.Now.ToString();
+                if (fQuiet && sLastLog == sData)
+                    return;
+                sLastLog = sData;
+
                 sw.WriteLine(Timestamp + ": " + sData);
                 sw.Close();
             }
@@ -645,6 +651,8 @@ namespace BiblePayCommon
             public string MainNetPrivateKey;
             public BiblePayCommon.Common.User userTestNet;
             public BiblePayCommon.Common.User userProd;
+            public double TESTNET_SERVER_BALANCE;
+            public double MAINNET_SERVER_BALANCE;
         }
         public static KeySet _keyset = new KeySet();
 
@@ -670,6 +678,14 @@ namespace BiblePayCommon
             sHomePath = "c:\\inetpub\\wwwroot\\";
             return sHomePath;
         }
+
+        public static DateTime TimestampToDateTime(double nStamp)
+        {
+            DateTime dt = new DateTime();
+            dt = BiblePayCommon.Encryption.UnixTimeStampToDateTime(nStamp);
+            return dt;
+        }
+
 
         public static string GetExtConfigurationKeyValue(string sPath, string _Key)
         {

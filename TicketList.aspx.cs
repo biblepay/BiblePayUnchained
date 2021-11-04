@@ -25,7 +25,7 @@ namespace Unchained
 
         public static string GetTicketIdsFromHistory(bool fTestNet, string sUserID)
         {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "TicketHistory");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "TicketHistory");
             dt = dt.FilterDataTable("AssignedTo='" + sUserID + "'");
             string sList = "id in (";
             if (dt.Rows.Count == 0)
@@ -81,11 +81,18 @@ namespace Unchained
             string s4 = s1 + s2 + s3;
             return s4;
         }
+
+        public static string GetTd(string sID, string sValue, string sDestination, string sExtra = "")
+        {
+            string sAnchor = "<a href='" + sDestination + ".aspx?id=" + sID + sExtra + "'>";
+            string td = "<td>" + sAnchor + sValue + "</a></td>";
+            return td;
+        }
         protected string GetTicketListBase(string sFilter, string sNarrative)
         {
             _EntityName = "Ticket";
 
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), _EntityName);
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), _EntityName);
             if (txtSearch.Text != "")
             {
                 if (gUser(this).Administrator == 0)
@@ -122,7 +129,7 @@ namespace Unchained
                         + "<td>" + UICommon.GetUserAvatarAndName(this, sAssignedTo)
                         + "<td>" + dt.GetColDateTime(y, "Time").ToString()
                         + "<td>" + sDisposition 
-                        + "" + UICommon.GetTd(dt.Rows[y], "Title", "TicketView", "&entity=" + _EntityName) + "</tr>";
+                        + "" + GetTd(dt.Rows[y]["id"].ToString(), dt.Rows[y]["Title"].ToString(), "TicketView", "&entity=" + _EntityName) + "</tr>";
                     html += div + "\r\n";
             }
             html += "</table>";

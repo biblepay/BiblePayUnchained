@@ -41,14 +41,14 @@ namespace BiblePayCommonNET
 
         public static double GetCryptoBasePrice(string sTicker)
         {
-            double nPrice = BiblePayCommon.HalfordCache.Read(sTicker).ToDouble();
+            double nPrice = BiblePayCommon.HalfordMemoryCache.Read(sTicker).ToDouble();
             if (nPrice > 0)
                 return nPrice;
 
             string sURL = "https://foundation.biblepay.org/Server?action=" + sTicker + "_PRICE_QUOTE";
             string sData = ExecMVCCommand(sURL);
             string sMid = ExtractXML(sData, "<MIDPOINT>", "</MIDPOINT>");
-            BiblePayCommon.HalfordCache.Write(sTicker, sMid.ToDouble(), 90);
+            BiblePayCommon.HalfordMemoryCache.Write(sTicker, sMid.ToDouble(), 90);
             return sMid.ToDouble();
         }
 

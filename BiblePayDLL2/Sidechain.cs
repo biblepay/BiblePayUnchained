@@ -1,4 +1,6 @@
 ﻿using BiblePayCommon;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -6,8 +8,11 @@ using System.Dynamic;
 using System.IO;
 using System.Net.Mail;
 using System.Reflection;
+using System.Threading.Tasks;
 using static BiblePayCommon.Common;
 using static BiblePayCommon.DataTableExtensions;
+using static BiblePayCommon.Entity;
+using static BiblePayCommon.EntityCommon;
 using static BiblePayCommonNET.BiblePay;
 using static BiblePayCommonNET.StringExtension;
 
@@ -100,7 +105,7 @@ namespace BiblePayDLL
             bool fSigned = BiblePayTestHarness.BBPInterface.VerifySignature(fTestNet, sBBPAddress, sMessage, sSignature);
             return fSigned;
         }
-        
+
         public static string SignMessage(bool fTestNet, string sPrivKey, string sMessage)
         {
             string s = BiblePayTestHarness.BBPInterface.SignMessage(fTestNet, sPrivKey, sMessage);
@@ -117,16 +122,38 @@ namespace BiblePayDLL
             BiblePayCommon.Entity.accountingobject o = BiblePayTestHarness.BBPInterface.GetAccountingBalance(fTestNet, sBillFrom, sBillTo);
             return o;
         }
+
+        public static IList<T> GetChainObjects<T>(bool fTestNet, string sTable, FilterDefinition<T> myFilter, SERVICE_TYPE stType, string sSortBy = "", bool fAscending = false, string sURL = "")
+        {
+            string fqTable = BiblePayCommon.EntityCommon.GetFQTableName(fTestNet, sTable);
+            
+
+            IList<T> l1 = BiblePayTestHarness.BBPInterface.DSQL.GetChainObjects<T>(fTestNet, sTable, myFilter, stType, sSortBy, fAscending, sURL);
+            return l1;
+        }
+
+
+
         public static DACResult AdjustServiceAccountBalance(bool fTestNet, double nAdjAmt, string sBillFromAddress,
             string sBillToAddress, string sID, string sLineItem1, string sLineItem2, string sServiceName, bool fFlushNow, User u)
         {
             // Either the buyer or the seller must sign the accounting entry, otherwise the accounting entry is rejected.
             // If a fraudulent person bills something to you from *their* address, it succeeds, but obviously it does not need to be paid.
             // If a user tips another user, the billTo is the Tipper, and BillFrom is the Tippee and the BillTo is signed.
-            DACResult r1 = BiblePayTestHarness.BBPInterface.AdjustServiceAccountBalance(fTestNet, nAdjAmt, sBillFromAddress, sBillToAddress, sID, 
-                sLineItem1, sLineItem2, sServiceName, fFlushNow, u, u.BiblePayAddress, u.Signature, u.SignatureTimestamp);
+            BiblePayTestHarness.BBPInterface.AdjustServiceAccountBalance(fTestNet, nAdjAmt, sBillFromAddress, sBillToAddress, sID,
+                sLineItem1, sLineItem2, sServiceName, fFlushNow);
+            DACResult r1 = new DACResult();
+            // Mission critical todo; whoever calls this function from BuyPet needs to rewrite this call...
             return r1;
         }
+
+
+        public static BiblePayCommon.Common.DACResult SpeedyInsertMany(bool fTestNet, string sTable, List<dynamic> oList, SERVICE_TYPE stType, User u)
+        { 
+            DACResult t = BiblePayTestHarness.BBPInterface.DSQL.SpeedyInsertMany(fTestNet, sTable, oList, stType, u);
+            return t;
+        }
+
 
         public static string DownloadResourceAsString(string sURL)
         {
@@ -291,19 +318,19 @@ namespace BiblePayDLL
 
         public static void GhostVideos()
         {
-            DataTable dtProd = RetrieveDataTable2(false, "video1");
-            DataTable dtTest = RetrieveDataTable2(true, "video1");
+            DataTable dtProd = RetrieveDataTable3(false, "video1");
+            DataTable dtTest = RetrieveDataTable3(true, "video1");
             BiblePayTestHarness.BBPInterface.BBPMuse.GhostVideos(dtProd, dtTest);
         }
         public static void TranscodeVideos(bool fTestNet, string sPubKey, string sPrivKey, User u)
         {
-            DataTable dt = RetrieveDataTable2(fTestNet, "video1");
+            DataTable dt = RetrieveDataTable3(fTestNet, "video1", false,true);
             BiblePayTestHarness.BBPInterface.BBPMuse.Transcode(fTestNet, dt, sPubKey, sPrivKey, u);
         }
 
         public static void TranscriptVideos(bool fTestNet, string sPubKey, string sPrivKey, User u)
         {
-            DataTable dt = RetrieveDataTable2(fTestNet, "video1");
+            DataTable dt = RetrieveDataTable3(fTestNet, "video1", false,true);
             BiblePayTestHarness.BBPInterface.BBPMuse.Transcript(fTestNet, dt, sPubKey, sPrivKey, u);
         }
 
@@ -316,17 +343,20 @@ namespace BiblePayDLL
         public static bool DeleteObject(bool fTestNet, string sTable, string sObjectID, User u = new User())
         {
             // Permissions: The user must have ownership rights (see server signing plus user signing)
-            DataTable dt = RetrieveDataTable2(fTestNet, sTable);
-            dt = dt.FilterDataTable("id='" + sObjectID + "'");
-            if (dt.Rows.Count != 1)
+            var builder = Builders<dynamic>.Filter;
+            var filter = builder.Eq("_id", sObjectID);
+            IList<dynamic> dt = BiblePayDLL.Sidechain.GetChainObjects<dynamic>(false, sTable, filter, SERVICE_TYPE.PUBLIC_CHAIN);
+            if (dt.Count != 1)
                 return false;
-            BiblePayCommon.IBBPObject v = (BiblePayCommon.IBBPObject)BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, sTable, 0);
+            dynamic v = BiblePayCommon.EntityCommon.ExpandoToStronglyCastObject(dt[0], sTable);
             DACResult r = BiblePayTestHarness.BBPInterface.DeleteObject(fTestNet, v, u);
             if (r.fError())
             {
                 return false;
             }
-            UpdateDictionary(fTestNet, sTable, r.ExpandoObject);
+            //UpdateDictionary(fTestNet, sTable, r.ExpandoObject);
+            EvictAllCachedTables("video1");
+
             return true;
         }
 
@@ -340,6 +370,10 @@ namespace BiblePayDLL
 
         public static void UpdateDictionary(bool fTestNet, string sTable, dynamic o)
         {
+
+            EvictAllCachedTables(sTable);
+
+            
             if (!dictTables.ContainsKey(BiblePayCommon.EntityCommon.GetFQTableName(fTestNet, sTable)))
             {
                 return;
@@ -536,6 +570,7 @@ namespace BiblePayDLL
             { 
                 string sFQName = BiblePayCommon.EntityCommon.GetFQTableName(b.TestNet, b.TableName);
                 BiblePayCommon.EntityCommon.dictTableDirty[sFQName] = true;
+                EvictAllCachedTables(b.TableName);
             }
         }
 
@@ -543,10 +578,11 @@ namespace BiblePayDLL
         {
             // This runs once per Web Site action per table, but only if 30 seconds have passed since the last action, and once per distinct object 
             // This lets the federated server know if the chain has changed and therefore it inducts the new block into memory, resulting in a dictionary change of the table
-            double nLastCheck = GetDouble(BiblePayCommon.HalfordCache.Read("lbc_" + sTableName));
+            string fCM = fTestNet ? "TESTNET" : "MAINNET";
+            double nLastCheck = GetDouble(BiblePayCommon.HalfordMemoryCache.Read("lbc_" + fCM + sTableName));
             if (nLastCheck == 1)
                 return;
-            BiblePayCommon.HalfordCache.Write("lbc_" + sTableName, "1", 30);
+            BiblePayCommon.HalfordMemoryCache.Write("lbc_" + fCM + sTableName, "1", 30);
             System.Threading.Thread t = new System.Threading.Thread(CheckForNewBlocks);
             bgObj b = new bgObj();
             b.TableName = sTableName;
@@ -555,19 +591,11 @@ namespace BiblePayDLL
             t.Start(b);
         }
 
-        /*
-        public static void SetSelector(int iSel, bool fTestNet, string sTable, BiblePayCommon.IBBPObject o)
-        {
-            BiblePayTestHarness.BBPInterface.DSQL.CSSELECTOR = iSel;
-            BiblePayTestHarness.BBPInterface.DSQL.SpeedInsertTest(fTestNet, sTable, o);
-
-        }
-        */
-
-        public static BBPDataTable RetrieveDataTable2(bool fTestNet, string sTable, bool fIncludeDeleted = false)
+     
+        public static BBPDataTable RetrieveDataTable3(bool fTestNet, string sTable, bool fIncludeDeleted = false, bool fOverrideCache = false)
         {
             string fqTable = BiblePayCommon.EntityCommon.GetFQTableName(fTestNet, sTable);
-            if (dictTables.ContainsKey(fqTable) && !fIncludeDeleted)
+            if (dictTables.ContainsKey(fqTable) && !fIncludeDeleted && !fOverrideCache)
             {
                 if (BiblePayCommon.EntityCommon.dictTableDirty[fqTable] == false && dictTables[fqTable].Rows.Count > 0)
                 {
@@ -576,7 +604,9 @@ namespace BiblePayDLL
                 }
             }
             BBPDataTable dt = new BBPDataTable{ TableName = sTable };
-            IO.Log("Retrieving DataTable " + sTable);
+
+            IO.Log("Retrieving DataTable " + sTable, true);
+
             int nRow = 0;
             List<string> lReqColumns = EntityCommon.GetAssemblyNameContainingType("BiblePayCommon.Entity", sTable);
             lReqColumns.Clear(); // For now, lets leave this empty
@@ -605,8 +635,11 @@ namespace BiblePayDLL
                     }
                 }
                 dt.BestBlockHash = BiblePayTestHarness.BBPInterface.DSQL.GetBestBlockHash(fTestNet, sTable, out dt.Height);
-                dictTables[fqTable] = dt;
-                BiblePayCommon.EntityCommon.dictTableDirty[fqTable] = false;
+                if (!fIncludeDeleted)
+                {
+                    dictTables[fqTable] = dt;
+                    BiblePayCommon.EntityCommon.dictTableDirty[fqTable] = false;
+                }
                 return dt;
             }
             catch (Exception ex)

@@ -16,11 +16,16 @@ namespace Unchained
             {
                 return false;
             }
-
-            BiblePayCommon.Entity.vote1 o = new BiblePayCommon.Entity.vote1();
-            o.UserID = gUser(this).id;
-            o.ParentID = parentID;
+            // If they already voted, use that object
+            BiblePayCommon.Entity.vote1 o = (BiblePayCommon.Entity.vote1)GetObjectWithFilter(IsTestNet(this), "vote1", "userid='" + gUser(this).id 
+                + "' and parentid='" + parentID + "'");
+            if (o == null || o.id == null)
+            {
+                o.UserID = gUser(this).id;
+                o.ParentID = parentID;
+            }
             o.VoteType = sVoteType;
+
             if (sVoteType == "upvote")
             {
                 o.VoteValue = 1;

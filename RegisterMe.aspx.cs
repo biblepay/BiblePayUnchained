@@ -207,13 +207,13 @@ namespace Unchained
             }
 
             // (Replay attack prevention)
-            double nReplay = BiblePayCommon.Common.GetDouble(BiblePayCommon.HalfordDatabase.GetKVWithExpiration("VerifyEmail" + u.id));
+            double nReplay = BiblePayCommon.Common.GetDouble(BiblePayCommon.HalfordDatabase.GetKVDWX("VerifyEmail" + u.id));
             if (nReplay == 1)
             {
                 MsgModal(this, "Error", "Sorry, you must wait at least 30 minutes before sending a new verification e-mail.  Please check your junk folder. ", 400, 200, true);
                 return;
             }
-            BiblePayCommon.HalfordDatabase.SetKV("1", "VerifyEmail" + u.id, 60 * 30);
+            BiblePayCommon.HalfordDatabase.SetKVDWX("VerifyEmail" + u.id, 1, 60 * 30);
             MailMessage m = new MailMessage();
             EmailNarr e1 = GetEmailFooter(this);
 

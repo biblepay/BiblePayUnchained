@@ -124,7 +124,7 @@ namespace Unchained
 
         public static Dictionary<string, PortfolioParticipant> GenerateUTXOReport(bool fTestNet)
         {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "utxostake1");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "utxostake1");
             dt = dt.FilterDataTable("owneraddress is not null");
 
             Dictionary<string, PortfolioParticipant> dictParticipants = new Dictionary<string, PortfolioParticipant>();
@@ -141,7 +141,6 @@ namespace Unchained
 
                 Portfolios p = new Portfolios();
                 User u = UICommon.GetUserRecord(fTestNet, dt.Rows[i]["UserID"].ToString());
-
 
                 try
                 {
@@ -362,7 +361,7 @@ namespace Unchained
 
         public static BiblePayCommon.Entity.NFT GetSpecificNFT(bool fTestNet, string id)
         {
-            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "NFT");
+            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "NFT");
             dt = dt.FilterBBPDataTable("id='" + id + "'");
             if (dt.Rows.Count < 1)
                 return null;
@@ -502,7 +501,7 @@ namespace Unchained
         {
             try
             {
-                BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "NFTBid");
+                BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "NFTBid");
                 object nAmt = dt.Compute("max(amount)", "nftid='" + nftid + "'");
                 return GetDouble(nAmt);
             }
@@ -516,7 +515,7 @@ namespace Unchained
         {
             try
             {
-                BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "Ticket");
+                BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "Ticket");
                 object nAmt = dt.Compute("max([TicketNumber])", "");
                 return GetDouble(nAmt) + 1;
             }

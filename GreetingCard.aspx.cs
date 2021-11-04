@@ -197,7 +197,7 @@ namespace Unchained
 		{
 			if (e.EventAction == "BoughtGreetingCard")
 			{
-				string sPin = BiblePayCommon.Common.GetDouble(BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Output.ToString()));
+				string sPin = BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Output.ToString());
 
 				DACResult r30 = UICommon.BuySomething2(this, sPin);
 				if (!r30.fError())
@@ -211,7 +211,7 @@ namespace Unchained
 						+ "<b>Click HERE to Review PROOF</b></a><br>" + sSuffix + "<br>Thank you for using BiblePay Physical Mail Delivery." : sError;
 
 					lblInfo.Text = sNarr;
-					MsgModal(this, "Mail Delivery Result", sNarr, 600, 300, true);
+					MsgModalWithLinks(this, "Mail Delivery Result", sNarr, 600, 300, true);
 				}
 				else
 				{
@@ -300,10 +300,13 @@ namespace Unchained
 				Session["_dmFrom"] = _dmFrom;
 				Session["_dmTo"] = _dmTo;
 
-				if (!fDryRun && nCost > 0)
+				if (true)
 				{
 					if (nCost == 0)
 						nCost = 1;
+					if (fDryRun)
+						nCost = 1;
+
 					string sProductID = "Greeting Card";
 					BiblePayCommon.Entity.invoice1 i = new BiblePayCommon.Entity.invoice1();
 					i.BillFromAddress = BiblePayCommon.Encryption.GetBurnAddress(IsTestNet(this));

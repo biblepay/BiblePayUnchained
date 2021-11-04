@@ -27,7 +27,7 @@
    <br />
    Virtual Gift Card Amount $:
     <br />
-   <asp:TextBox ID="txtAmount" readonly type="number" runat="server" style="width: 200px">        </asp:TextBox>
+   <asp:TextBox ID="txtAmount" type="number" runat="server" style="width: 200px">        </asp:TextBox>
    <br />
     Street Address Line 1:
     <br />

@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
-using System.Dynamic;
 using System.Web.UI;
 using static BiblePayCommon.Common;
 using static Unchained.Common;
-using RestSharp;
-using System.Net.Http;
-using static BiblePayCommon.DataTableExtensions;
-using System.Net.Mail;
 using static BiblePayCommonNET.StringExtension;
+using MongoDB.Driver;
+using MongoDB.Bson;
+using System.Linq;
+using static BiblePayCommon.EntityCommon;
 
 namespace Unchained
 {
@@ -45,73 +43,7 @@ namespace Unchained
         }
 
 
-        private void FixVideos(bool fTestNet)
-        {
-            DataTable dt5 = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
-            Data d = new Data(Data.SecurityType.REQ_SA);
-            for (int i = 0; i < dt5.Rows.Count; i++)
-            {
-                BiblePayCommon.Entity.video1 v = (BiblePayCommon.Entity.video1)BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt5, "video1", i);
-                string sql = "Select Category from Rapture where title like '%" + Mid(v.Title, 0, 20) + "%'";
-                string sCat = d.GetScalarString(sql, "category");
-                if (v.Category == "" && sCat != "")
-                {
-                    v.Category = sCat;
-                    BiblePayDLL.Sidechain.InsertIntoDSQL(fTestNet, v, gUser(this));
-                }
-                else if (v.Category == "" && !v.Title.ToLower().Contains("mass") && !v.Title.ToLower().Contains("batch"))
-                {
-                    v.Category = "Uncategorized";
-                    BiblePayDLL.Sidechain.InsertIntoDSQL(fTestNet, v, gUser(this));
-                }
-            }
-            string sTest = "";
-            return;
-        }
-
-
-        private void PerformanceTest(bool fTestNet)
-        {
-
-            
-            double nStartTime = UnixTimestampUTC();
-            // 67 secs for writing 256 records...
-            // 1 second to read 1174 records
-            BiblePayCommon.Entity.performance1 p = new BiblePayCommon.Entity.performance1();
-            int i = 7;
-            p.field1 = i.ToString();
-            p.field2 = i.ToString();
-            p.field3 = i.ToString();
-            p.id = Guid.NewGuid().ToString();
-
-            //BiblePayDLL.Sidechain.SetSelector(1, true, "performance1", p);
-
-            //1.5 secs read; 7 secs to write
-            //2 secs to read (9000 docs); on sanc-rep-set; 2 secs to write
-
-
-            DataTable dt5 = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "performance1", true);
-            Data d = new Data(Data.SecurityType.REQ_SA);
-            for (int z = 0; z < dt5.Rows.Count;z++)
-            {
-                //BiblePayCommon.Entity.performance1 q = (BiblePayCommon.Entity.performance1)BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt5, "performance1", z);
-
-                
-            }
-            double nReadTime = UnixTimestampUTC();
-            double nElapsedReadTime = nReadTime - nStartTime;
-
-            string pause1 = "";
-
-            double nEndTime = UnixTimestampUTC();
-            double nElapsed = nEndTime - nStartTime;
-            Console.WriteLine(nElapsed.ToString());
-            
-            string sTest = "";
-            return;
-        }
-
-
+        
         private void InitializeObject(bool fTestNet)
         {
             BiblePayCommon.Entity.versememorizer1 n = new BiblePayCommon.Entity.versememorizer1();
@@ -127,15 +59,89 @@ namespace Unchained
             UICommon.ReskinCSS("#ffffff", "darkblue", "#ececec", "whiteblue", "#0096FF", "white", "#F0FFFF", "darkblue");  //Azure is the header color
         }
 
+        public void InnerJoinExample()
+        {
+            string sOut = "";
+
+            try
+            {
+                IList<BiblePayCommon.Entity.user1> lUsers = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.user1>(false, "user1", null,
+                    SERVICE_TYPE.PUBLIC_CHAIN);
+                IList<BiblePayCommon.Entity.video1> lVideos = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(false, "video1",
+                    null, SERVICE_TYPE.PUBLIC_CHAIN);
+
+                var query1 = 
+                    from v in lVideos
+                    join u in lUsers
+                    on new { userid = v.UserID }
+                       equals new { userid = u.id }
+                    into grpJoin
+                    from u in grpJoin.DefaultIfEmpty()
+                    where v != null && u != null
+                    select new
+                         { UserName1 = u.FirstName, UserID = u.id, VideoURL = v.URL, VideoTitle = v.Title };
+
+                //var list = new List<object?>();
+                //IEnumerable<MyObject> notNull = list.NotNull();
+                //var l = query1.Where(x => x != null).ToList();
+                var l = query1.Where(x => x != null).ToList();
+                foreach (var v in query1)
+                {
+                    try
+                    {
+                        if (v.VideoTitle.ToNonNullString() != "")
+                        {
+                            try
+                            {
+                                string data = v.UserID + "," + v.VideoURL;
+                                sOut += data;
+                            }
+                            catch (Exception ex9)
+                            {
+                                string s1004 = "";
+                            }
+
+                        }
+                    }catch(Exception ex99)
+                    {
+                        string s1044 = "";
+                    }
+                }
+                string sFin = "";
+
+            }
+            catch(Exception ex)
+            {
+                string s1099 = "";
+
+            }
+
+        }
+
         protected void btnSave_Click(object sender, EventArgs e)
         {
-            //PerformanceTest(true);
 
-            //string s1 = BiblePayDLL.Sidechain.EncryptWithUserKeyPair(true, "mydata1 1008 irwin st aliquippa", gUser(this));
-            //string s2 = BiblePayDLL.Sidechain.DecryptStringWithUserKeyPair(true, s1, gUser(this));
+            InnerJoinExample();
 
-            BiblePayDLL.Sidechain.RD();
+            return;
 
+
+            List<dynamic> lv = new List<dynamic>();
+            for (int i = 26; i < 35; i++)
+            {
+                BiblePayCommon.Entity.video1 v= new BiblePayCommon.Entity.video1();
+                v.id = i.ToString();
+                v.URL = "https://" + i.ToString() + ".com";
+                v.time = i;
+                lv.Add(v);
+            }
+            // mission critical - deleted flag <> 1 throughout
+            var t = BiblePayDLL.Sidechain.SpeedyInsertMany(false, "customvideo1", lv, SERVICE_TYPE.PRIVATE_CHAIN, gUser(this));
+
+  
+            //IList<BiblePayCommon.Entity.video1> l1 = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(false, "customvideo", filter, SERVICE_TYPE.PUBLIC_CACHE);
+            IList<BiblePayCommon.Entity.video1> l1 = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(false, 
+                "customvideo1", null, SERVICE_TYPE.PRIVATE_CHAIN);
             return;
         }
     }

@@ -52,6 +52,14 @@
     <Reference Include="HtmlAgilityPack, Version=1.7.4.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>packages\HtmlAgilityPack.1.7.4\lib\Net45\HtmlAgilityPack.dll</HintPath>
     </Reference>
+    <Reference Include="MongoDB.Bson, Version=2.13.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Dependencies\MongoDB.Bson.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Driver, Version=2.13.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Dependencies\MongoDB.Driver.dll</HintPath>
+    </Reference>
     <Reference Include="netstandard" />
     <Reference Include="Google.Authenticator, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\GoogleAuthenticator.2.1.1\lib\net45\Google.Authenticator.dll</HintPath>
@@ -218,6 +226,7 @@
     <Content Include="Images\truthbook-clear.png" />
     <Content Include="Images\VideoRecordIcon.png" />
     <Content Include="LiveRecord.aspx" />
+    <Content Include="Meeting.aspx" />
     <Content Include="ReportHoursByDeveloper.aspx" />
     <Content Include="Reports.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
@@ -595,6 +604,13 @@
     </Compile>
     <Compile Include="LiveRecord.aspx.designer.cs">
       <DependentUpon>LiveRecord.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Meeting.aspx.cs">
+      <DependentUpon>Meeting.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Meeting.aspx.designer.cs">
+      <DependentUpon>Meeting.aspx</DependentUpon>
     </Compile>
     <Compile Include="ReportHoursByDeveloper.aspx.cs">
       <DependentUpon>ReportHoursByDeveloper.aspx</DependentUpon>

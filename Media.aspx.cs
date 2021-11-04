@@ -12,6 +12,10 @@ using static BiblePayCommonNET.UICommonNET;
 using static BiblePayCommonNET.StringExtension;
 using static BiblePayCommonNET.CommonNET;
 using System.Web;
+using MongoDB.Driver;
+using System.Collections.Generic;
+using static BiblePayCommon.Entity;
+using static BiblePayCommon.EntityCommon;
 
 namespace Unchained
 {
@@ -161,24 +165,22 @@ namespace Unchained
         protected string GetEmbedVideo(string sID, int nWidth, int nHeight)
         {
             BiblePayVideo.Video video1 = new BiblePayVideo.Video(this);
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
-            dt = dt.FilterDataTable("id='" + sID + "'");
-            if (dt.Rows.Count < 1)
+            var builder = Builders<BiblePayCommon.Entity.video1>.Filter;
+            var filter = builder.Eq("id", sID);
+            IList<BiblePayCommon.Entity.video1> dt = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(false, "video1", filter, SERVICE_TYPE.PUBLIC_CHAIN);
+            if (dt.Count < 1)
                 return String.Empty;
             string html = String.Empty;
-            video1.URL = dt.GetColValue("URL");
-            video1.SVID = dt.GetColValue("SVID");
-            video1.Body = dt.GetColValue("Body");
-
+            video1.URL = dt[0].URL;
+            video1.SVID = dt[0].SVID;
+            video1.Body = dt[0].Body;
             video1.Title = null;
-
             video1.Width = nWidth;
             video1.Height = nHeight;
             video1.ID = "video1" + sID;
-            string sFID = dt.GetColValue("FID");
-            string sDownloadLink = "<a href='" + video1.URL + "'>Download</a>";
-
-            string sTheirChannel = "VideoList?channelid=" + dt.GetColValue("userid");
+            //string sFID = dt.GetColValue("FID");
+            //string sDownloadLink = "<a href='" + video1.URL + "'>Download</a>";
+            //string sTheirChannel = "VideoList?channelid=" + dt.GetColValue("userid");
 
             /*
             video1.Footer = "Uploaded by <a href='" + sTheirChannel + "'>"
@@ -190,32 +192,28 @@ namespace Unchained
                 + dt.GetColDateTime(0, "time").ToString()
                 + " • " + sDownloadLink + " • " + dt.GetColValue("Category");
                             video1.Footer += " • " + dt.GetColValue("domain");
-
-                */
-
-
+           */
             video1.Playable = true;
-            
-
             string sVideoControl = UICommon.RenderControl(video1);
             UICommon.StoreCount(sID, this, "video");
             return sVideoControl;
-
         }
 
         protected string GetVideo()
         {
             BiblePayVideo.Video video1 = new BiblePayVideo.Video(this);
             string sID = Request.QueryString["id"].ToNonNullString();
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "video1");
-            dt=dt.FilterDataTable("id='" + sID + "'");
-            if (dt.Rows.Count < 1)
+            var builder = Builders<BiblePayCommon.Entity.video1>.Filter;
+            var filter = builder.Eq("id", sID);
+            IList<BiblePayCommon.Entity.video1> dt = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(false, "video1", filter, SERVICE_TYPE.PUBLIC_CHAIN);
+
+            if (dt.Count < 1)
                 return String.Empty;
             string html = String.Empty;
-            video1.URL = dt.GetColValue("URL");
-            video1.SVID = dt.GetColValue("SVID");
-            video1.Body = dt.GetColValue("Body");
-            video1.Title = dt.GetColValue("Title");
+            video1.URL = dt[0].URL;
+            video1.SVID = dt[0].SVID;
+            video1.Body = dt[0].Body;
+            video1.Title = dt[0].Title;
             if (video1.Title == "")
             {
                 video1.Title = "N/A";
@@ -224,31 +222,31 @@ namespace Unchained
             video1.Height = 600;
             video1.ID = "video1" + sID;
 
-            string sFID = dt.GetColValue("FID");
+            string sFID = dt[0].FID;
             string sDownloadLink = "<a href='" + video1.URL + "'>Download</a>";
             
             
-            string sTheirChannel = "VideoList?channelid=" + dt.GetColValue("userid");
-            string sShareAnchor = UICommon.GetStandardAnchor("share"+sID, "ShareVideo", sID, "Share&nbsp;<i class='fa fa-share'></i>", "Share this Video", "video1");
+            string sTheirChannel = "VideoList?channelid=" + dt[0].UserID;
+            string sShareAnchor = UICommon.GetStandardAnchor("share" + sID, "ShareVideo", sID, "Share&nbsp;<i class='fa fa-share'></i>", "Share this Video", "video1");
 
             video1.Footer = "Uploaded by <a href='" + sTheirChannel + "'>"
-                + UICommon.GetUserAvatarAndName(this, dt.GetColValue("userid"), true)
+                + UICommon.GetUserAvatarAndName(this, dt[0].UserID, true)
                 + "</a> • " + GetObjectRating(IsTestNet(this), sID, "video1", gUser(this)) + " • "
-                + UICommon.GetFollowControl(IsTestNet(this), dt.GetColValue("userid"), gUser(this).id)
-                + " • " + UICommon.GetTipControl(IsTestNet(this), dt.GetColValue("id"), dt.GetColValue("userid"))
+                + UICommon.GetFollowControl(IsTestNet(this), dt[0].UserID, gUser(this).id)
+                + " • " + UICommon.GetTipControl(IsTestNet(this), dt[0].id, dt[0].UserID) + " • " + BiblePayCommon.Common.UnixTimeStampToDateControl(dt[0].time)
                 + "<br>" + UICommon.GetWatchSum(IsTestNet(this), sID) + " view(s) • "
-                + dt.GetColDateTime(0, "time").ToString()
-                + " • " + sDownloadLink + " • " + sShareAnchor + " • " + dt.GetColValue("Category");
+                + BiblePayCommon.Common.UnixTimeStampToDisplayAge(dt[0].time)
+                + " • " + sDownloadLink + " • " + sShareAnchor + " • " + dt[0].Category;
 
-            video1.Footer += " • " + dt.GetColValue("domain");
-
+            video1.Footer += " • " + dt[0].domain;
+            
             video1.Playable = true;
             if (HasOwnership(IsTestNet(this), sID, "video1", gUser(this).id))
             {
                 string sButton = "&nbsp;&nbsp;" + UICommon.GetStandardButton(sID, "Edit", "EditVideo", "Edit Video");
                 video1.Footer += sButton;
             }
-            string sTranscript = dt.GetColValue("Transcript");
+            string sTranscript = dt[0].Transcript;
             sTranscript = sTranscript.Replace("\n", "<br>");
             sTranscript = sTranscript.Replace("[br]", "<br>");
             bool fMobile = BiblePayCommonNET.UICommonNET.fBrowserIsMobile(this);

@@ -90,7 +90,7 @@ namespace Unchained
                         +" Thank you.<br>The " + e1.DomainName + " Team<br>";
                     m.Subject = "[Transactional Message] Ticket #" + T.TicketNumber + " - " + T.Title + " has been assigned to you for " + T.Disposition;
                     // CC everyone who touched this ticket also
-                    BiblePayCommon.BBPDataTable th1 = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "TicketHistory");
+                    BiblePayCommon.BBPDataTable th1 = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), "TicketHistory");
                     th1 = th1.FilterBBPDataTable("parentid='" + id + "'");
                    
                     for (int i = 0; i < th1.Rows.Count; i++)
@@ -126,7 +126,7 @@ namespace Unchained
 
             if (id == "")
                 return "N/A";
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), _EntityName);
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), _EntityName);
             DataOps.FilterDataTable(ref dt, "id='" + id + "'");
 
             if (dt.Rows.Count < 1)
@@ -136,7 +136,7 @@ namespace Unchained
             }
             string sAssignedTo = dt.Rows[0]["AssignedTo"].ToString();
             string sDisposition = dt.Rows[0]["Disposition"].ToString();
-            BiblePayCommon.BBPDataTable th = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "TicketHistory");
+            BiblePayCommon.BBPDataTable th = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), "TicketHistory");
             th = th.FilterBBPDataTable("parentid='" + id + "'");
             th = th.OrderBy0("time desc");
 
@@ -173,7 +173,8 @@ namespace Unchained
             {
                 string sReplyModule = "<form id='myform10'><tr><td width=10%>Your Comments:</td><td width=90% colspan=7>"
                     + "<textarea id='txtComment' class='pc90 comments' name='txtComment' rows=10 cols=10></textarea><br><br></td></tr>";
-                sReplyModule += "<tr><td>Assign To:<td>" + UICommon.GetDropDownUser(this, "ddAssignees", sAssignedTo, dt.GetColValue("UserID"), true) + "</td></tr>";
+                sReplyModule += "<tr><td>Assign To:<td>" 
+                    + UICommon.GetDropDownUser(this, "ddAssignees", sAssignedTo, dt.GetColValue("UserID"), true) + "</td></tr>";
                 sReplyModule += "<tr><td>Disposition:<td>" + UICommon.GetDispositions("ddDispositions", sDisposition) + "</td></tr>";
                 sReplyModule += "<tr><td>Hours:<td><input name='txtHours' id='txtHours'></input></td></tr>";
 

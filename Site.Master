@@ -68,54 +68,75 @@
                 <asp:ScriptReference Name="muse" />
             </Scripts>
         </asp:ScriptManager>
+
+
+
+
+
     <div class="Page" id="main">
    
         <asp:HiddenField ID="hidSourceID" runat="server" />
 
-        <div id="divdialog" title="" class='spandialog'><span id="spandialog"></span>
+
+        <div id="divdialog" title="" class='spandialog'><span id="spanVersion1"></span><span id="spandialog"></span></div>
 
 
         <!--Above div height is used to calculate the whole page size (so the footer knows the page height)-->
-        <div class="navbar navbar-inverse navbar-fixed-top" style="top:-2px;z-index:256;height:90px;max-height:90px;">
-            <div class="xcontainer1" style="display:inline-block;xfloat:right;">
-            
-                <table>
-                    <tr>
-                    <td style="width:240px;"> 
-                        &nbsp;
-                    </td>
-                    <td>
-                        <div>
-                         <img style="overflow:hidden;height:78px;" src="<%=Unchained.UICommon.GetHeaderImage(this.Page) %>" />
+        <div class="xnavbar navbar-inverse navbar-fixed-top" style="z-index:256;height:64px;max-height:64px;">
+        <table>
+            <tr>
+
+                <td style="min-width:255px;width:255px;" width="5%">
+                    &nbsp;
+                </td>
+
+                <td style="padding:0px;white-space:nowrap;max-height:84px;padding-right:15px;" width="20%">
+    
+                           
+                         <div style="overflow:hidden;max-height:90px;"><%=Unchained.UICommon.GetBannerControls(this.Page) %>&nbsp;</div>
+                         <span style="font-family:candara;color:antiquewhite;font-size:22px;"><%=Unchained.Common.Config("SiteName") %></span>
+                              <div id='rightmenubutton' style='float:right;' class="close-sidebar hidden-lg hidden-sm"></div>
+                </td>
+                <td width="5%">
+                    <a href="#" onclick="openNav();" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                           <i class="fa fa-navicon"></i>
+                    </a>
+                </td>
+                <td width="5%">
+                    <!--notificationarea-->
+                </td>
+                <td style="padding-left:20px;" width="40%">
+
+                         <img style="height:72px;position:relative;" src="<%=Unchained.UICommon.GetHeaderImage(this.Page) %>" />
                          <br />
-                         <span style="position:relative;top:-33px;left:35px;text-align:right;font-size:7px;">
+                         <span style="text-align:right;left:24px;top:-32px;position:relative;font-size:7px;">
                             <%=Unchained.Common.Config("poweredby") %>
                          </span>
-                        </div>
-                    </td>
-                    <td style="padding:12px;white-space:nowrap;max-height:84px;'>
+                </td>
 
-                         <a href="#" onclick="openNav();" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-                           <i class="fa fa-navicon"></i>
-                         </a>
-                         <span style="font-family:candara;color:antiquewhite;font-size:22px;"><%=Unchained.Common.Config("SiteName") %></span>
-                        
-                       
-                         <div style="overflow:hidden;"><%=Unchained.UICommon.GetBannerControls(this.Page) %>&nbsp;</div>
-                         <div id='rightmenubutton' style='float:right;' class="close-sidebar hidden-lg hidden-sm"></div>
-                    </td>
-                    <td style="padding:20px;">
-                    </td>
-                  
-                    </tr>
-               </table>
+                <td width="5%">
+    
+                </td>
+                </tr>
+
+    </table>
+
+                   
             </div>
-            <%=Unchained.Common.GetGlobalAlert(this.Page) %>
-        </div>
 
+            <%=Unchained.Common.GetGlobalAlert(this.Page) %>
+          </div>
+
+
+                  
+                 
             <%=Unchained.UICommon.GetSideBar(this.Page) %>
-        
-            <div class="xcontainer1 body-content">
+                
+            <div class="body-content">
+
+                   <asp:UpdatePanel runat="server" ID="UpdatePanel9">
+                    <ContentTemplate>
+                 
                 <br />
 
                 <div id="load1" class="hidden">
@@ -123,16 +144,29 @@
                         <span style="position:relative; top:-90px;left:80px;" id="spanLoader1">50%</span>
                 </div>
                 
-                 <%=Unchained.UICommon.GetChatBox(this.Page) %>
-
+                <%=Unchained.UICommon.GetChatBox2(this.Page) %>  
+ 
+                <%=Unchained.UICommon.GetNotificationConsole(this.Page) %>
+ 
                 <asp:ContentPlaceHolder ID="MainContent" runat="server">
 
                 </asp:ContentPlaceHolder>
+
+                               </ContentTemplate>
+                        </asp:UpdatePanel>
+
             </div>
+
+
          <p></p><p></p>
     
     
     </div>        
+
+
+ 
+
+
 
     </form>
  </body>

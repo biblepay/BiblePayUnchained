@@ -63,7 +63,7 @@ namespace Unchained
 
 		void PopulateNewVerse()
 		{
-			DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "versememorizer1");
+			DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), "versememorizer1");
 			if (dt.Rows.Count < 1)
 				return;
 			Random r = new Random();

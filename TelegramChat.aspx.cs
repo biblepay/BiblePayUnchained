@@ -138,6 +138,7 @@ namespace Unchained
                 string sWriter = "<font color=green><span>" + t.UserFirstName + " " + t.UserLastName + "</span></font><br><br>";
                 string sOutro = "&nbsp;<div style='float:right;'>" + DisplayDateTime(t.Date) + "</div>";
 
+                string sSerial = "msgid:" + t.MessageID + ",chatid:" + t.ChatID + ", UserID:" + t.UserID + ", UserName: " + t.UserFirstName + " " + t.UserLastName;
 
                 if (t.ContentType == "messageText")
                 {
@@ -153,7 +154,7 @@ namespace Unchained
                         }
                         string sWebPage = "<div>" + sIntro + "<b>" + t.WebPageTitle + "</b><br>" + sWPD + "<br>";
                         sWebPage += "<span>" + t.WebPageDisplayURL + "</span>";
-                        sWebPage += "<img width='100%' xheight=200 src='" + MakeURL(t.WebPagePhotoPath) + "' />";
+                        sWebPage += "<img style='max-width:100%;max-height:500px' src='" + MakeURL(t.WebPagePhotoPath) + "' />";
                         if (t.WebEmbedType != null && t.WebEmbedType != "")
                         {
                             if (t.WebEmbedType == "iframe")
@@ -176,7 +177,7 @@ namespace Unchained
                 else if (t.ContentType == "messageVideo")
                 {
                     
-                    sValueControl = "<div>" + sIntro + "<video style='width:100%;' controls><source src='" + MakeURL(t.Path) + "'></source></video>";
+                    sValueControl = "<div>" + sIntro + "<video style='height:500px;max-width:100%;' controls><source src='" + MakeURL(t.Path) + "'></source></video>";
                     sValueControl += "<br><span style='text-align:bottom;'>" + t.Text + "</span></div>";
 
                 }

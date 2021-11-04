@@ -35,7 +35,7 @@ namespace Unchained
                 string sTable = Request.QueryString["table"] ?? "";
                 // Mission critical, check has ownership here:
 
-                DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), sTable);
+                DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), sTable);
                 if (sMode == "edit")
                 {
                     dt = dt.FilterDataTable("id='" + sID + "'");
@@ -103,7 +103,7 @@ namespace Unchained
             string sTable = Request.QueryString["table"] ?? "";
             string sID = Request.QueryString["id"] ?? "";
             string sMode = Request.QueryString["action"] ?? "";
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), sTable);
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), sTable);
             
             if (sTable == "news1" && dt.Rows.Count == 0)
             {
@@ -149,7 +149,7 @@ namespace Unchained
                 bool fRestricted = BiblePayCommon.EntityCommon.IsRestrictedColumn(sColName);
                 // if (System.Diagnostics.Debugger.IsAttached)
                 bool fHidden = BiblePayCommon.EntityCommon.IsHidden(sTable, sColName);
-                bool fReadonly = BiblePayCommon.EntityCommon.IsReadOnly(sColName);
+                bool fReadonly = BiblePayCommon.EntityCommon.IsReadOnly(sTable, sColName);
                 string sReadOnly = (sMode == "view" || fReadonly) ? " readonly " : "";
                 if (sTable == "news1" && sColName == "URL")
                     sReadOnly = "";

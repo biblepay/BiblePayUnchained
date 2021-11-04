@@ -25,25 +25,6 @@ namespace Unchained
             this.LoadComplete += new EventHandler(this.Page_LoadComplete);
         }
 
-        public static int GetObjectOrdinal(Page p, string sTable, string sFilter, string sID, string sSnippet)
-        {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(Common.IsTestNet(p), sTable);
-            if (sSnippet == "profile")
-            {
-                sFilter += " and Title='Profile Attachment'";
-            }
-            dt = dt.FilterAndSort(sFilter, "Order");
-                
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                if (dt.Rows[i]["id"].ToString() == sID)
-                {
-                    return i;
-                }
-            }
-            return 0;
-        }
-
         protected void ProcessComments()
         {
             if (_bbpevent.EventName == "DeleteObject_Click")
@@ -59,6 +40,12 @@ namespace Unchained
                 {
                     UICommon.MsgBox("Error", "Sorry, the object could not be deleted. ", this);
                 }
+            }
+            else if (_bbpevent.EventName == "GetNotifications_Click")
+            {
+                // Show the Notifications console.
+                string sHTML = "<br>This is a sample notification area.";
+                BiblePayCommonNET.UICommonNET.ModalEmpty(this, "iconBell", "Notification Console", sHTML, 400, 600, true);
             }
             else if (_bbpevent.EventName == "CloseChat_Click")
             {
@@ -94,6 +81,11 @@ namespace Unchained
                 c.chatGuid = Guid.NewGuid().ToString();
                 UICommon.dictChats[Common.gUser(this).id] = c;
                 UICommon.dictChats[_bbpevent.EventValue] = c;
+                User uOther = Common.gUserById(this, c.chattingWithUser);
+                string sURL = "Meeting?id=" + c.chatGuid.ToString() + "&type=private";
+                string sClose = "onclick='closeModalDialog();'";
+                string sNarr = "Click <a " + sClose + " href='" + sURL + "' target='_blank'>here to page " + uOther.FullUserName() + " and enter the chat room.  ";
+                UICommonNET.MsgModalWithLinks(this, "Enter Chat Room", sNarr, 320, 200, false, true);
             }
             else if (_bbpevent.EventName=="RearrangeObjectUp_Click")
             {
@@ -108,11 +100,9 @@ namespace Unchained
                     UICommon.MsgBox("Error", "Sorry, cannot locate object.", this.Page);
                     return;
                 }
-                double nCurrentOrdinal = GetObjectOrdinal(this, "video1", "attachment=1 and parentid='" + v.ParentID + "'", v.id, _bbpevent.Extra.Snippet.ToString());
+                double nCurrentOrdinal = 0; 
                 v.Order = nCurrentOrdinal - 1.9;
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), v, Common.gUser(this));
-
-
 
                 if (!r.fError())
                 {
@@ -136,7 +126,7 @@ namespace Unchained
                     UICommon.MsgBox("Error", "Sorry, cannot locate object.", this.Page);
                     return;
                 }
-                double nCurrentOrdinal = GetObjectOrdinal(this, "video1", "attachment=1 and parentid='" + v.ParentID + "'", v.id, _bbpevent.Extra.Snippet.ToString());
+                double nCurrentOrdinal = 0; // inal(this, "video1", "attachment=1 and parentid='" + v.ParentID + "'", v.id, _bbpevent.Extra.Snippet.ToString());
                 v.Order = nCurrentOrdinal + 1.6;
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), v, Common.gUser(this));
                 if (!r.fError())
@@ -267,6 +257,10 @@ namespace Unchained
                     return;
                 }
                 string sPreJson = BiblePayCommon.Encryption.Base64Decode0(hfPostback);
+                //sPreJson = System.Text.RegularExpressions.Regex.Unescape(sPreJson);
+
+                //string sPreJson = hfPostback;
+
 
                 dynamic oEventInfo1 = JsonConvert.DeserializeObject<dynamic>(sPreJson);
 
@@ -353,7 +347,6 @@ namespace Unchained
 
                 }
 
-                
 
             }
             catch(Exception ex)
@@ -418,7 +411,6 @@ namespace Unchained
             ProcessComments();
             ProcessToast();
         }
-
         protected virtual void Event(BBPEvent e)
         {
 

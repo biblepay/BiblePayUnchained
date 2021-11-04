@@ -78,6 +78,7 @@ namespace Unchained
                 {
                     if (true)
                     {
+                        
                         Sidechain.TranscodeVideos(false, GetFundingAddress(false), GetFundingKey(false), CoerceUser(false));
                         Sidechain.TranscodeVideos(true, GetFundingAddress(true), GetFundingKey(true), CoerceUser(true));
 
@@ -91,16 +92,19 @@ namespace Unchained
                         Sidechain.UpdateWatchCounts(false);
                         
 
-                        double nPrice1 = BiblePayCommon.Common.GetDouble(BiblePayCommon.HalfordDatabase.GetKVWithExpiration("price1"));
+                        double nPrice1 = BiblePayCommon.Common.GetDouble(BiblePayCommon.HalfordDatabase.GetKVDWX("price1"));
                         if (nPrice1 == 0)
                         {
-                            BiblePayCommon.HalfordDatabase.SetKV("1", "price1", 60 * 60 * 24 * 1);
+                            BiblePayCommon.HalfordDatabase.SetKVDWX("price1", 1, 60 * 60 * 24 * 1);
                             BiblePayUtilities.GetCryptoPrices(true);
                             BiblePayUtilities.GetCryptoPrices(false);
                         }
+                        if (fAttached)
+                            Sidechain.GhostVideos();
+                        
                     }
 
-                    System.Threading.Thread.Sleep(fAttached ? 60000 * 1 : 60000 * 7);
+                    System.Threading.Thread.Sleep(fAttached ? 60000 * 1 : 60000 * 6);
                 }
                 catch(Exception ex)
                 {

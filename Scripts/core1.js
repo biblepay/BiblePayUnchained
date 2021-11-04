@@ -166,7 +166,50 @@ $(document).ready(function () {
             });
             var e = document.getElementById("spandialog");
             e.innerHTML = body;
-        }
+}
+
+function showModalDialogWithCancel(title, body, width, height) {
+    $("#divdialog").dialog({
+        "body": body,
+        "title": title,
+        "show": true,
+        "width": width,
+        "height": height,
+        buttons: {
+            CANCEL: function ()
+            {
+                    $(this).dialog("close");
+            }
+        },
+    });
+    var e = document.getElementById("spandialog");
+    e.innerHTML = body;
+}
+
+function showModalEmptyDialog(sParent, title, body, width, height)
+{
+
+    var oParent = document.getElementById(sParent);
+    if (!oParent)
+        return;
+    var x = oParent.left + 540;
+    var y = oParent.top - 90;
+    $("#divdialog").dialog({
+        "body": body,
+        "title": title,
+        "show": true,
+        "width": width,
+        "height": height,
+        "position": { my:'top',at: 'top+45' }
+    });
+
+    $("#divdialog").dialog("moveToTop");
+    var e = document.getElementById("spandialog");
+    e.innerHTML = body;
+    
+}
+
+
 
         function transmit(id,action,affectedID,affectedID2)
         {
@@ -344,7 +387,8 @@ var notified = false;
             */
         }
 
-        function closeNav() {
+function closeNav() {
+
             $("#mySidenav").css("transform", "translate(-240px,0)");
             $('#rightmenubutton').removeClass('hidden-lg');
             $('#rightmenubutton').removeClass('hidden-sm');
@@ -452,9 +496,13 @@ function XSS(oData) {
     oData = oData.replace('<', '[lessthan]');
     oData = oData.replace('>', '[greaterthan]');
     oData = oData.replace('&', '[ampersand]');
+    
+    //oData = escape(oData);
+    console.log(oData);
 
     var oData2 = window.btoa(oData);
-    
+    //var oData2 = oData;
+
     return oData2;
 }
 

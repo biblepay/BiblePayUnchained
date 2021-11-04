@@ -1,9 +1,8 @@
 ﻿<%@ Page Title="Decentralized Videos" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" EnableEventValidation="false" CodeBehind="VideoList.aspx.cs" Inherits="Unchained.VideoList" %>
-<%@ Register TagPrefix="BBP" Namespace="BiblePayPaginator"  Assembly="BiblePayPaginator"%>
 
  
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-    <script>
+         <script>
               function search(ele) {
                   if (event.key === 'Enter') {
                       document.getElementById('<%= btnSearch.ClientID %>').click();
@@ -12,8 +11,7 @@
               }
         </script>
 
- <asp:UpdatePanel runat="server" ID="Up1">
-    <ContentTemplate>
+
             <div style="z-index:1;top:-50px;">
         <small>
         <asp:TextBox ID="txtSearch" width="500px" runat="server" onkeydown = "search(this);return (event.keyCode!=13);"></asp:TextBox>
@@ -21,8 +19,7 @@
     </div>
 
          <%=GetVideoList() %>
-    </ContentTemplate>
-  </asp:UpdatePanel>
+
     
          
 </asp:Content>

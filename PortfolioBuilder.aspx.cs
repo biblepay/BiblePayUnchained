@@ -124,7 +124,7 @@ namespace Unchained
             o.Amount = 0;
             o.id = Guid.NewGuid().ToString();
 
-            bool fExists = UICommon.RecordExists(IsTestNet(this), "utxostake1", "address='" + o.Address + "' and OwnerAddress='" + gUser(this).BiblePayAddress + "'");
+            bool fExists = UICommon.UTXORecordExists(IsTestNet(this), "utxostake1", "address='" + o.Address + "' and OwnerAddress='" + gUser(this).BiblePayAddress + "'");
 
             if (fExists)
             {

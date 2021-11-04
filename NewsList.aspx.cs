@@ -13,7 +13,7 @@ namespace Unchained
         protected string GetNews()
         {
             // Shows the comments section for the object.  Also shows the replies to the comments.
-            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "news1");
+            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), "news1");
             dt = dt.FilterBBPDataTable("URL like '%https%'");
             dt = (BBPDataTable)dt.OrderBy("time desc");
             string sHTML = "<table class='news'>";

@@ -8,7 +8,7 @@ using static BiblePayCommon.Encryption;
 namespace BiblePayCommon
 {
 
-    public static class HalfordCache
+    public static class HalfordMemoryCache
     {
         // This is an in memory only app-cache
 
@@ -65,13 +65,6 @@ namespace BiblePayCommon
             fs.Close();
         }
 
-        public static void xAppendTxData(string sTxFileName, string sData)
-        {
-             string sPath = GetFolderUnchained("Database") + "\\" + sTxFileName;
-             System.IO.StreamWriter sw = new System.IO.StreamWriter(sPath, true);
-             sw.WriteLine(sData);
-             sw.Close();
-        }
         
         // The disk based application cache calls "SetKV" and "GetKV"
         public static void SetKV(string sData, string sKey)
@@ -101,7 +94,6 @@ namespace BiblePayCommon
         {
             BiblePayCommon.HalfordDatabase.SetKV(nValue.ToString(), sKey, (int)nExpirationSeconds);
         }         
-
 
 
 

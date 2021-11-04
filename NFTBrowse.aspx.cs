@@ -48,7 +48,7 @@ namespace Unchained
         public static double GetScalarAge(Page p, string id, string table, string groupbycolumn, string maxcolumn)
         {
             // SQL Equivalent of : Select id,max(maxcolumn) group by groupbycolumn
-            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), table);
+            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), table);
             dt = dt.FilterBBPDataTable(groupbycolumn + "='" + id + "'");
             var query = from row in dt.AsEnumerable()
                         group row by row.Field<string>(groupbycolumn) into grp
@@ -73,7 +73,7 @@ namespace Unchained
         public static List<BiblePayCommon.Entity.NFT> GetListOfNFTs(Page p, string sTypes)
         {
             List<BiblePayCommon.Entity.NFT> nList = new List<BiblePayCommon.Entity.NFT>();
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "NFT");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "NFT");
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 BiblePayCommon.Entity.NFT n = (BiblePayCommon.Entity.NFT)BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, "NFT", i);
@@ -197,7 +197,7 @@ namespace Unchained
                     double nAge = GetScalarAge(p, n[i].GetHash(), "NFTBid", "nftid", "Amount");
                     if (nAge > (60 * 60 * 24 * 14))
                     {
-                        BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "nftbid");
+                        BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "nftbid");
                         dt = dt.FilterBBPDataTable("nftid='" + sID + "' and amount > " + n[i].LowestAcceptableAmount().ToString());
                         if (dt.Rows.Count > 0)
                         {

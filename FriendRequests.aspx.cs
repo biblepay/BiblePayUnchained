@@ -1,9 +1,12 @@
-﻿using System;
+﻿using MongoDB.Driver;
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Web;
 using static BiblePayCommon.Common;
 using static BiblePayCommon.DataTableExtensions;
 using static BiblePayCommon.Entity;
+using static BiblePayCommon.EntityCommon;
 using static BiblePayCommonNET.CommonNET;
 using static BiblePayDLL.Sidechain;
 using static Unchained.Common;
@@ -15,6 +18,15 @@ namespace Unchained
         protected new void Page_Load(object sender, EventArgs e)
         {
 
+        }
+
+
+        private bool IsFriend(Friend f)
+        {
+            var builder = Builders<dynamic>.Filter;
+            var filter = builder.Eq("userid", f.UserID) & builder.Eq("requesterid", f.RequesterID);
+            IList<dynamic> l1 = BiblePayDLL.Sidechain.GetChainObjects<dynamic>(IsTestNet(this), "Friend", filter, SERVICE_TYPE.PUBLIC_CHAIN);
+            return l1.Count > 0;
         }
 
         protected override void Event(BBPEvent e)
@@ -32,8 +44,8 @@ namespace Unchained
                 f.UserID = gUser(this).id;
                 // delete the friends request; add the friend
 
-                bool fExists = DataExists(IsTestNet(this), "Friend", "userid='" + f.UserID + "' and requesterid='" + f.RequesterID + "'");
-                if (fExists && false)
+               
+                if (IsFriend(f) && false)
                 {
                     UICommon.MsgBox("Error", "Sorry, you are already friends with this person. ", this);
                     return;
@@ -59,26 +71,30 @@ namespace Unchained
             string html = "<table class=saved>";
             string sRow = "<tr><th>Requestor Name<th>Avatar<th>Request Date<th>Approve</tr>";
             html += sRow;
-            DataTable dtFriends = RetrieveDataTable2(IsTestNet(this), "FriendRequest");
-            dtFriends = dtFriends.FilterDataTable("UserID='" + gUser(this).id + "'");
 
-            if (dtFriends.Rows.Count == 0)
+            var builder = Builders<BiblePayCommon.Entity.FriendRequest>.Filter;
+            var filter = builder.Eq("UserID", gUser(this).id);
+            IList<BiblePayCommon.Entity.FriendRequest> dtFriends = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.FriendRequest>(IsTestNet(this),
+                "FriendRequest", filter, SERVICE_TYPE.PUBLIC_CHAIN);
+
+            if (dtFriends.Count == 0)
             {
                 html = "You do not have any friend requests.";
                 return html;
             }
-            for (int i = 0; i < dtFriends.Rows.Count; i++)
+            for (int i = 0; i < dtFriends.Count; i++)
             {
-                User requestor = gUserById(this, dtFriends.Rows[i]["RequesterID"].ToString());
-                string sApproveButton = UICommon.GetStandardButton(dtFriends.Rows[i]["id"].ToString(), "<i style='color:black;' class='fa fa-heart'></i>", "ApproveFriendRequest", "Approve Friend Request");
+                User requestor = gUserById(this, dtFriends[i].RequesterID);
+                string sApproveButton = UICommon.GetStandardButton(dtFriends[i].id,
+                    "<i style='color:black;' class='fa fa-heart'></i>", "ApproveFriendRequest", "Approve Friend Request");
                 
                 string sVURL = "Person?id=" + requestor.id + "'";
                 string sUserAnchor = "<a href='" + sVURL + "'>" + requestor.FullUserName() + "</a>";
-                string sID = dtFriends.Rows[i]["id"].ToString();
+                string sID = dtFriends[i].id;
 
                 sRow = "<tr><td>" + sUserAnchor
                         + "<td>" + requestor.GetAvatarImage()
-                        + "<td>" + dtFriends.GetColDateTime(i,"time").ToString()
+                        + "<td>" + dtFriends[i].time.ToString()
                         + "<td>" + sApproveButton + "</tr>";
                 html += sRow;
             }

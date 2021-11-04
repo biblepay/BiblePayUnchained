@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Web;
 using static BiblePayCommon.Common;
 using static BiblePayCommon.DataTableExtensions;
@@ -91,7 +92,7 @@ namespace Unchained
 
         protected string GetPeople()
         {
-            BiblePayCommon.BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(this), "user1");
+            BiblePayCommon.BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), "user1");
             string sFilter = Config("hideusersdomain");
             if (sFilter != "")
             {
@@ -105,7 +106,13 @@ namespace Unchained
                     + "%' or LastName like '%" + txtSearch.Text + "%' or TelegramLinkName like '%"
                     + txtSearch.Text + "' or TelegramLinkURL like '%" + txtSearch.Text + "%' or TelegramLinkDescription like '%" + txtSearch.Text + "%'");
             }
-            string html = UICommon.GetUserGallery(this, dt, paginator1, 3);
+            List<BiblePayCommon.Entity.user1> l = new List<BiblePayCommon.Entity.user1>();
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                BiblePayCommon.Entity.user1 o = (BiblePayCommon.Entity.user1)BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, "user1", i);
+                l.Add(o);
+            }
+            string html = UICommon.GetUserGallery(this, l, paginator1, 3);
             return html;
         }
 
