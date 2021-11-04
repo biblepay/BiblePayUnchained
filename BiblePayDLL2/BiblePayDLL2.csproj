@@ -27,8 +27,15 @@
   </ItemGroup>
 
   <ItemGroup>
+  
     <Reference Include="BiblePayTestHarness">
       <HintPath>..\Dependencies\BiblePayTestHarness.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Bson">
+      <HintPath>..\bin\MongoDB.Bson.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Driver">
+      <HintPath>..\Bin\MongoDB.Driver.dll</HintPath>
     </Reference>
     <Reference Include="NBitcoin">
       <HintPath>..\Dependencies\NBitcoin.dll</HintPath>

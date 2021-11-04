@@ -46,3 +46,5 @@ Properties/PublishProfiles/FolderProfile.pubxml.user
 Dependencies/BiblePayCommon.pdb
 *.user
 *.pubxml
+*.user
+*.pubxml
