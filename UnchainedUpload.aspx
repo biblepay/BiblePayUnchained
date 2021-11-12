@@ -16,8 +16,6 @@
         return upload.getUploadedFiles().length;
     }
 
-
-
     (function () {
         var $;
         var dnd = window.dnd = window.dnd || {};

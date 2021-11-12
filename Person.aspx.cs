@@ -3,9 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Dynamic;
+using System.IO;
 using System.Net.Mail;
 using System.Web;
 using System.Web.UI;
+using Telerik.Web.UI;
 using static BiblePayCommon.Common;
 using static BiblePayCommon.DataTableExtensions;
 using static BiblePayCommon.Entity;
@@ -26,8 +28,17 @@ namespace Unchained
         protected User MySelf;
         protected new void Page_Load(object sender, EventArgs e)
         {
+            
             if (Request.Path.Contains("comment"))
             {
+                if (!Common.gUser(this).LoggedIn)
+                {
+                    UICommon.MsgBox("Error", "You Must be logged in first.", this);
+                    return;
+                    //var status = new { status = false, loggedIn = false, message = "You Must be logged in first." };
+                    //Response.Write(Newtonsoft.Json.JsonConvert.SerializeObject(status));
+                    //Response.End();
+                }
                 string data = Request.Headers["headeraction"].ToNonNullString();
                 var comment = Newtonsoft.Json.JsonConvert.DeserializeObject<comment1>(data);
                 var status = SaveComment(comment);
@@ -37,6 +48,14 @@ namespace Unchained
             }
             if (Request.Path.Contains("voting"))
             {
+                if (!Common.gUser(this).LoggedIn)
+                {
+                    UICommon.MsgBox("Error", "You Must be logged in first.", this);
+                    return;
+                    //var status = new { status = false, loggedIn = false, message = "You Must be logged in first." };
+                    //Response.Write(Newtonsoft.Json.JsonConvert.SerializeObject(status));
+                    //Response.End();
+                }
                 string s1 = Request.Headers["headeraction"].ToNonNullString();
                 string parentId = Common.GetElement(s1, "|", 1);
                 string voteType = Common.GetElement(s1, "|", 0);
@@ -48,6 +67,14 @@ namespace Unchained
             }
             if (Request.Path.Contains("deletecomentbyid"))
             {
+                if (!Common.gUser(this).LoggedIn)
+                {
+                    UICommon.MsgBox("Error", "You Must be logged in first.", this);
+                    return;
+                    //var status = new { status = false, loggedIn = false, message = "You Must be logged in first." };
+                    //Response.Write(Newtonsoft.Json.JsonConvert.SerializeObject(status));
+                    //Response.End();
+                }
                 string id = Request.Headers["headeraction"].ToNonNullString();
                 bool fDeleted = BiblePayDLL.Sidechain.DeleteObject(Common.IsTestNet(this), "comment1",
                                           id, Common.gUser(this));
@@ -57,6 +84,14 @@ namespace Unchained
             }
             if (Request.Path.Contains("editcomentbyid"))
             {
+                if (!Common.gUser(this).LoggedIn)
+                {
+                    UICommon.MsgBox("Error", "You Must be logged in first.", this);
+                    return;
+                    //var status = new { status = false, loggedIn = false, message = "You Must be logged in first." };
+                    //Response.Write(Newtonsoft.Json.JsonConvert.SerializeObject(status));
+                    //Response.End();
+                }
                 object result = new { status = true };
 
                 string data = Request.Headers["headeraction"].ToNonNullString();
@@ -259,6 +294,63 @@ namespace Unchained
             return result;
         }
 
+        private object UploadAttachment(string sParentID, string sSubj, string sBody)
+        {
+
+            int iFileNo = 0;
+            bool fSuccess = false;
+            int failed = 0;
+            int success = 0;
+            string error="";
+            foreach (UploadedFile f in AsyncUpload1.UploadedFiles)
+            {
+                try
+                {
+                    string sPath = Common.GetFolderUnchained("Temp");
+                    string extension = Path.GetExtension(f.FileName);
+                    string newName = Guid.NewGuid().ToString() + extension;
+                    string fullpath = Path.Combine(sPath, newName);
+
+                    if (UICommon.IsAllowableExtension(extension))
+                    {
+                        f.SaveAs(fullpath);
+
+                        BiblePayCommon.Entity.object1 o = new BiblePayCommon.Entity.object1();
+                        o.FileName = fullpath;
+                        o.ParentID = sParentID;
+                        o.Title = sSubj;
+                        o.Subject = sSubj;
+                        o.Body = sBody;
+
+                        o.Attachment = 1;
+
+                        string sURL = OffchainUpload(o, iFileNo);
+                        fSuccess = true;
+                        success++;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    failed++;
+
+                    error = ex.InnerException == null ? ex.Message : ex.InnerException.Message;
+                }
+                //mission critical; check the calling process, verify this fSuccss flag is actually valid.
+
+            }
+            var r = new { status = failed == 0, message = failed == 0 ? "Attachment uploaded successfully." : $"{failed} attachement failed to upload.", error=error };
+            return r;
+        }
+        protected string OffchainUpload(BiblePayCommon.Entity.object1 o1, int iFileNo)
+        {
+            string sCat = Request.Form["ddCategory"].ToNonNullString();
+            if (iFileNo == 1 || true)
+            {
+                o1.Category = sCat;
+            }
+            BiblePayDLL.Sidechain.UploadIntoDSQL_Background(IsTestNet(this), ref o1, gUser(this));
+            return o1.URL;
+        }
 
         #endregion
         protected override void Event(BBPEvent e)
@@ -273,9 +365,15 @@ namespace Unchained
 
                 Timeline t = new Timeline();
 
-                try
+                
+                    try
                 {
                     t.Privacy = e.Extra.Privacy.ToString();
+                }
+                catch { }
+                try
+                {
+                    t.Category = e.Extra.Category.ToString();
                 }
                 catch { }
                 try
@@ -300,8 +398,9 @@ namespace Unchained
                     t.URLPreviewImage = HttpUtility.UrlDecode(e.Extra.URLPreviewImage?.ToString());
                 }
                 catch { }
-
-                t.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Body.ToString()));
+                var body = e.Extra.Body.ToString();
+                
+                t.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(body));
                 t.UserID = gUser(this).id;
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), t, gUser(this));
                 if (r.fError())
@@ -311,6 +410,13 @@ namespace Unchained
                 }
                 else
                 {
+                   var upload =  UploadAttachment(t.id, "", t.Body);
+                    if (!(bool)upload.GetType().GetProperty("status").GetValue(upload))
+                    {
+                        UICommon.MsgBox("Error", upload.GetType().GetProperty("error").GetValue(upload).ToString(), this);
+                    }
+
+                    //UICommon.MsgBox("Error", "You Must be logged in first.", this);
                     //SendBlastOutForTimeline(this, t);
                     ToastLater(this, "Success", "Your timeline entry has been saved!");
                 }

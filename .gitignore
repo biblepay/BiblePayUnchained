@@ -16,6 +16,7 @@ BiblePayDLL/obj/
 bin/
 obj/
 packages/
+.vs/
 
 # Windows Installer files
 *.cab

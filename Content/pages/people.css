@@ -11,7 +11,7 @@ body {
 #friends-container .fa-heart-broken {
     font-size: 22px;
 }
-
+.profile-page .btn-edit-profile,
 .profile-page .btn-edit-profile a:link, .profile-page .btn-edit-profile a:visited {
     color: #fff;
 }
@@ -254,6 +254,7 @@ select.postprivacy {
     height: 22px;
     background-color: gray;
     line-height: 9px;
+    display: inline-block;
 }
 textarea.newpost {
     border: none;
@@ -305,9 +306,9 @@ textarea.newpost:focus{
         .commentview .emojionearea.commentbody.emojionearea-disable
         .emojionearea-editor {
             color: initial !important;
+            min-height: 1em;
         }
-#post-container
-.emojionearea .emojionearea-editor {
+.emojionearea.writecomment .emojionearea-editor {
     min-height: 1em;
     max-height: none;
 }
@@ -359,3 +360,61 @@ display:initial;
     font-size:12px !important;
     margin-right:4px;
 }
+#contentpopup img.tosee {
+    max-height: 100vh;
+    display: block;
+    margin: auto;
+}
+#contentpopup .btn-close {
+    top: 15px;
+    right: 15px;
+}
+.loading .loader1{
+    display:flex
+}
+.loader1 {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 99999999;
+    color: #000;
+    background-color: #fff;
+    display: none;
+    text-align: center;
+    align-items: center;
+}
+    .loader1 .fa-spin {
+        align-self: center;
+        float: none;
+        flex-shrink: inherit;
+        display: block;
+        margin: auto;
+    }
+
+.ruButton.ruBrowse{
+
+}
+.cate-type{
+    font-size:12px;
+}
+.icon-post {
+    max-width: 30px;
+}
+
+.RadAsyncUpload{
+    margin-top:5px;
+    width:100%;
+}
+
+    .RadAsyncUpload ul li:last-child {
+        text-align: right;
+        width: 100%;
+    }
+
+    .RadAsyncUpload ul li:last-child span {
+    width:84px;
+    }

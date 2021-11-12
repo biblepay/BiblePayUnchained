@@ -212,7 +212,12 @@
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\embed-player3.min.js" />
+    <Content Include="Content\pages\bz.png" />
+    <Content Include="Content\pages\cv.png" />
     <Content Include="Content\pages\people.css" />
+    <Content Include="Content\pages\rq.png" />
+    <Content Include="Content\pages\sc.png" />
+    <Content Include="Content\pages\sp.png" />
     <Content Include="Content\sidenav_black.css" />
     <Content Include="Content\sidenav_blue.css" />
     <Content Include="Content\sidenav_grey.css" />

@@ -1,6 +1,7 @@
 ﻿<%@ Page Title="View Person" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" EnableEventValidation="false" CodeBehind="Person.aspx.cs" Inherits="Unchained.Person" %>
 
 <%@ Register TagPrefix="BBP" Namespace="BiblePayPaginator" Assembly="BiblePayPaginator" %>
+<%@ Register TagPrefix="telerik" Namespace="Telerik.Web.UI" Assembly="Telerik.Web.UI" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <link href="Scripts/emoji/emojionearea.min.css" rel="stylesheet" />
@@ -11,7 +12,6 @@
                 <div class="col-12 grid-margin">
                     <div class="profile-header">
                         <div class="cover">
-
                             <div class="cover-body d-flex justify-content-between align-items-center">
                                 <div>
                                     <%= user.GetAvatarImageNoDims("profile-pic") %>
@@ -204,6 +204,57 @@
                 <!-- left wrapper end -->
                 <!-- middle wrapper start -->
                 <div class="col-md-8 col-xl-6 middle-wrapper">
+                    <div class="row">
+                        <div class="col-12 mb-2 text-center">
+                            
+                            <div class="btn-group" role="group" aria-label="Filter post by category">
+  <input type="radio" class="btn-check" value="A"  name="rdopostcategory" id="btnradioA" autocomplete="off" checked>
+  <label class="btn btn-outline-secondary cate-type" for="btnradioA">
+     <span class="d-none d-md-inline">All</span>
+      <i class="d-inline d-md-none fa fa-globe" style="font-size:28px" title="All"></i>
+  </label>
+
+  <input type="radio" class="btn-check" value="SC" name="rdopostcategory" id="btnradioS" autocomplete="off">
+  <label class="btn btn-outline-secondary cate-type" for="btnradioS">
+     <span class="d-none d-md-inline">Social</span> 
+      <img src="Content/pages/sc.png" class="icon-post d-inline d-md-none" title="Social" alt="Social"/>
+      <%--<i class="d-inline d-md-none fa fa-bullseye" title="Social"></i>--%>
+
+  </label>
+
+  <input type="radio" class="btn-check" value="BZ" name="rdopostcategory" id="btnradioB" autocomplete="off">
+  <label class="btn btn-outline-secondary cate-type" for="btnradioB">
+     <span class="d-none d-md-inline">Business</span> 
+            <img src="Content/pages/bz.png" class="icon-post d-inline d-md-none" title="Business" alt="Business"/>
+<%--<i class="d-inline d-md-none fa fa-bank" title="Business"></i>--%>
+
+  </label>
+
+  <input type="radio" class="btn-check"  value="SP" name="rdopostcategory" id="btnradioF" autocomplete="off">
+  <label class="btn btn-outline-secondary cate-type" for="btnradioF">
+     <span class="d-none d-md-inline">Spiritual</span> 
+            <img src="Content/pages/sp.png" class="icon-post d-inline d-md-none" title="Spiritual" alt="Spiritual"/>
+<%--<i class="d-inline d-md-none fa fa-blind" title="Faith"></i>--%>
+
+  </label>
+
+  <input type="radio" class="btn-check"  value="CV" name="rdopostcategory" id="btnradioC" autocomplete="off">
+  <label class="btn btn-outline-secondary cate-type" for="btnradioC">
+     <span class="d-none d-md-inline">Civic</span> 
+      <img src="Content/pages/cv.png" class="icon-post d-inline d-md-none" title="Civic" alt="Civic"/>
+      <%--<i class="d-inline d-md-none fa fa-anchor" title="Civic"></i>--%>
+          </label>
+
+  <input type="radio" class="btn-check"  value="RQ" name="rdopostcategory" id="btnradioP" autocomplete="off">
+  <label class="btn btn-outline-secondary cate-type" for="btnradioP">
+     <span class="d-none d-md-inline">Request</span> 
+            <img src="Content/pages/rq.png" class="icon-post d-inline d-md-none" title="Request" alt="Request"/>
+<%--<i class="d-inline d-md-none fa fa-hand-paper-o" title="Request"></i>--%>
+
+  </label>
+</div>
+                        </div>
+                    </div>
                     <%if (IsMe)
                         {%>
                     <div class="row">
@@ -236,15 +287,25 @@
                                 <div class="modal-body">
                                     <div class="d-flex align-items-center hover-pointer flex-fill">
                                         <%= MySelf.GetAvatarImageNoDims("img-xs rounded-circle") %>
-                                        <div class="ms-2">
+                                        <div class="ms-2 flex-fill">
 
                                             <span class=""><%= MySelf.FullUserName() %></span>
+                                            <div>
                                             <select id="visibility" class="form-control postprivacy">
                                                 <option value="public">Public</option>
                                                 <option value="Friends">Friends Only</option>
                                                 <option value="private">Private</option>
                                                 <option value="me">Only Me</option>
                                             </select>
+                                                <span class="small">Type:</span>
+                                             <select id="category" style="width:auto; min-width:100px;" class="form-control postprivacy">
+                                                <option value="CV">CV - Civic</option> 
+                                                <option value="SC">SC- Social</option>
+                                                <option value="BZ">BZ - Bussiness</option>
+                                                <option value="SP">SP - Faith-Sipritual-Religious</option>
+                                                <option value="RQ">RQ - Prayer Request</option>
+                                            </select>
+                                                </div>
                                         </div>
                                     </div>
                                     <div class="d-flex flex-fill pt-2">
@@ -263,8 +324,16 @@
                                             <a href="#" target="_blank" class="stretched-link"></a>
                                         </div>
                                     </div>
+                                    <div class="">
+                                        <telerik:RadAsyncUpload  runat="server"  RenderMode="Classic" HideFileInput="true"
+                     ID="AsyncUpload1" MultipleFileSelection="Automatic" 
+                    AllowedFileExtensions=".jpeg,.jpg,.bmp,.svg,.png,.pdf,.gif,.mp3,.webm,.mp4" >
+                                            <Localization Select="Add Media" />
+                                        </telerik:RadAsyncUpload>
+                                    </div>
                                 </div>
                                 <div class="modal-footer">
+
                                     <div class="mb-2" id="response"></div>
                                     <button type="button" onclick="savepost()" class="btn btn-primary w-100 text-center">Post</button>
                                 </div>
@@ -280,11 +349,11 @@
                         <div class="card-body">
                             <% if (IsMe)
                                 {%>
-                            <p>Oops! You have no post to display</p>
+                            <p>There are no posts to show of this type.</p>
                             <%}
                                 else
                                 { %>
-                            <p>Oops! <%=user.FirstName %> has no post to display</p>
+                            <p> <%=user.FirstName %> has no posts to show of this type.</p>
                             <%} %>
                         </div>
                     </div>
@@ -376,6 +445,9 @@
                             </div>
                         </div>
                         <div class="row">
+                            <div class="row attachment-container mt-2">
+
+                                </div>
                             <div class="col-12 small ">
                             <hr class="my-2" />
                                 <span class="postlikecount">
@@ -384,6 +456,7 @@
                                 <%--<span class="postdislikecount">
                                     <i class="fa fa-thumbs-up" aria-hidden="true"></i> <span class="count"></span> Dislike this
                                 </span>--%>
+                                
                             </div>
                         </div>
                     </div>
@@ -436,7 +509,7 @@
                 <div class="col">
                     <p class="mb-0 commentview bg-default small position-relative">
                         <span class="saving-comment">
-                            <i class="fa fa-spinner fa-spin"></i>
+                            <i class="fa fa-sun fa-spin text-blue"></i>
                         </span>
                         <b class="d-block commentername"></b>
                         <span class="commentbody"></span>
@@ -486,11 +559,92 @@
                 <a href="/Person?id={{userid}}" class="stretched-link"></a>
             </div>
         </div>
+
+
+         <!-- Modal -->
+                    <div class="modal fade" id="contentpopup" tabindex="-1"  aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-fullscreen">
+                            <div class="modal-content">
+                                <div class="modal-body py-0">    
+                              <div class="row">
+                                 
+                                       
+                                  <div class="col bg-dark">
+                                      <img src="" alt="" class="img-fluid tosee" />
+                                  </div>
+                                  <div class="col-12 col-md-3 order-0 order-md-1 pt-2" style="max-width:300px;">
+                                      <div class="d-flex align-items-center hover-pointer">
+                                        <img class="img-xs rounded-circle userimage" src="" alt="">
+                                        <div class="ms-2">
+                                            <p class="mb-0 username"></p>
+                                            <span class="text-muted time"></span>
+                                        </div>
+                                    </div>
+                                      <button type="button" class="btn-close position-absolute" data-bs-dismiss="modal" aria-label="Close"></button>
+                               <div class="row small">
+                                   <div class="col-12 mt-3">
+                                       <span class="likecount" >
+                            <i class="fa fa-thumbs-up"></i>
+                            <span class="count mr-1">0</span> Like this
+                        </span>
+                                      <%-- <span class="viewcount float-end" >
+                            <i class="fa fa-eye"></i>
+                            <span class="count mr-1">0</span> View(s)
+                        </span>--%>
+                                   </div>
+                                   <hr class="col-12 mt-2 mb-2" />
+                                   <div class="col">
+                                       <a href="javascript:;" class="btnlike me-2">
+                                           <i class="fa fa-thumbs-up"></i> Like
+                                       </a>
+                                         <a href="javascript:;" class="btncomment me-2">  <i class="fa fa-comment"></i> Comment</a>
+                                       <a href="javascript:;" class="btnshare me-2">
+                                           <i class="fa fa-share"></i> Share</a>
+                                   </div>
+                                   <hr class="col-12 mt-2" />
+
+                               </div>
+                                  
+                                   <div class="post-comments new-comment g-0 row">
+                            <hr class="col-12 my-2" />
+                            
+                            <div class="postcommentscontainer mb-2">
+                            </div>
+                            <div class="col" style="max-width: 45px" id="">
+                                <%= MySelf.GetAvatarImageNoDims("img-xs rounded-circle commenterpic") %>
+                            </div>
+                            <div class="col commententrycontainer">
+                                <textarea class="mb-1 writecomment" rows="1" placeholder="Write a public comment."></textarea>
+                            </div>
+                        </div>
+                                      <div class="row">
+                                          <div id="comment-container" class="col-12">
+
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                                </div>
+                                <div class="loader1">
+                                    <i class="fa fa-sun fa-spin fa-4x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
         <script src="Scripts/waypoint/jquery.waypoints.min.js"></script>
         <script src="Scripts/waypoint/shortcuts/infinite.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="Scripts/emoji/emojionearea.min.js"></script>
         <script>
+
+            $(function () {
+
+                let visi = localStorage.getItem("post_visitbility");
+                if (visi & visi != '')
+                    $('#visibility').val(visi);
+
+
+            });
             <%if (IsMe)
             {%>
             $("#newpost").emojioneArea({
@@ -562,43 +716,36 @@
                 }
             });
             function savepost() {
-                let vis = $('#visibility').val();
                 let body = $('#newpost').emojioneArea()[0].emojioneArea.getText();
-
-                if (body == '') {
+                if (body == '' & getAttachmentCount()==0) {
                     return false;
                 } else {
                     body = XSS(escape(body));
                     var e = {};
                     if (url != '') {
                         e.URL = encodeURIComponent(url);
-                        console.log('url ' + e.URL);
-
-                        // This is where the error is thrown - possibly need to escape this
-
                         e.URLTitle = XSS(escape($('#url-content h3').html()));
-
-                        console.log('url title ' + e.URLTitle);
-
-                        
                         e.URLDescription = XSS(escape($('#url-content p').html()));
-                        console.log('desc ' + e.URLDescription);
-
-
-                        //decodeURIComponent
                         e.URLPreviewImage = encodeURIComponent($('#url-content img').attr('src'));
-                        console.log('preview image ' + e.URLPreviewImage);
-
                     }
                     e.Event = 'AddTimeline_Click';
                     e.Value = sID;
                     e.Privacy = $('#visibility').val();
+
+                    localStorage.setItem("post_visitbility", e.Privacy);
+                    e.Category = $('#category').val();
                     e.Body = body; //window.btoa(escape(body));
                     BBPPostBack2(null, e);
 
                 }
             }
+
+            function getAttachmentCount() {
+                var upload = $find("<%=AsyncUpload1.ClientID%>");
+                return upload.getUploadedFiles().length;
+            }
             <%}%>
+
 
 
             let pno = 0;
@@ -610,12 +757,20 @@
 
             let postfinished = false;
             let loadingpost = false;
+
+            $('input[name="rdopostcategory"]').on('change', function () {
+                postfinished = false;
+                loadingpost = false;
+                pno = 0;
+                $('#post-container').html('');
+                getpost();
+            });
             function getpost() {
                 if (loadingpost || postfinished)
                     return false;
-
+               let category = $('input[name="rdopostcategory"]:checked').val();
                 loadingpost = true;
-                $.get(`api/post/posts?sID=${userId}&fHomogenized=${homogenized}&me=${me}&IsTestNet=${isTestNet}&pno=${pno}`, function (response) {
+                $.get(`api/post/posts?category=${category}&sID=${userId}&fHomogenized=${homogenized}&me=${me}&IsTestNet=${isTestNet}&pno=${pno}`, function (response) {
                     if (response.length == 0) {
                         $('#no-post').show();
                         postfinished = true;
@@ -641,7 +796,7 @@
                         html.find('.profilepic').attr('src', p);
                         html.find('.username').html(v.FullName);
                         html.find('.posttime').html(PrepareTime(v.PostedOn));
-                        html.find('.postbody').html(v.Body.replaceAll('\n', '<br\>'));
+                        html.find('.postbody').html(v.Body?.replaceAll('\n', '<br\>'));
                         html.find('.postlikecount .count').html(v.Likes.nUpvotes);
                         html.find('.btnpostlike').on('click', function () {
                             let param = 'upvote|' + v.id;
@@ -699,9 +854,9 @@
                                                 let pic = $('.new-comment .commenterpic').attr('src')
 
                                                 chtml.find('.commenterpic').attr('src', pic);
-                                                chtml.find('.commentername').html('<%= user.FullUserName()  %>');
+                                                chtml.find('.commentername').html('<%= MySelf.FullUserName()  %>');
                                               chtml.find('.commenttime').html(PrepareTime(new Date()));
-                                              chtml.find('.commentbody').html(body.replaceAll('\n', '<br\>'));
+                                              chtml.find('.commentbody').html(body?.replaceAll('\n', '<br\>'));
                                               html.find('.postcommentscontainer').append(chtml);
                                               chtml.addClass('saving');
                                               console.log(body);
@@ -714,8 +869,145 @@
                                                   success: function (response) {
                                                       var result = JSON.parse(response);
                                                       if (result.status) {
-                                                          $(chtml[0]).attr('id', 'comment' + result.data);
-                                                          chtml.removeClass('saving')
+                                                          let ncid = result.data;
+                                                          $(chtml[0]).attr('id', 'comment' + ncid);
+                                                          chtml.removeClass('saving');
+
+                                                          //$(chtml[0]).attr('id', 'comment' + id);
+                                                          chtml.find('.commentlike').on('click', function () {
+                                                              let param = 'upvote|' + ncid;
+                                                              chtml.addClass('saving')
+                                                              $.ajax({
+                                                                  type: "POST",
+                                                                  url: "Person.aspx/voting",
+                                                                  data: { data: param },
+                                                                  headers: { headeraction: param },
+                                                                  success: function (response) {
+                                                                      var result = JSON.parse(response);
+                                                                      if (result.status.status) {
+                                                                          chtml.find('.commentview .likecount .count').html(result.nUpvotes);
+                                                                          if (result.nUpvotes > 0) {
+                                                                              chtml.find('.commentview .likecount').show()
+                                                                          }
+                                                                          else {
+                                                                              chtml.find('.commentview .likecount').hide()
+                                                                          }
+                                                                          chtml.find('.commentview .dislikecount .count').html(result.nDownvotes);
+                                                                          if (result.nDownvotes > 0) {
+                                                                              chtml.find('.commentview .dislikecount').show()
+                                                                          }
+                                                                          else {
+                                                                              chtml.find('.commentview .dislikecount').hide()
+                                                                              chtml.find('.commentview .likecount').addClass('no-dislike')//'right', '10px !important');
+                                                                          }
+                                                                          chtml.removeClass('saving')
+                                                                      }
+                                                                  }
+                                                              });
+
+                                                          })
+                                                          chtml.find('.commentdis').on('click', function () {
+                                                              let param = 'downvote|' + ncid;
+                                                              chtml.addClass('saving')
+                                                              $.ajax({
+                                                                  type: "POST",
+                                                                  url: "Person.aspx/voting",
+                                                                  data: { data: param },
+                                                                  headers: { headeraction: param },
+                                                                  success: function (response) {
+                                                                      var result = JSON.parse(response);
+                                                                      if (result.status) {
+                                                                          chtml.find('.commentview .likecount .count').html(result.nUpvotes);
+                                                                          if (result.nUpvotes > 0) {
+                                                                              chtml.find('.commentview .likecount').show()
+                                                                          }
+                                                                          else {
+                                                                              chtml.find('.commentview .likecount').hide()
+                                                                          }
+                                                                          chtml.find('.commentview .dislikecount .count').html(result.nDownvotes);
+                                                                          if (result.nDownvotes > 0) {
+                                                                              chtml.find('.commentview .dislikecount').show()
+                                                                          }
+                                                                          else {
+                                                                              chtml.find('.commentview .dislikecount').hide()
+                                                                              chtml.find('.commentview .likecount').addClass('no-dislike')//'right', '10px !important');
+                                                                          }
+                                                                          chtml.removeClass('saving')
+                                                                      }
+                                                                  }
+                                                              });
+
+                                                          })
+                                                           
+                                                              chtml.find('.commentdel').on('click', function () {
+                                                                  chtml.addClass('saving')
+                                                                  $.ajax({
+                                                                      type: "POST",
+                                                                      url: "Person.aspx/deletecomentbyid",
+                                                                      data: { data: ncid },
+                                                                      headers: { headeraction: ncid },
+                                                                      success: function (response) {
+                                                                          var result = JSON.parse(response);
+                                                                          if (result.status) {
+                                                                              chtml.remove();
+                                                                          }
+                                                                      }
+                                                                  });
+                                                              })
+                                                              chtml.find('.commentedit').on('click', function () {
+                                                                  if ($(this).hasClass('cancel')) {
+                                                                      chtml.find('.commentbody').data('emojioneArea').disable();
+                                                                      $(this).removeClass('cancel')
+                                                                  }
+                                                                  else {
+                                                                      chtml.find('.commentbody').data('emojioneArea').enable();
+                                                                      $(this).addClass('cancel')
+                                                                  }
+                                                              })
+                                                              chtml.find('.commentbody').emojioneArea(
+                                                                  {
+                                                                      autoHideFilters: true,
+                                                                      useSprite: true,
+                                                                      pickerPosition: "bottom",
+                                                                      events: {
+                                                                          keypress: function (e, o) {
+                                                                              if (o.originalEvent.charCode == 13) {
+                                                                                  if (!o.originalEvent.shiftKey) {
+                                                                                      o.originalEvent.returnValue = false;
+                                                                                      let body = chtml.find('.commentbody').data("emojioneArea").getText();
+                                                                                      if (body != null & body != 'undefined' & body != '') {
+                                                                                          chtml.addClass('saving');
+                                                                                          let data1 = JSON.stringify({ Body: XSS(escape(body)), Id: ncid });
+                                                                                          $.ajax({
+                                                                                              type: "POST",
+                                                                                              url: "Person.aspx/editcomentbyid",
+                                                                                              data: { data: data1 },
+                                                                                              headers: { headeraction: data1 },
+                                                                                              success: function (response) {
+                                                                                                  var result = JSON.parse(response);
+                                                                                                  if (result.status) {
+                                                                                                      chtml.find('.commentbody').data("emojioneArea").disable();
+                                                                                                      //$(chtml[0]).attr('id', 'comment' + result.data);
+                                                                                                      chtml.removeClass('saving')
+                                                                                                  }
+                                                                                              }
+                                                                                          });
+                                                                                      }
+                                                                                      return false;
+
+                                                                                  }
+                                                                                  else {
+
+                                                                                  }
+                                                                              }
+
+                                                                          }
+                                                                      }
+                                                                  }
+                                                              );
+                                                              chtml.find('.commentbody').data('emojioneArea').disable();
+                                                          
+                                                          ///end of comment buttons copied
                                                       }
                                                   }
                                               });
@@ -757,7 +1049,7 @@
                                 chtml.find('.commenterpic').attr('src', p1);
                                 chtml.find('.commentername').html(v1.FullName);
                                 chtml.find('.commenttime').html(PrepareTime(v1.PostedOn));
-                                chtml.find('.commentbody').html(v1.Body.replaceAll('\n', '<br\>'));
+                                chtml.find('.commentbody').html(v1.Body?.replaceAll('\n', '<br\>'));
 
                                 //Count.nUpvotes nDownvotes
                                 chtml.find('.commentview .likecount .count').html(v1.Count.nUpvotes);
@@ -933,7 +1225,9 @@
                                 return false;
                             })
                             html.find('.deletepost').on('click', function () {
-                                var e = {}; e.Event = 'DeleteTimeline_Click'; if (e.Event == '_Click') return false;
+                                var e = {}; e.Event = 'DeleteTimeline_Click';
+                                if (e.Event == '_Click')
+                                    return false;
                                 e.Value = v.id; BBPPostBack2(null, e); return false;
                             })
 
@@ -942,6 +1236,16 @@
                             html.find('.mainpostaction').remove();
                         }
 
+                        if (v.Attachments && v.Attachments.length > 0) {
+                            let attcount = v.Attachments.length;
+                            let cssClass = 'col-12';
+                            if (attcount > 1)
+                                cssClass = 'col-6';
+                            $.each(v.Attachments, function (ii,vv) {
+                                let atthtml = '<div class="' + cssClass + '"><img src="' + vv.URL + '" data-id="' + vv.id + '" data-parentid="' + vv.ParentID + '" class="img-fluid preview"></div>';
+                                html.find('.attachment-container').append(atthtml);
+                            });
+                        }
 
                         $('#post-container').append(html);
                     })
@@ -964,9 +1268,9 @@
 
             $(function () {
                 getpost();
-                $.get(`api/media/images?sID=${userId}&isTestNet=${isTestNet}`, function (response) {
+                $.get(`api/media?type=images&count=9&sID=${userId}&isTestNet=${isTestNet}`, function (response) {
                     $.each(response, function (i, v) {
-                        let temp = '<div class="col-md-4" ><figure><img class="img-fluid" src="' + v.URL + '" alt="' + v.Title + '"></figure></div>'
+                        let temp = '<div class="col-md-4" ><figure><img data-id="' + v.id + '" data-parentid="' + v.ParentId +'" class="img-fluid preview" src="' + v.URL + '" alt="' + v.Title + '"></figure></div>'
                         $('#latest-images').append(temp);
                     })
                 })
@@ -987,9 +1291,302 @@
                     })
                 })
             })
+
+            $('body').on('click', 'img.preview', function () {
+               let id = $(this).attr('data-id');
+                let parentid = $(this).attr('data-parentid');
+                //getMediaById()
+                $('#contentpopup').modal('show');
+                $('#contentpopup').addClass('loading');
+
+                $('#contentpopup img.tosee').attr('src', '');
+                $('#contentpopup img.userimage').attr('src', '');
+                $('#contentpopup .username').html('');
+                $('#contentpopup .time').html('');
+                $('#contentpopup .commententrycontainer').html('<textarea class="mb-1 writecomment" rows="1" placeholder="Write a public comment."></textarea>');
+
+                $('#contentpopup #comment-container').html('');
+
+                
+                $.get(`api/media/get-by-id?parentid=${parentid}&isTestNet=${isTestNet}`, function (response) {
+
+                    let v = response.find(function (t) { return t.id == id; });
+
+                    //if (!v)
+                      //  v = response[0];
+                    $('#contentpopup img.tosee').attr('src', response[0].URL);
+                    $('#contentpopup img.userimage').attr('src', response[0].ProfilePicture);
+                    $('#contentpopup .username').html(response[0].FullName);
+                    $('#contentpopup .time').html(PrepareTime(response[0].PostedOn));
+                    $('#contentpopup .likecount .count').html(response[0].Likes);
+                    $('#contentpopup .viewcount .count').html(response[0].Views);
+
+                    let emojin =  $('#contentpopup .writecomment').emojioneArea({
+                        autoHideFilters: true,
+                        useSprite: true,
+                        pickerPosition: "bottom",
+                        events: {
+                            keypress: function (e, o) {
+                                if (o.originalEvent.charCode == 13) {
+                                    if (!o.originalEvent.shiftKey) {
+                                        o.originalEvent.returnValue = false;
+                                        let body = emojin.data("emojioneArea").getText();
+                                        if (body != null & body != 'undefined' & body != '') {
+                                            emojin.data("emojioneArea").setText('');
+                                            let ctemplate = $('#comment-template').html().toString();
+                                            var chtml = $(ctemplate);
+                                            let pic = $('.new-comment .commenterpic').attr('src')
+
+                                            chtml.find('.commenterpic').attr('src', pic);
+                                            chtml.find('.commentername').html('<%= user.FullUserName()  %>');
+                                            chtml.find('.commenttime').html(PrepareTime(new Date()));
+                                            chtml.find('.commentbody').html(body?.replaceAll('\n', '<br\>'));
+                                            $('#contentpopup #comment-container').append(chtml);
+                                            chtml.addClass('saving');
+                                            let data1 = JSON.stringify({ Body: XSS(escape(body)), ParentID: response[0].id });
+                                            $.ajax({
+                                                type: "POST",
+                                                url: "Person.aspx/comment",
+                                                data: { data: data1 },
+                                                headers: { headeraction: data1 },
+                                                success: function (response) {
+                                                    var result = JSON.parse(response);
+                                                    if (result.status) {
+                                                        $(chtml[0]).attr('id', 'comment' + result.data);
+                                                        chtml.removeClass('saving')
+                                                    }
+                                                }
+                                            });
+                                        }
+                                        return false;
+
+                                    }
+                                    else {
+
+                                    }
+                                }
+
+                            }
+                        }
+                    });
+
+                    $('#contentpopup .btnlike').on('click', function () {
+                        let param = 'upvote|' + v.id;
+                        $('#contentpopup .likecount').addClass('saving')
+                        $.ajax({
+                            type: "POST",
+                            url: "Person.aspx/voting",
+                            data: { data: param },
+                            headers: { headeraction: param },
+                            success: function (response) {
+                                var result = JSON.parse(response);
+                                if (result.status.status) {
+                                    $('#contentpopup .likecount .count').html(result.nUpvotes);
+                                    if (result.nUpvotes > 0) {
+                                        $('#contentpopup .likecount').show()
+                                    }
+                                    else {
+                                        $('#contentpopup .likecount').hide()
+                                    }
+                                    $('#contentpopup .likecount').removeClass('saving')
+                                }
+                            }
+                        });
+
+                    })
+
+                    $('#contentpopup .btncomment').on('click', function () {
+                        //console.log(emojin[0].getBoundingClientRect().top);
+                        //console.log($(emojin[0].getBoundingClientRect().top).offset().top);
+                        emojin.data("emojioneArea").setFocus();
+                    });
+                    if (v.Comments && v.Comments.length > 0) {
+                        $.each(v.Comments, function (i, v1, a) {
+                            let ctemplate = $('#comment-template').html().toString();
+                            var chtml = $(ctemplate);
+                            let p1 = '';
+                            if (v1.ProfilePicture.startsWith('<img'))
+                                p1 = $(v1.ProfilePicture).attr('src');
+                            else {
+                                p1 = v1.ProfilePicture;
+                            }
+                            chtml.find('.commenterpic').attr('src', p1);
+                            chtml.find('.commentername').html(v1.FullName);
+                            chtml.find('.commenttime').addClass('small d-block');
+                            chtml.find('.commenttime').html(PrepareTime(v1.PostedOn));
+                            chtml.find('.commentbody').html(v1.Body?.replaceAll('\n', '<br\>'));
+
+                            //Count.nUpvotes nDownvotes
+                            chtml.find('.commentview .likecount .count').html(v1.Count.nUpvotes);
+                            if (v1.Count.nUpvotes > 0) {
+                                chtml.find('.commentview .likecount').show()
+                            }
+                            else {
+                                chtml.find('.commentview .likecount').hide()
+                            }
+                            chtml.find('.commentview .dislikecount .count').html(v1.Count.nDownvotes);
+                            if (v1.Count.nDownvotes > 0) {
+                                chtml.find('.commentview .dislikecount').show()
+                            }
+                            else {
+                                chtml.find('.commentview .dislikecount').hide()
+                                chtml.find('.commentview .likecount').addClass('no-dislike')//'right', '10px !important');
+                            }
+                            $(chtml[0]).attr('id', 'comment' + v1.id);
+                            chtml.find('.commentlike').addClass('small')
+                            chtml.find('.commentdis').addClass('small')
+                            chtml.find('.commentdel').addClass('small')
+                            chtml.find('.commentedit').addClass('small')
+                            chtml.find('.commentlike').on('click', function () {
+                                let param = 'upvote|' + v1.id;
+                                chtml.addClass('saving')
+                                $.ajax({
+                                    type: "POST",
+                                    url: "Person.aspx/voting",
+                                    data: { data: param },
+                                    headers: { headeraction: param },
+                                    success: function (response) {
+                                        var result = JSON.parse(response);
+                                        if (result.status.status) {
+                                            chtml.find('.commentview .likecount .count').html(result.nUpvotes);
+                                            if (result.nUpvotes > 0) {
+                                                chtml.find('.commentview .likecount').show()
+                                            }
+                                            else {
+                                                chtml.find('.commentview .likecount').hide()
+                                            }
+                                            chtml.find('.commentview .dislikecount .count').html(result.nDownvotes);
+                                            if (result.nDownvotes > 0) {
+                                                chtml.find('.commentview .dislikecount').show()
+                                            }
+                                            else {
+                                                chtml.find('.commentview .dislikecount').hide()
+                                                chtml.find('.commentview .likecount').addClass('no-dislike')//'right', '10px !important');
+                                            }
+                                            chtml.removeClass('saving')
+                                        }
+                                    }
+                                });
+
+                            })
+                            chtml.find('.commentdis').on('click', function () {
+                                let param = 'downvote|' + v1.id;
+                                chtml.addClass('saving')
+                                $.ajax({
+                                    type: "POST",
+                                    url: "Person.aspx/voting",
+                                    data: { data: param },
+                                    headers: { headeraction: param },
+                                    success: function (response) {
+                                        var result = JSON.parse(response);
+                                        if (result.status) {
+                                            chtml.find('.commentview .likecount .count').html(result.nUpvotes);
+                                            if (result.nUpvotes > 0) {
+                                                chtml.find('.commentview .likecount').show()
+                                            }
+                                            else {
+                                                chtml.find('.commentview .likecount').hide()
+                                            }
+                                            chtml.find('.commentview .dislikecount .count').html(result.nDownvotes);
+                                            if (result.nDownvotes > 0) {
+                                                chtml.find('.commentview .dislikecount').show()
+                                            }
+                                            else {
+                                                chtml.find('.commentview .dislikecount').hide()
+                                                chtml.find('.commentview .likecount').addClass('no-dislike')//'right', '10px !important');
+                                            }
+                                            chtml.removeClass('saving')
+                                        }
+                                    }
+                                });
+
+                            })
+                            if (v1.UserId == sID) {
+                                chtml.find('.commentdel').on('click', function () {
+                                    chtml.addClass('saving')
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "Person.aspx/deletecomentbyid",
+                                        data: { data: v1.id },
+                                        headers: { headeraction: v1.id },
+                                        success: function (response) {
+                                            var result = JSON.parse(response);
+                                            if (result.status) {
+                                                chtml.remove();
+                                            }
+                                        }
+                                    });
+                                })
+                                chtml.find('.commentedit').on('click', function () {
+                                    if ($(this).hasClass('cancel')) {
+                                        chtml.find('.commentbody').data('emojioneArea').disable();
+                                        $(this).removeClass('cancel')
+                                    }
+                                    else {
+                                        chtml.find('.commentbody').data('emojioneArea').enable();
+                                        $(this).addClass('cancel')
+                                    }
+                                })
+                                chtml.find('.commentbody').emojioneArea(
+                                    {
+                                        autoHideFilters: true,
+                                        useSprite: true,
+                                        pickerPosition: "bottom",
+                                        events: {
+                                            keypress: function (e, o) {
+                                                if (o.originalEvent.charCode == 13) {
+                                                    console.log('Enter');
+                                                    if (!o.originalEvent.shiftKey) {
+                                                        console.log('no shift');
+                                                        o.originalEvent.returnValue = false;
+                                                        let body = chtml.find('.commentbody').data("emojioneArea").getText();
+                                                        if (body != null & body != 'undefined' & body != '') {
+                                                            chtml.addClass('saving');
+                                                            let data1 = JSON.stringify({ Body: XSS(escape(body)), Id: v1.id });
+                                                            $.ajax({
+                                                                type: "POST",
+                                                                url: "Person.aspx/editcomentbyid",
+                                                                data: { data: data1 },
+                                                                headers: { headeraction: data1 },
+                                                                success: function (response) {
+                                                                    var result = JSON.parse(response);
+                                                                    if (result.status) {
+                                                                        chtml.find('.commentbody').data("emojioneArea").disable();
+                                                                        //$(chtml[0]).attr('id', 'comment' + result.data);
+                                                                        chtml.removeClass('saving')
+                                                                    }
+                                                                }
+                                                            });
+                                                        }
+                                                        return false;
+
+                                                    }
+                                                    else {
+
+                                                    }
+                                                }
+
+                                            }
+                                        }
+                                    }
+                                );
+                                chtml.find('.commentbody').data('emojioneArea').disable();
+                            }
+                            else {
+                                chtml.find('.commentdel').remove()
+                                chtml.find('.commentedit').remove()
+                            }
+                            $('#contentpopup #comment-container').append(chtml);
+
+                        });
+                    }
+                    $('#contentpopup').removeClass('loading');
+                })
+            })
             function PrepareTime(t) {
                 return moment(t).fromNow();
             }
+
         </script>
     </div>
 </asp:Content>

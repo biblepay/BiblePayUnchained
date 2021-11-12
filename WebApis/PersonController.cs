@@ -14,6 +14,8 @@ using System.Web;
 using ScrapySharp.Network;
 using System.Threading.Tasks;
 using static Unchained.Common;
+using MongoDB.Driver;
+using static BiblePayCommon.EntityCommon;
 
 namespace Unchained.WebApis
 {
@@ -41,66 +43,72 @@ namespace Unchained.WebApis
         }
         #endregion
         [Route("api/post/posts")]
-        public object GetPosts(string sID, bool fHomogenized, bool me, bool IsTestNet, int pno)
+        public object GetPosts(string category, string sID, bool fHomogenized, bool me, bool IsTestNet, int pno)
         {
             // For each timeline entry...
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "Timeline");
 
             if (fHomogenized)
             {
-                //string sMyFriendsList = GetFriendsList(IsTestNet, sID);
-                //// Per Mike, just show system wide timeline until phase 2 - this will allow newbies to see some timeline data
-                //if (false)
-                //{
-                //    DataOps.FilterDataTable(ref dt, sMyFriendsList);
-                //    if (dt.Rows.Count == 0)
-                //    {
-                //        // Show homogenized view with everyones posts (since I have no friends yet, and no timeline posts yet):
-                //        dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet, "Timeline");
-                //    }
-                //}
+               
             }
             else
             {
                 DataOps.FilterDataTable(ref dt, "userid='" + sID + "'");
             }
+
+            if (!category.ToLower().Equals("a"))
+            {
+                DataOps.FilterDataTable(ref dt, "category='" + category + "'");
+
+            }
             int take = 5;
             int skip = pno * take;
-            // Default Sort, time desc:
-            // TODO: Figure out why this line doesnt work, but the OrderBy works: dt= dt.SortBy("time desc");
-
+            
             dt = dt.OrderBy("time desc");
             var data = dt.AsEnumerable().Skip(skip).Take(take);
-            //dt.Columns.Add("ProfilePicture");
-            //dt.Columns.Add("FullName");
-            //dt.Columns.Add("PostedOn");
-
+            
             List<object> posts = new List<object>();
             for (int i = 0; i < data.Count(); i++)
             {
                 var fields = data.ElementAt(i);
                 string userId = data.ElementAt(i).Field<string>("userid");
                 var user = UICommon.GetUserRecord(IsTestNet, userId);
+                var builder = Builders<BiblePayCommon.Entity.video1>.Filter;
+                //var filter = builder.Eq("Attachment", 1) & builder.Eq("ParentId", fields.Field<string>("id"));
+                ////mission critical check the Optional Filter (sFilter) and tack that on...
+                //IList<BiblePayCommon.Entity.video1> dtAttachments = 
+                //    BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(IsTestNet, "video1",
+                //    filter, SERVICE_TYPE.PUBLIC_CHAIN);
+
+
+                DataTable dtAttachments = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "video1");
+
+                dtAttachments = dtAttachments.FilterDataTable("parentid='" + fields.Field<string>("id") + "'");
+                dtAttachments = dtAttachments.FilterDataTable("attachment=1");
+
                 var p = new
                 {
-                    id = fields.Field<string>("id"),// dt.Rows[i]["id"],
+                    id = fields.Field<string>("id"),
                     ProfilePicture = string.IsNullOrEmpty(user.AvatarURL) ? "" : user.AvatarURL,
                     FullName = user.FullUserName(),
                     PostedOn = Encryption.UnixTimeStampToDateTime(BiblePayCommon.Common.GetDouble(fields.Field<object>("time"))),
-                    Body = fields.Field<string>("Body"),// dt.Rows[i]["Body"],
-                    URL = fields.Field<string>("URL"),//dt.Rows[i]["URL"],
-                    URLPreviewImage = fields.Field<string>("URLPreviewImage"),//dt.Rows[i]["URLPreviewImage"],
-                    URLTitle = fields.Field<string>("URLTitle"),//dt.Rows[i]["URLTitle"],
+                    Body = fields.Field<string>("Body"),
+                    URL = fields.Field<string>("URL"),
+                    URLPreviewImage = fields.Field<string>("URLPreviewImage"),
+                    URLTitle = fields.Field<string>("URLTitle"),
                     UserId = user.id,
-                    URLDescription = fields.Field<string>("URLDescription"),//dt.Rows[i]["URLDescription"],
+                    URLDescription = fields.Field<string>("URLDescription"),
                     Likes = GetVoteSum(IsTestNet, fields.Field<string>("id")),
-                    Comments = new List<object>()
+                    Comments = new List<object>(),
+                    Attachments = dtAttachments //.Select(s => new { s.id, s.ParentID, s.FileName })
                 };
-                 
-                //sTimeline += UICommon.GetAttachments(this, dt.Rows[i]["id"].ToString(), "", "Timeline Attachments", "style='background-color:white;padding-left:30px;'");
-                DataTable dt2 = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "comment1");
 
-                dt2 = dt2.FilterDataTable("parentid='" + dt.Rows[i]["id"].ToString() + "'");
+                
+                var attch = UICommon.GetAttachments(null, p.id, "", "", "");
+                 DataTable dt2 = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "comment1");
+
+                dt2 = dt2.FilterDataTable("parentid='" + fields.Field<string>("id") + "'");
                 dt2 = dt2.OrderBy("time asc");
 
                 for (int c = 0; c < dt2.Rows.Count; c++)
@@ -173,21 +181,77 @@ namespace Unchained.WebApis
             return sOut;
         }
 
-        [Route("api/media/images")]
-        public object GetImages(string sID, bool isTestNet)
+        [Route("api/media")]
+        public object GetImages(string sID, bool isTestNet, string type = "images", int count = 9, string id = "")
         {
 
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(isTestNet, "video1");
 
             dt = dt.FilterDataTable("userid='" + sID + "'");
-            dt = dt.FilterDataTable("URL like '%.png%' or URL like '%.gif' or URL Like '%.jpeg' or URL like '%.jpg%' or URL like '%.jpeg%' or URL like '%.gif%'");
+            if (type == "images")
+                dt = dt.FilterDataTable("URL like '%.png%' or URL like '%.gif' or URL Like '%.jpeg' or URL like '%.jpg%' or URL like '%.jpeg%' or URL like '%.gif%'");
+            else if (type == "")
+                dt = dt.FilterDataTable("URL like '%.png%' or URL like '%.gif' or URL Like '%.jpeg' or URL like '%.jpg%' or URL like '%.jpeg%' or URL like '%.gif%'");
 
             dt = dt.OrderBy("time desc");
 
-            var result = dt.AsEnumerable().Take(9).Select(s => new { URL = s.Field<string>("URL"), Title = s.Field<string>("Title") });
+            var result = dt.AsEnumerable().Take(count).Select(s => new { id = s.Field<string>("id"), URL = s.Field<string>("URL"), Title = s.Field<string>("Title"), ParentId = s.Field<string>("ParentID") });
 
             return result;
         }
+
+        [Route("api/media/get-by-id")]
+        public object GetMediaById(string parentid, bool isTestNet,string id="")
+        {
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(isTestNet, "video1");
+
+            dt = dt.FilterDataTable("parentid='" + parentid + "'");
+
+            List<object> result = new List<object>();
+            foreach(DataRow s in dt.Rows)
+            {
+                string userId = s.Field<string>("UserId");
+                var userc = UICommon.GetUserRecord(isTestNet, userId);
+                var o = new
+                {
+                    id = s.Field<string>("id"),
+                    URL = s.Field<string>("URL"),
+                    Title = s.Field<string>("Title"),
+                    UserId = userId,
+                    Likes = GetVoteSum(isTestNet, s.Field<string>("id")),
+                    Views = s.Field<int>("WatchSum"),
+                    PostedOn = Encryption.UnixTimeStampToDateTime(BiblePayCommon.Common.GetDouble(s.Field<object>("time"))),
+                    ProfilePicture = string.IsNullOrEmpty(userc.AvatarURL) ? "" : userc.AvatarURL,
+                    FullName = userc.FullUserName(),
+                    Comments=new List<object>()
+                };
+
+                DataTable dt2 = BiblePayDLL.Sidechain.RetrieveDataTable3(isTestNet, "comment1");
+
+                dt2 = dt2.FilterDataTable("parentid='" + s.Field<string>("id") + "'");
+                dt2 = dt2.OrderBy("time asc");
+
+                for (int c = 0; c < dt2.Rows.Count; c++)
+                {
+                    var userd = UICommon.GetUserRecord(isTestNet, dt2.Rows[c]["userid"].ToString());
+                    o.Comments.Add(new
+                    {
+                        Body = dt2.Rows[c]["Body"],
+                        id = dt2.Rows[c]["Id"],
+                        ProfilePicture = string.IsNullOrEmpty(userc.AvatarURL) ? "" : userc.AvatarURL,
+                        FullName = userc.FullUserName(),
+                        UserId = userc.id,
+                        PostedOn = dt2.GetColDateTime(c, "time"),
+                        Count = GetVoteSum(isTestNet, dt2.Rows[c]["Id"].ToString())
+                    });
+                }
+
+                result.Add(o);
+            }
+
+            return result;
+        }
+
 
         [HttpPost]
         [Route("api/web/scrap")]

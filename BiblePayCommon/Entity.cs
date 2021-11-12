@@ -478,6 +478,7 @@ namespace BiblePayCommon
             public string Subject { get; set; }
             public string Body { get; set; }
             public string Privacy { get; set; }
+            public string Category { get; set; }
             public string URL { get; set; }
             public string URLTitle { get; set; }
             public string URLDescription { get; set; }
