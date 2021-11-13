@@ -162,7 +162,6 @@ namespace Unchained
             string sGrabber = "";
             sInitialTextValue = sInitialTextValue.Replace("\n", "\\n");
             sInitialTextValue = sInitialTextValue.Replace("'", "\\'");
-
             if (eInputType == InputType.multiline)
             {
                 sInputControl = "<textarea autocomplete=\"nope\" id=\"q1\" class=\"comments\" name=\"q1\" rows=\"6\" cols=\"10\">" + sInitialTextValue + "</textarea>";
@@ -175,7 +174,6 @@ namespace Unchained
             }
             string sClear = "var o = document.getElementById('q1'); o.value='';";
             //this used to say b t o a(escape(v)); test this 
-
             string sJavascript = "$('<form id=\"wform1\" method=\"POST\">" + sNarrative
                 + "<br>" + sInputControl + "<br></form>').dialog({"
                 + "  modal: true, width: " + nWidth.ToString() + ", title: '" + sTitle + "', buttons: {    'OK': function() {"
@@ -184,8 +182,43 @@ namespace Unchained
                 + "Extra.Output=XSS(v);Extra.Event='" + sCallBackEvent + "';" + sClear + "BBPPostBack2(this, Extra);"
                 + "$(this).dialog('close');"
                 + " },     'Cancel': function() {       $(this).dialog('close');                 }            }        });";
-            //p.ClientScript.RegisterStartupScript(p.GetType(), "msginput1", sJavascript, true);
             ScriptManager.RegisterStartupScript(p,p.GetType(), "msginput1", sJavascript, true);
+        }
+
+
+        private static int iteration = 0;
+        public static void MsgInputRichText(Page p, string sCallBackEvent, string sTitle, string sNarrative,
+             int nWidth, string sAddress, string sAmt, InputType eInputType, bool fInputHidden, string sEventValue = "", string sInitialTextValue = "")
+        {
+            string sType = eInputType.ToString();
+            if (fInputHidden)
+                sType = "hidden";
+            string sInputControl = "";
+            string sGrabber = "";
+            sInitialTextValue = sInitialTextValue.Replace("\n", "\\n");
+            sInitialTextValue = sInitialTextValue.Replace("\r", "\\r");
+            sInitialTextValue = sInitialTextValue.Replace("'", "\\'");
+            sInitialTextValue = sInitialTextValue.Replace("\"", "\\\"");
+
+            if (eInputType == InputType.multiline)
+            {
+                sInputControl = "<textarea id=\"q1\" class=\"comments\" name=\"q1\" rows=\"6\" cols=\"10\">" + sInitialTextValue + "</textarea>";
+                sGrabber = "var v=$(\"textarea#q1\").val(); ";
+            }
+            string sClear = "var o = document.getElementById('q1'); o.value='';";
+            iteration++;
+            string sRegJS = "var editor" + iteration.ToString() + " = new RichTextEditor('#q1',{maxHTMLLength:65535});";
+
+            string sJavascript = "$('<form id=\"wform" + Guid.NewGuid().ToString() + "\" method=\"POST\">" + sNarrative
+                + "<br>" + sInputControl + "<br></form>').dialog({"
+                + "  modal: true, width: " + nWidth.ToString() + ", closeOnEscape: false, title: '" + sTitle + "', buttons: {    'OK': function() {"
+                + "  " + sGrabber
+                + "  var Extra={};Extra.Value='" + sEventValue + "';Extra.Address='" + sAddress + "';Extra.Amount='" + sAmt + "';"
+                + "Extra.Output=XSS2(v);Extra.Event='" + sCallBackEvent + "';" + sClear + "BBPPostBack3(this, Extra);"
+                + "$(this).dialog('close');$(this).dialog('destroy'); "
+                + " },     'Cancel': function() {       $(this).dialog('close');    $(this).dialog('destroy');             }            }        });"
+                +" $(\".ui-dialog-titlebar-close\").hide(); " + sRegJS;
+            ScriptManager.RegisterStartupScript(p, p.GetType(), "msginput1", sJavascript, true);
         }
 
         public static void GenerateJsTag(Page page, string jsCode)
@@ -399,17 +432,71 @@ namespace Unchained
             sScreen += "</div>";
             return sScreen;
         }
+        public static void ShowNotificationConsole(Page p, bool fUpdate, ref double nUnread)
+        {
+            // Show the Notifications console.
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(Common.IsTestNet(p), "Notification");
+            dt = dt.FilterDataTable("userid='" + Common.gUser(p).id + "'");
+            string html = "<table width=100% style='table-layout:fixed'>";
 
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                string sID = dt.Rows[i]["id"].ToString();
+                string sTrashAnchor = UICommon.GetStandardAnchor("ancDelete1", "DeleteNotification", sID, "&nbsp;&nbsp;<i class='fa fa-trash'></i>",
+                    "Delete Notification", "Notification", "", "");
+                //11-8-2021
+                string sArea = dt.Rows[i]["Body"].ToString() 
+                    + "<br><font color=blue>" + GetPrettyDate(dt.GetColDouble(i, "time"));
+                string sDiv = "<tr class='notification'><td width=5%>" + UICommon.GetUserAvatarAndName(p, dt.Rows[i]["UserID"].ToString())
+                + "</td><td width='90%' style='width:255px;overflow-x:hidden;'><small>" + sArea 
+                + "</small></td><td width=6% style='padding:2em;margin:-2em;font-size:150%;'><b>" + sTrashAnchor + "</b></tr>";
+                string sRow = "<tr>" + sDiv + "</tr>";
+                html += sRow;
+            }
+            if (nUnread > 0)
+            {
+                nUnread = dt.Rows.Count;
+                return;
+            }
+            html += "</table>";
+            if (dt.Rows.Count == 0)
+                return;
+
+            string sOptJS = "";
+            if (fUpdate)
+            {
+                sOptJS = "updateNotificationCount();";
+            }
+            BiblePayCommonNET.UICommonNET.ModalEmpty(p, "iconBell", "Notification Console", html, 400, 600, true, fUpdate, sOptJS);
+
+        }
+        public static string UnreadWidget(int nUnread)
+        {
+            if (nUnread < 1)
+                return "";
+            string sUnreadWidget = "<div class='numberCircle'>" + nUnread.ToString() + "</div>";
+            return sUnreadWidget;
+        }
         public static string GetNotificationConsole(Page p)
         {
+            double nLastNotification = BiblePayCommonNET.CommonNET.GetSessionDouble(p, "unread_notifications");
+            nLastNotification = 0;
+            if (nLastNotification == 0)
+            {
+                nLastNotification = 1;
+                ShowNotificationConsole(p, false, ref nLastNotification);
+                BiblePayCommonNET.CommonNET.SetSessionDouble(p, "unread_notifications", nLastNotification);
+            }
+            /*
             string sNotify = Config("notifications");
             if (sNotify == "")
                 return "";
+                */
 
             string sHTML = "";
             string sIcon  = "<i id='iconBell' class='facircle fa fa-bell'></i>";
             string sAnchor = GetStandardAnchor("ancNotificationBell", "GetNotifications", "GN", sIcon, "Get my Notifications", "", "");
-            sHTML = sAnchor;
+            sHTML = "<div id='idNotificationConsole'>" + sAnchor + UnreadWidget((int)nLastNotification) + "</div>";
             return sHTML;
         }
 
@@ -442,7 +529,7 @@ namespace Unchained
             string sNarrative = "Hi " + gUser(p).FirstName + ", " + u.FullUserName() 
                 + " is calling you into a chat.  <a " + sClose + " href='" + sURL + "'><br><b>Click here if you would like to go. </b></a>";
 
-            BiblePayCommonNET.UICommonNET.MsgModalWithLinks(p, "Chat Request", sNarrative, 600, 300, false, true);
+            BiblePayCommonNET.UICommonNET.MsgModalWithLinks(p, "Chat Request", sNarrative, 600, 300, true, true);
             myChat.NotifiedOfChatRequest = true;
             dictChats[gUser(p).id] = myChat;
             return "";
@@ -482,7 +569,7 @@ namespace Unchained
                 + "var myname='" + gUser(p).FirstName 
                 + "';var theirname = '" + u.FirstName + "';"
                 + "function sendit(o) {if (event.key != 'Enter') return true; "
-                + "var data = XSS(myname + ' said: ' + o.value); transmit(\"" + "chat" + "\", data, 'chatinner', \"\"); o.value=''; "
+                + "var data = XSS(myname + ' said: ' + o.value); transmit_has_been_removed(\"" + "chat" + "\", data, 'chatinner', \"\"); o.value=''; "
                 + "var owindow = document.getElementById('chat1'); "
                 + "owindow.scrollIntoView(false); return false;}";
 
@@ -507,8 +594,8 @@ namespace Unchained
 
             string html = "<div id='entireleftmenu'><aside class='main-sidebar' id='mySidenav'>";
             html += "<section class='sidebar'><div class='user-panel' class='trump'>"
-              + "<a style='padding-left:20px;z-index:9999;font-size:150%;background-color:transparent;' onclick='closeNav();' class='sidebar-toggle' data-toggle='offcanvas' role='button'>"
-              + "<b><i class='fa fa-close'></i></b></a>"
+              + "<a style='z-index:9999;font-size:150%;position:relative;left:-10px;' onclick='closeNav();' class='sidebar-toggle' data-toggle='offcanvas' role='button'>"
+              + "<i class='fa fa-window-close'></i></a>"
               + "<div class='pull-left myavatar'>" + sChangeProfileLink + "</div>"
               + "<div class='pull-left info'><p><small>" + gUser(p).FirstName.ToNonNullString() + "</small></p><small><p>" + sKeys + "</p></small>" + "</div>"
               + "</div><div id='divsidebar-menu' class='divsidebar'><ul class='sidebar-menu'>";
@@ -595,7 +682,7 @@ namespace Unchained
             {
                 sDiv += " • O:" + nOrder.ToString();
                 // Video count
-                sDiv += " • " + GetObjectRating(IsTestNet(p), sID, "video1", gUser(p));
+                sDiv += " • " + GetObjectRating(IsTestNet(p), sID, "video1", gUser(p), "video1");
                 sDiv += " • " + UICommon.GetWatchSum(IsTestNet(p), sID) + " view(s)";
             }
             sDiv += "</small></span>";
@@ -713,11 +800,9 @@ namespace Unchained
         {
             //DataTable dtAttachments = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "video1");
             var builder = Builders<BiblePayCommon.Entity.video1>.Filter;
-            var filter = builder.Eq("attachment", 1) & builder.Eq("parentid", sParentID);
-            //mission critical check the Optional Filter (sFilter) and tack that on...
-            IList<BiblePayCommon.Entity.video1> dtAttachments = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(false, "video1",
+            var filter = builder.Eq("Attachment", 1) & builder.Eq("ParentID", sParentID);
+            IList<BiblePayCommon.Entity.video1> dtAttachments = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(IsTestNet(p), "video1",
                 filter, SERVICE_TYPE.PUBLIC_CHAIN);
-            //dtAttachments = dtAttachments.FilterAndSort("attachment=1 and parentid='" + sParentID + "' " + sFilter, "Order");
             string sSnip = sFilter.Contains("Profile") ? "profile" : "";
             if (dtAttachments.Count > 0)
             {
@@ -728,9 +813,59 @@ namespace Unchained
             return String.Empty;
         }
 
+        private static string GetFileNameFromURL(string hrefLink)
+        {
+            string[] parts = hrefLink.Split('/');
+            string fileName = "";
+
+            if (parts.Length > 0)
+                fileName = parts[parts.Length - 1];
+            else
+                fileName = hrefLink;
+
+            return fileName;
+        }
+
+        public static string GetLightboxGallery(Page p, string sParentID, string sFilter, string sHeaderName, string sStyle)
+        {
+            var builder = Builders<BiblePayCommon.Entity.video1>.Filter;
+            var filter = builder.Eq("Attachment", 1) & builder.Eq("ParentID", sParentID);
+            IList<BiblePayCommon.Entity.video1> dtAttachments = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(IsTestNet(p), "video1",
+                filter, SERVICE_TYPE.PUBLIC_CHAIN);
+            if (dtAttachments.Count == 0)
+            {
+                return "";
+            }
+            string html = "<div style='display: none;' id='maingallery' class='html5gallery' data-responsive='true' data-skin='vertical' data-width='480' data-height='272'>";
+            for (int i = 0; i < dtAttachments.Count; i++)
+            {
+                string sURL = dtAttachments[i].URL;
+                string sFN = GetFileNameFromURL(sURL);
+
+                if (sURL.ToLower().Contains("png") || sURL.ToLower().Contains("jpeg") || sURL.ToLower().Contains("jpg"))
+                {
+                    string sRow="<a href='" + sURL + "'><img src='" + sURL + "' alt='" + sFN + "'></a>";
+
+                    html += sRow;
+      
+                }
+                else if (sURL.Contains("mp4"))
+                {
+                    string sPoster = dtAttachments[i].URL2.Replace("/data", "/thumbnails/video.jpg");
+                    string sRow = "<a href='" + sURL + "'><img src='" + sPoster + "' alt='" + sFN + "'></a>";
+                    html += sRow;
+
+                }
+            }
+            html += "</div>";
+            return html;
+        }
+
+
         public static string GetGallery(Page p, IList<Entity.video1> dt, BiblePayPaginator.Paginator pag, string sViewType,
             int nWidthPct, int nHeight, int nWidth, bool fVideoContainer, bool fShowRearrangeOption, string sOptSnippet)
         {
+
             string html = "<table width='100%'><tr>";
 
             string sClass = fVideoContainer ? "gallerycontainer" : "imgcontainer";
@@ -816,13 +951,8 @@ namespace Unchained
                         }
 
                         string sVisibility = iItem < 29 ? "galleryvisibile" : "galleryinvisible";
-
-
                         string sRow = "<td id='xgtd" + iItem.ToString() + "' width='" + nWidthPct.ToString() + "%' ><div id='gtd" + iItem.ToString() + "' class='gallerycontainer " + sVisibility + "'>"
                             + sElement + "</div></td>";
-                        //string sRow = "<div id='gtd" + iItem.ToString() + "' style='width:'" + nWidthPct.ToString() + "%' class='gallerycontainer'>" + sElement + "</div>";
-                        //string sRow = sElement;
-
                         html += sRow;
                         iCol++;
                         iItem++;
@@ -902,10 +1032,11 @@ namespace Unchained
             return sButton;
         }
 
-        public static string GetStandardAnchor(string sID, string sEvent, string sValue, string sCaption, string sAltText, string sOptTable = "", string sOptSnippet = "")
+        public static string GetStandardAnchor(string sID, string sEvent, string sValue, string sCaption, string sAltText,
+            string sOptTable = "", string sOptSnippet = "", string sOptJS = "")
         {
             string sAnchor = "<a id='" + sID + "' onclick=\"var e={};e.Event='" + sEvent + "_Click';e.Value='" + sValue + "';e.Table='"
-                + sOptTable + "';e.Snippet='" + sOptSnippet + "';BBPPostBack2(this, e);\" title='" + sAltText + "'>" + sCaption + "</a>";
+                + sOptTable + "';e.Snippet='" + sOptSnippet + "';BBPPostBack2(null, e);" + sOptJS + "\" title='" + sAltText + "'>" + sCaption + "</a>";
             return sAnchor;
         }
 
@@ -1013,7 +1144,7 @@ namespace Unchained
             }
         }
 
-        public static string GetComments(bool fTestNet, string id, Page z, bool fMaskIfNone = false)
+        public static string GetComments(bool fTestNet, string id, Page z, string sParentType, bool fMaskIfNone = false)
         {
             // Shows the comments section for the object.  Also shows the replies to the comments.
             
@@ -1022,7 +1153,7 @@ namespace Unchained
             filter &= builder.Regex("ParentID", new BsonRegularExpression(".*" + id + "*", "i"));
             filter &= builder.Ne("deleted", 1);
 
-            IList<BiblePayCommon.Entity.comment1> dt = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.comment1>(false, "comment1", 
+            IList<BiblePayCommon.Entity.comment1> dt = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.comment1>(fTestNet, "comment1", 
                 filter, SERVICE_TYPE.PUBLIC_CHAIN, "time", false);
 
             string sHTML = "";
@@ -1032,7 +1163,7 @@ namespace Unchained
                 sHTML += "<h3>Comments:</h3><br>";
             }
 
-            sHTML += "<table class='saved2' width=100%>"
+            sHTML += "<table class='saved2' width='100%'>"
                 + "<tr><th width=4%><th width=14%>User</th><th width=10%>Added</th><th width=11%>Rating</th><th width=64%>Comment</th><th width=1%>Actions</th></tr>";
 
             if (dt.Count == 0 && fMaskIfNone)
@@ -1057,8 +1188,14 @@ namespace Unchained
 
                 string div = "<tr><td><td>" + UICommon.GetUserAvatarAndName(z, dt[i].UserID)
                     + "</td><td>" + BiblePayCommon.Common.UnixTimeStampToDateControl(dt[i].time)
-                    + "</td><td>" + GetObjectRating(fTestNet, dt[i].id, "comment1", gUser(z))
-                    + "</td><td>" + sBody + "</td><td>"  + sCluster + "</td></tr>";
+                    + "</td><td>" + GetObjectRating(fTestNet, dt[i].id, "comment1", gUser(z), sParentType)
+                    + "</td><td>";
+                // string sValueControl = "<textarea class='comments' readonly id='txtCM" + dt[i].id.ToString() + "'>" + sBody + "</textarea>";
+                string sValueControl = "<div id='txtCM" + dt[i].id.ToString() + "'>" + sBody + "</div>";
+                //  string sRegJS1 = "var editor" + i.ToString() + "=new RichTextEditor('#txtCM" + dt[i].id.ToString() + "', { readOnly: true });";
+                //  ScriptManager.RegisterStartupScript(z, z.GetType(), "rteJSCM" + i.ToString(), sRegJS1, true);
+
+                div +=  sValueControl + "</td><td>"  + sCluster + "</td></tr>";
                 sHTML += div;
 
             }
@@ -1069,7 +1206,7 @@ namespace Unchained
                 return sHTML;
             }
 
-            sHTML += "<table class='comments'><tr><th colspan=2><h3>Add a Comment:</h3></th></tr>";
+            sHTML += "<table class='comments' width='100%'><tr><th colspan=2><h3>Add a Comment:</h3></th></tr>";
 
             if (!gUser(z).LoggedIn)
             {
@@ -1077,10 +1214,15 @@ namespace Unchained
                 return sHTML;
             }
 
-            string sSaveArea = "<tr><td width=10%>Comment:</td><td><textarea id='txtComment' class='comments' name='txtComment' rows=10 cols=10></textarea><br><br></td></tr></table>";
+            string sSaveArea = "<tr><td width=70%>"
+                + "<textarea id='txtComment' class='comments' name='txtComment' id='txtComment' rows=10 cols=10></textarea>"
+                + "<br><br></td></tr></table>";
+            // Register the JS:
+            string sRegJS = "var editor1 = new RichTextEditor('#txtComment', {maxHTMLLength:65535});";
+            ScriptManager.RegisterStartupScript(z, z.GetType(), "rteJS1", sRegJS, true);
             sHTML += sSaveArea;
-            sHTML += BiblePayCommonNET.UICommonNET.GetButtonTypeSubmit("btnSaveComments1", "SaveComments_Click", "Save Comments");
-
+            string sJS = "var oComment=document.getElementById(\"txtComment\");oComment.value = encodeHTMLTags(oComment.value);";
+            sHTML += BiblePayCommonNET.UICommonNET.GetButtonTypeSubmit("btnSaveComments1", "SaveComments_Click", "Save Comments", sJS);
             return sHTML;
         }
 
@@ -1144,22 +1286,30 @@ namespace Unchained
             return sDD;
         }
 
-        /*
         public static string GetDropDownOrganization(Page p, string sHTMLID, string sSelectedValue)
         {
-            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "Organization");
+            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "Organization");
             string dd = GetDropDownFromDataTable(dt, "name", sHTMLID, sSelectedValue);
             return dd;
         }
 
         public static string GetDropDownRole(Page p, string sHTMLID, string sSelectedValue)
         {
-            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "Role");
+            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "Role");
             string dd = GetDropDownFromDataTable(dt, "name", sHTMLID, sSelectedValue);
             return dd;
         }
-        */
 
+        public static string GetDropDownTable(Page p, string sHTMLID, string sSelectedValue)
+        {
+            List<string> lEntities = BiblePayCommon.EntityCommon.GetBiblePayEntities();
+            DataTable dt = BiblePayDLL.Sidechain.ListToDataTable(lEntities);
+
+            dt = dt.OrderBy("column1");
+
+            string dd = GetDropDownFromDataTable(dt, "column1", sHTMLID, sSelectedValue);
+            return dd;
+        }
 
         public static string GetDispositions(string HTMLID, string sSelectedValue)
         {
@@ -1246,6 +1396,61 @@ namespace Unchained
         }
 
 
+        public static string ObjectToHR(string sParentType)
+        {
+            string sOut = "";
+            if (sParentType == "video1")
+            {
+                sOut = "Video";
+            }
+            else if (sParentType == "pray1")
+            {
+                sOut = "Prayer";
+            }
+            else if (sParentType == "comment1")
+            {
+                sOut = "Comment";
+            }
+            else if (sParentType == "townhall1")
+            {
+                sOut = "Townhall";
+            }
+            else if (sParentType == "diary1")
+            {
+                sOut = "Diary";
+            }
+            else
+            {
+                sOut = sParentType;
+            }
+            return sOut;
+        }
+
+        public static string CleanseBodyOfHTML(string sData)
+        {
+            sData = sData.Replace("<", "[lessthan]");
+            sData = sData.Replace(">", "[greaterthan]");
+            return sData;
+        }
+        public static void SendNotification(string sParentType, string sBlurb, Page p, string sAction, string sDisplayPage, string sAffectedUserID)
+        {
+            BiblePayCommon.Entity.Notification n = new BiblePayCommon.Entity.Notification();
+            string HRType = ObjectToHR(sParentType);
+            string sHRObject = " your " + HRType;
+            if (sBlurb.Length > 128)
+                sBlurb = Mid(sBlurb, 0, 128);
+            if (sBlurb == "")
+                sBlurb = "N/A";
+            n.Anchor = "<a href='" + sDisplayPage + "'>";
+            sBlurb = CleanseBodyOfHTML(sBlurb);
+
+            n.Body = Common.gUser(p).FullUserNameAnchor() + " " + n.Anchor + " " + sAction + " " + sHRObject + " about " + sBlurb + ". </a>";
+            n.NotifierID = Common.gUser(p).id;
+            n.Title = sAction;
+            n.UserID = sAffectedUserID;
+            BiblePayDLL.Sidechain.InsertIntoDSQL_Background(Common.IsTestNet(p), n, Common.gUser(p));
+        }
+
         public static bool LogIn(Page p, User u)
         {
             string sDomainName = HttpContext.Current.Request.Url.Host;
@@ -1299,14 +1504,14 @@ namespace Unchained
 
         public static string GetBannerControls(Page p)
         {
-            string sUpload = GetStandardButton("btnUpload","Upload <i class='fa fa-camera'></i>", "UploadVideo", "Upload a new Video", "", "largebuttondark");
+            string sUpload = GetStandardButton("btnUpload","<i class='fa fa-camera'></i>", "UploadVideo", "Upload a new Video", "", "largebuttondark");
 
             string sSwitchToVideoModule = GetStandardButton("btnVideoModule", "<i class='fa fa-video'></i>", "WatchVideos", "Watch Decentralized Videos", "", "largebuttondark");
             string sSwitchToPeopleModule= GetStandardButton("btnPeopleModule", "<i class='fa fa-users'></i>","PeopleModule", "Connect with Friends", "", "largebuttondark");
 
-            string s1 = GetStandardButton("btnLogIn", gUser(p).LoggedIn ? "Log Out" : "Log In", gUser(p).LoggedIn ? "LogOut" : "LogIn", 
+            string s1 = GetStandardButton("btnLogIn", gUser(p).LoggedIn ? "<i class='fa fa-power-off'></i>" : "<i class='fa fa-key'></i>", gUser(p).LoggedIn ? "LogOut" : "LogIn", 
                 gUser(p).LoggedIn ? "Log Out of the system" : "Log into the system", "" , "largebuttondark");
-            string s2 = GetStandardButton("btnLogIn", gUser(p).LoggedIn ? "My Account" : "Sign Up", 
+            string s2 = GetStandardButton("btnLogIn", gUser(p).LoggedIn ? "<i class='fa fa-user'></i>" : "Sign Up", 
                 "SignUp", gUser(p).LoggedIn ? "Edit my user record" : "Join our community!", "", "largebuttondark");
             
             string sOut = String.Empty;

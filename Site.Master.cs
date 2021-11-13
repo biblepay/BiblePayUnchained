@@ -11,7 +11,7 @@ namespace Unchained
     public partial class SiteMaster : MasterPage
     {
 
-        private static int nVersion = 1405;
+        private static int nVersion = 1406;
         protected void Page_Load(object sender, EventArgs e)
         {
             string sThemeName = UICommon.GetCurrentThemeName(this.Page);

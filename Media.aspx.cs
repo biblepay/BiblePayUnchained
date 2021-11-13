@@ -158,16 +158,17 @@ namespace Unchained
         protected string GetComments()
         {
             string sID = Request.QueryString["id"].ToNonNullString();
-            string html1 = UICommon.GetComments(IsTestNet(this), sID, this);
+            string html1 = UICommon.GetComments(IsTestNet(this), sID, this, "video1");
             return html1;
         }
+        
 
         protected string GetEmbedVideo(string sID, int nWidth, int nHeight)
         {
             BiblePayVideo.Video video1 = new BiblePayVideo.Video(this);
             var builder = Builders<BiblePayCommon.Entity.video1>.Filter;
             var filter = builder.Eq("id", sID);
-            IList<BiblePayCommon.Entity.video1> dt = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(false, "video1", filter, SERVICE_TYPE.PUBLIC_CHAIN);
+            IList<BiblePayCommon.Entity.video1> dt = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(IsTestNet(this), "video1", filter, SERVICE_TYPE.PUBLIC_CHAIN);
             if (dt.Count < 1)
                 return String.Empty;
             string html = String.Empty;
@@ -205,7 +206,7 @@ namespace Unchained
             string sID = Request.QueryString["id"].ToNonNullString();
             var builder = Builders<BiblePayCommon.Entity.video1>.Filter;
             var filter = builder.Eq("id", sID);
-            IList<BiblePayCommon.Entity.video1> dt = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(false, "video1", filter, SERVICE_TYPE.PUBLIC_CHAIN);
+            IList<BiblePayCommon.Entity.video1> dt = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(IsTestNet(this), "video1", filter, SERVICE_TYPE.PUBLIC_CHAIN);
 
             if (dt.Count < 1)
                 return String.Empty;
@@ -231,7 +232,7 @@ namespace Unchained
 
             video1.Footer = "Uploaded by <a href='" + sTheirChannel + "'>"
                 + UICommon.GetUserAvatarAndName(this, dt[0].UserID, true)
-                + "</a> • " + GetObjectRating(IsTestNet(this), sID, "video1", gUser(this)) + " • "
+                + "</a> • " + GetObjectRating(IsTestNet(this), sID, "video1", gUser(this), "video1") + " • "
                 + UICommon.GetFollowControl(IsTestNet(this), dt[0].UserID, gUser(this).id)
                 + " • " + UICommon.GetTipControl(IsTestNet(this), dt[0].id, dt[0].UserID) + " • " + BiblePayCommon.Common.UnixTimeStampToDateControl(dt[0].time)
                 + "<br>" + UICommon.GetWatchSum(IsTestNet(this), sID) + " view(s) • "
@@ -247,6 +248,9 @@ namespace Unchained
                 video1.Footer += sButton;
             }
             string sTranscript = dt[0].Transcript;
+            if (sTranscript == null)
+                sTranscript = "";
+
             sTranscript = sTranscript.Replace("\n", "<br>");
             sTranscript = sTranscript.Replace("[br]", "<br>");
             bool fMobile = BiblePayCommonNET.UICommonNET.fBrowserIsMobile(this);

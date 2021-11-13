@@ -26,7 +26,7 @@ namespace Unchained
                     string sAdded = dt.GetColDateTime(i, "time").ToShortDateString();
                     string sAsset = "<a target='_blank' href='" + dt.GetColValue(i, "URL") + "'><h2 class='headline'>" + dt.GetColValue(i, "Title") + "</h2>"
                         + "<br>Read more<br></a>";
-                    string sRow = "<tr><td>FEATURED • " + sAdded + " • " + GetObjectRating(IsTestNet(this), sID, "news1", gUser(this)) + " • "
+                    string sRow = "<tr><td>FEATURED • " + sAdded + " • " + GetObjectRating(IsTestNet(this), sID, "news1", gUser(this), "news1") + " • "
                         + "<br>" + sAsset + "<hr></td></tr>";
                     sHTML += sRow;
                 }

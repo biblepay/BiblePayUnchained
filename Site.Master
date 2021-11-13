@@ -24,6 +24,11 @@
     <meta name="viewport" content="width=device-width, maximum-scale=1.0" />
     <link href='~/Content/themes/base/jquery-ui.css' rel="stylesheet" type="text/css" />
    	<link rel="stylesheet" type="text/css" href="~/Content/jquery.toast.css" />
+
+
+    <link rel="stylesheet" href="/richtexteditor/rte_theme_default.css" />
+
+
     <title><%: Page.Title %> - <%=Unchained.Common.GetSiteTitle(this.Page)%></title>
 
     <asp:PlaceHolder runat="server">
@@ -56,6 +61,8 @@
                 <%--To learn more about bundling scripts in ScriptManager see https://go.microsoft.com/fwlink/?LinkID=301884 --%>
                 <%--Framework Scripts--%>
                 <asp:ScriptReference Name="MsAjaxBundle" />
+                <asp:ScriptReference Path="~/Scripts/bootstrap.min.js" />
+
                 <asp:ScriptReference Name="jquery" />
                 
                 <asp:ScriptReference Name="WebForms.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebForms.js" />
@@ -67,14 +74,16 @@
                 <asp:ScriptReference Name="WebParts.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebParts.js" />
                 <asp:ScriptReference Name="Focus.js" Assembly="System.Web" Path="~/Scripts/WebForms/Focus.js" />
                 <asp:ScriptReference Name="WebFormsBundle" />
-                <asp:ScriptReference Path="~/Scripts/po" />
-                <asp:ScriptReference Path="~/Scripts/bootstrap.min.js" />
+                
                 <%--Site Scripts--%>
                 <asp:ScriptReference Name="jquery-ui" />
                 <asp:ScriptReference Name="jquery-context-menu" />
                 <asp:ScriptReference Name="jquery-toast" />
                 <asp:ScriptReference Name ="core" />
                 <asp:ScriptReference Name="muse" />
+                <asp:ScriptReference Name ="rte" />
+                <asp:ScriptReference Name="rte2" />
+                <asp:ScriptReference Name="lightbox" />
             </Scripts>
         </asp:ScriptManager>
 
@@ -82,13 +91,11 @@
 
 
 
+
     <div class="Page" id="main">
-   
-        <asp:HiddenField ID="hidSourceID" runat="server" />
+ 
 
-
-        <div id="divdialog" title="" class='spandialog'><span id="spanVersion1"></span><span id="spandialog"></span></div>
-
+    
 
         <!--Above div height is used to calculate the whole page size (so the footer knows the page height)-->
         <div class="xnavbar navbar-inverse navbar-fixed-top" style="z-index:256;height:64px;max-height:64px;">
@@ -100,19 +107,21 @@
                 </td>
 
                 <td style="padding:0px;white-space:nowrap;max-height:84px;padding-right:15px;" width="20%">
-    
                            
                          <div style="overflow:hidden;max-height:90px;"><%=Unchained.UICommon.GetBannerControls(this.Page) %>&nbsp;</div>
                          <span style="font-family:candara;color:antiquewhite;font-size:22px;"><%=Unchained.Common.Config("SiteName") %></span>
-                              <div id='rightmenubutton' style='float:right;' class="close-sidebar hidden-lg hidden-sm"></div>
+                         <div id='rightmenubutton' style='float:right;' class="close-sidebar hidden-lg hidden-sm"></div>
                 </td>
-                <td width="5%">
-                    <a href="#" onclick="openNav();" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                <td width="6%">
+                    <a href="#" onclick="openNav();" style="font-size:150%;padding-right:10px;" class="sidebar-toggle" data-toggle="offcanvas" role="button">
                            <i class="fa fa-navicon"></i>
                     </a>
                 </td>
-                <td width="5%">
-                    <!--notificationarea-->
+                <td width="5%"><div id="gNotificationConsole">
+ 
+                        <%=Unchained.UICommon.GetNotificationConsole(this.Page) %>
+
+                    </div>
                 </td>
                 <td style="padding-left:20px;" width="40%">
 
@@ -128,23 +137,27 @@
                 </td>
                 </tr>
 
-    </table>
-
-                   
+           </table>       
             </div>
-
             <%=Unchained.Common.GetGlobalAlert(this.Page) %>
           </div>
 
 
-                  
+
+
+
+
                  
             <%=Unchained.UICommon.GetSideBar(this.Page) %>
                 
             <div class="body-content">
+                 <div id="divdialog" title="" class='spandialog'><span id="spanVersion1"></span><span id="spandialog"></span></div>
 
-                   <asp:UpdatePanel runat="server" ID="UpdatePanel9">
-                    <ContentTemplate>
+                <asp:UpdatePanel runat="server" ID="UpdatePanel9" UpdateMode="Conditional" ChildrenAsTriggers="false">
+                 <ContentTemplate>
+                 <asp:HiddenField ID="hidSourceID" runat="server" />
+                 <button id="hfNewButton1" style="visibility:hidden"></button>
+                <input id="hfPostback" style="visibility:hidden" />
                  
                 <br />
 
@@ -155,14 +168,13 @@
                 
                 <%=Unchained.UICommon.GetChatBox2(this.Page) %>  
  
-                <%=Unchained.UICommon.GetNotificationConsole(this.Page) %>
  
                 <asp:ContentPlaceHolder ID="MainContent" runat="server">
 
                 </asp:ContentPlaceHolder>
 
-                               </ContentTemplate>
-                        </asp:UpdatePanel>
+              </ContentTemplate>
+              </asp:UpdatePanel>
 
             </div>
 

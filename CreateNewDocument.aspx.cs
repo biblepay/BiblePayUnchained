@@ -16,10 +16,13 @@ namespace Unchained
         protected new void Page_Load(object sender, EventArgs e)
         {
             string sLoadFrom = Request.QueryString["file"] ?? "";
+            /*
             if (sLoadFrom != "")
             {
                    Response.Write("<body onload=\"populateWiki('" + sLoadFrom + "');\"");
             }
+            */
+
         }
 
         protected string SaveDoc(string sPath, string sTitle)
@@ -50,9 +53,5 @@ namespace Unchained
             string URL = SaveDoc(sNewFN, txtTitle.Text);
         }
 
-        protected void btnLoad_Click(object sender, EventArgs e)
-        {
-           // Response.Redirect("CreateNewDocument.aspx");
-        }
     }
 }

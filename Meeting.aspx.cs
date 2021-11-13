@@ -63,7 +63,7 @@ namespace Unchained
             }
             
             string sData = "<h3>" + sNarrative + "</h3><br><br><iframe allow=\"camera; microphone; fullscreen; display-capture; autoplay\" "
-                + "src=\"https://meet.biblepay.org/" + sMeetingName + "\" style='height: 100%; width: 100%; min-height:500px; border: 0px;'></iframe>";
+                + "src=\"https://meet.biblepay.org/" + sMeetingName + "#config.disableDeepLinking=true\" style='height: 100%; width: 100%; min-height:500px; border: 0px;'></iframe>";
 
             return sData;
         }

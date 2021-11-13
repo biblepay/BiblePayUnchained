@@ -125,9 +125,9 @@ namespace BiblePayDLL
 
         public static IList<T> GetChainObjects<T>(bool fTestNet, string sTable, FilterDefinition<T> myFilter, SERVICE_TYPE stType, string sSortBy = "", bool fAscending = false, string sURL = "")
         {
-            string fqTable = BiblePayCommon.EntityCommon.GetFQTableName(fTestNet, sTable);
-            
+            Log2("Retrieving GetChainObjects::" + sTable);
 
+            string fqTable = BiblePayCommon.EntityCommon.GetFQTableName(fTestNet, sTable);
             IList<T> l1 = BiblePayTestHarness.BBPInterface.DSQL.GetChainObjects<T>(fTestNet, sTable, myFilter, stType, sSortBy, fAscending, sURL);
             return l1;
         }
@@ -354,7 +354,7 @@ namespace BiblePayDLL
             {
                 return false;
             }
-            //UpdateDictionary(fTestNet, sTable, r.ExpandoObject);
+            UpdateDictionary(fTestNet, sTable, r.ExpandoObject);
             EvictAllCachedTables("video1");
 
             return true;
@@ -446,6 +446,26 @@ namespace BiblePayDLL
             }
             return dt;
         }
+
+        public static DataTable ListToDataTable(List<string> l)
+        {
+            BBPDataTable dt = new BBPDataTable { TableName = "table1" };
+            dt.Columns.Add("column1");
+            dt.Columns.Add("id");
+
+            for (int i = 0; i < l.Count; i++)
+            {
+                string sEle = l[i];
+                DataRow _newrow = dt.NewRow();
+                _newrow["column1"] = sEle;
+                _newrow["id"] = sEle;
+                dt.Rows.Add(_newrow);
+            }
+            return dt;
+        }
+
+
+
         public static DataRow ExpandoToDataRow(DataTable dt, System.Dynamic.ExpandoObject oDSQL)
         {
             DataRow _newrow = dt.NewRow();
@@ -594,6 +614,7 @@ namespace BiblePayDLL
      
         public static BBPDataTable RetrieveDataTable3(bool fTestNet, string sTable, bool fIncludeDeleted = false, bool fOverrideCache = false)
         {
+            
             string fqTable = BiblePayCommon.EntityCommon.GetFQTableName(fTestNet, sTable);
             if (dictTables.ContainsKey(fqTable) && !fIncludeDeleted && !fOverrideCache)
             {

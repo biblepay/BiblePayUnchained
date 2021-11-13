@@ -25,7 +25,7 @@ namespace Unchained
             var builder = Builders<dynamic>.Filter;
             var filter = builder.Eq("_id", id);
             
-            dynamic dt = BiblePayDLL.Sidechain.GetChainObjects<dynamic>(false, _EntityName, filter,
+            dynamic dt = BiblePayDLL.Sidechain.GetChainObjects<dynamic>(IsTestNet(this), _EntityName, filter,
                 SERVICE_TYPE.PUBLIC_CHAIN);
 
             if (dt.Count < 1)
@@ -44,8 +44,8 @@ namespace Unchained
                 + "<tr><td>Added:<td>" + BiblePayCommon.Common.UnixTimeStampToDisplayAge(dt[0].time) + "</td></tr>"
                 + "<tr><td>Subject:<td>" + dt[0].Subject + "</td></tr>"
                 + "<tr><td>Body:<td colspan=2>" + sBody + "<br>" 
-                + GetObjectRating(IsTestNet(this), id, _EntityName, gUser(this)) + "</td></tr></table>";
-            div += UICommon.GetComments(IsTestNet(this), id, this);
+                + GetObjectRating(IsTestNet(this), id, _EntityName, gUser(this), _EntityName) + "</td></tr></table>";
+            div += UICommon.GetComments(IsTestNet(this), id, this, _EntityName);
             return div;
         }
     }

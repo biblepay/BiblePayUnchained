@@ -14,11 +14,14 @@ using BiblePayCommonNET;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using static BiblePayCommonNET.CommonNET;
+using static BiblePayCommon.Entity;
 
 namespace Unchained
 {
     public partial class TelegramChat : BBPPage
     {
+        public static long lANRSocialChatID = -1001508518578;
+
         protected new void Page_Load(object sender, EventArgs e)
         {
 
@@ -28,6 +31,37 @@ namespace Unchained
         {
             if (e.EventName == "TelegramComment_Click")
             {
+
+            }
+            else if (_bbpevent.EventName == "TelegramShare_Click")
+            {
+
+                if (!Common.gUser(this).LoggedIn)
+                {
+                    UICommon.MsgBox("Error", "You Must be logged in first.", this);
+                    return;
+                }
+
+                Timeline t = new Timeline();
+                t.Privacy = "Public";
+                string sTM = RenderTelegramMessage((long)GetDouble(_bbpevent.EventValue));
+                if (sTM != null)
+                {
+                    string sAnchor = "<a href='TelegramChat'><font color=green>Forwarded from Telegram Chat</font></a><br>";
+
+                    t.Body = sAnchor + sTM;
+                    t.UserID = gUser(this).id;
+                    BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), t, gUser(this));
+                    if (r.fError())
+                    {
+                        BiblePayCommonNET.UICommonNET.MsgModal(this, "Error", "Sorry, the timeline was not saved.", 500, 200, true);
+                        return;
+                    }
+                    else
+                    {
+                        UICommonNET.ToastNow(this, "Success", "Your timeline entry has been saved!");
+                    }
+                }
 
             }
         }
@@ -62,7 +96,92 @@ namespace Unchained
             return ltm2;
         }
 
-        protected string MakeURL(string sPath)
+        public static TelegramMessage GetTelegramMessageById(long nMsgID)
+        {
+            List<BiblePayCommon.Common.TelegramMessage> lT = GetArchivedTelegramMessages(lANRSocialChatID);
+            for (int i = 0; i < lT.Count; i++)
+            {
+                if (lT[i].MessageID == nMsgID)
+                    return lT[i];
+            }
+            return new TelegramMessage();
+        }
+        public static string RenderTelegramMessage(long nMsgID)
+        {
+            TelegramMessage t = GetTelegramMessageById(nMsgID);
+            if (t.MessageID == null || t.MessageID == 0)
+                return null;
+            string sOut = RenderTelegramMessage(t);
+            return sOut;
+        }
+
+        public static string RenderTelegramMessage(TelegramMessage t)
+        {
+            string sValueControl = t.Text + "";
+            string sIntro = "<font color=blue><span>Forwarded from " + t.UserFirstName + " " + t.UserLastName + "</span></font><br>";
+            string sWriter = "<font color=green><span>" + t.UserFirstName + " " + t.UserLastName + "</span></font><br><br>";
+            string sOutro = "&nbsp;<div style='float:right;'>" + BiblePayCommon.Common.DisplayDateTime(t.Date) + "</div>";
+            string sSerial = "msgid:" + t.MessageID + ",chatid:" + t.ChatID + ", UserID:" + t.UserID + ", UserName: " + t.UserFirstName + " " + t.UserLastName;
+            if (t.ContentType == "messageText")
+            {
+                sValueControl = "<div>" + sWriter + t.Text + sOutro + "</div>";
+                if (t.WebPagePhotoPath != null)
+                {
+                    string sWPD = t.WebPageDescription;
+                    if (sWPD.Length > 500)
+                    {
+                        sWPD = Mid(sWPD, 0, 500) + " ...";
+                    }
+                    string sWebPage = "<div>" + sIntro + "<b>" + t.WebPageTitle + "</b><br>" + sWPD + "<br>";
+                    sWebPage += "<span>" + t.WebPageDisplayURL + "</span>";
+                    sWebPage += "<img style='max-width:100%;max-height:500px' src='" + MakeTelegramURL(t.WebPagePhotoPath) + "' />";
+                    if (t.WebEmbedType != null && t.WebEmbedType != "")
+                    {
+                        if (t.WebEmbedType == "iframe")
+                        {
+                            string sIframe = "<br><br><iframe style='border:1px;width:100%;height:500px;' src='" + t.WebEmbedURL + "'></iframe>";
+                            sWebPage += sIframe;
+                        }
+                        else
+                        {
+                        }
+                    }
+                    sWebPage += "</div>";
+                    sValueControl += sWebPage;
+                }
+            }
+            else if (t.ContentType == "messageVideo")
+            {
+                sValueControl = "<div>" + sIntro + "<video style='height:500px;max-width:100%;' controls><source src='" + MakeTelegramURL(t.Path) + "'></source></video>";
+                sValueControl += "<br><span style='text-align:bottom;'>" + t.Text + "</span></div>";
+            }
+            else if (t.ContentType == "messageChatAddMembers")
+            {
+                sValueControl += t.UserFirstName + " " + t.UserLastName + " has been added to the chat.";
+            }
+            else if (t.ContentType == "messagePhoto")
+            {
+
+                sValueControl = "<a href='" + MakeTelegramURL(t.Path) + "' target=_blank><img src='" + MakeTelegramURL(t.Path) + "' style='width:100%;'/></a>";
+                sValueControl += "<span>" + sIntro + t.Text + "</span>";
+
+            }
+            else if (t.ContentType == "messageSticker")
+            {
+                sValueControl = sIntro + "Sticker:<br><img src='" + MakeTelegramURL(t.Path) + "' style='height:200px;width:300px;'/>";
+                sValueControl = "Sticker";
+            }
+            else
+            {
+                // Reserved for Telegram unsupported messages
+            }
+
+            return sValueControl;
+
+        }
+
+
+        public static string MakeTelegramURL(string sPath)
         {
             if (sPath == null)
             {
@@ -74,15 +193,18 @@ namespace Unchained
             return sURL;
         }
 
-        protected string UserInitials(TelegramMessage t)
+        public static string TelegramUserInitials(TelegramMessage t)
         {
             string UI = Mid(t.UserFirstName, 0, 1)+ Mid(t.UserLastName, 0,1);
             return UI;
         }
-        protected string GetAvatar(TelegramMessage t)
+        public static string GetTelegramAvatar(TelegramMessage t)
         {
-            string bioPhoto = MakeURL(t.UserProfilePhoto);
-            string sValueControl = bioPhoto.Length > 0 ? "<img src='" + bioPhoto + "' width=100 height=100/>"  : UserInitials(t);
+            string bioPhoto = MakeTelegramURL(t.UserProfilePhoto);
+            string sValueControl = bioPhoto.Length > 0 ? "<img src='" + bioPhoto + "' width=100 height=100/>"  : TelegramUserInitials(t);
+            if (sValueControl.Length == 1)
+                sValueControl += ".";
+
             string s = "";
             if (bioPhoto.Length > 0)
             {
@@ -98,29 +220,10 @@ namespace Unchained
                 
         }
 
-        public string DisplayDateTime(long nUnixTime)
-        {
-            long nElapsed = UnixTimestampUTC() - nUnixTime;
-            DateTime theTime = BiblePayCommon.Common.ConvertFromUnixTimestamp(nUnixTime);
-
-            if (nElapsed < (60 * 60 * 24))
-            {
-
-                String hourMinute = theTime.ToString("HH:mm");
-                return hourMinute;
-            }
-            else
-            {
-                string longDate = theTime.ToString();
-                return longDate;
-            }
-        }
-
         protected string GetTelegram()
         {
             string html = "<h3>TruthBook.Social - Telegram</h3><br><table>";
-            long lANRSocialChatID = -1001508518578;
-
+            
             List<BiblePayCommon.Common.TelegramMessage> lT = GetArchivedTelegramMessages(lANRSocialChatID);
             // Last :
             double nPag = GetDouble(Request.QueryString["pag"] ?? "");
@@ -133,79 +236,22 @@ namespace Unchained
             {
                 BiblePayCommon.Common.TelegramMessage t = lT[i];
 
-                string sValueControl =  t.Text + "";
-                string sIntro = "<font color=blue><span>Forwarded from " + t.UserFirstName + " " + t.UserLastName + "</span></font><br>";
-                string sWriter = "<font color=green><span>" + t.UserFirstName + " " + t.UserLastName + "</span></font><br><br>";
-                string sOutro = "&nbsp;<div style='float:right;'>" + DisplayDateTime(t.Date) + "</div>";
+                string sValueControl = RenderTelegramMessage(t);
 
-                string sSerial = "msgid:" + t.MessageID + ",chatid:" + t.ChatID + ", UserID:" + t.UserID + ", UserName: " + t.UserFirstName + " " + t.UserLastName;
+                string sShare = "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-share icon-md'>"
+                + "<path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8'></path><polyline points='16 6 12 2 8 6'></polyline><line x1= '12' y1='2' x2='12' y2='15'></line>  </svg>"
+                + "<!--<p class='d-none d-md-block ms-2 mb-0'>Share</p>-->";
+                string sShareAnchor = UICommon.GetStandardAnchor("tShare1", "TelegramShare", t.MessageID.ToString(), sShare, "Share on my Timeline", "Timeline", "", "");
 
-                if (t.ContentType == "messageText")
+                string sData = "<tr><td width='10%'>" + GetTelegramAvatar(t) +
+                    "<td width='70%' ><div class='bubble-content telegram-message'>"
+                   + sValueControl + "</div></td>";
+                if (gUser(this).LoggedIn)
                 {
-                    sValueControl = "<div>" + sWriter + t.Text + sOutro + "</div>";
-
-
-                    if (t.WebPagePhotoPath != null)
-                    {
-                        string sWPD = t.WebPageDescription;
-                        if (sWPD.Length > 500)
-                        {
-                            sWPD = Mid(sWPD, 0, 500) + " ...";
-                        }
-                        string sWebPage = "<div>" + sIntro + "<b>" + t.WebPageTitle + "</b><br>" + sWPD + "<br>";
-                        sWebPage += "<span>" + t.WebPageDisplayURL + "</span>";
-                        sWebPage += "<img style='max-width:100%;max-height:500px' src='" + MakeURL(t.WebPagePhotoPath) + "' />";
-                        if (t.WebEmbedType != null && t.WebEmbedType != "")
-                        {
-                            if (t.WebEmbedType == "iframe")
-                            {
-                                string sIframe = "<br><br><iframe style='border:1px;width:100%;height:500px;' src='" + t.WebEmbedURL + "'></iframe>";
-                                sWebPage += sIframe;
-                            }
-                            else
-                            {
-                                string s2003 = "";
-                            }
-                            string s2002 = "";
-                        }
-                        sWebPage += "</div>";
-                        sValueControl += sWebPage;
-
-                        string s2001 = "";
-                    }
+                    sData += "<td width='5%' style='text-align:left;'>" + sShareAnchor + "</td>";
                 }
-                else if (t.ContentType == "messageVideo")
-                {
-                    
-                    sValueControl = "<div>" + sIntro + "<video style='height:500px;max-width:100%;' controls><source src='" + MakeURL(t.Path) + "'></source></video>";
-                    sValueControl += "<br><span style='text-align:bottom;'>" + t.Text + "</span></div>";
+                sData += "</tr>";
 
-                }
-                else if (t.ContentType == "messageChatAddMembers")
-                {
-                    sValueControl += t.UserFirstName + " " + t.UserLastName + " has been added to the chat.";
-                }
-                else if (t.ContentType == "messagePhoto")
-                {
-
-                    sValueControl = "<a href='" + MakeURL(t.Path) + "' target=_blank><img src='" + MakeURL(t.Path) + "' style='width:100%;'/></a>";
-                    sValueControl += "<span>" + sIntro + t.Text + "</span>";
-
-                }
-                else if (t.ContentType == "messageSticker")
-                {
-                    sValueControl = sIntro + "Sticker:<br><img src='" + MakeURL(t.Path) + "' style='height:200px;width:300px;'/>";
-                    sValueControl = "Sticker";
-                }
-                else
-                {
-                    // Reserved for Telegram unsupported messages
-                    string s1099 = "";
-                }
-                string sData = "<tr><td width='10%'>" + GetAvatar(t) + 
-                     "<td width='60%' ><div class='bubble-content telegram-message'>" 
-                    + sValueControl + "</div></td>"
-                    +"</tr>";
                 html += sData;
             }
             html += "</table>";
@@ -214,6 +260,7 @@ namespace Unchained
                 + "var o=document.getElementById('telegram1');var e={};e.Event='TelegramComment_Click';e.Value='"
                 + "';e.Body=XSS(o.value);send_out(o.value);\">Say Something, "
                 + gUser(this).FirstName + "</button> ";
+
             if (Common.gUser(this).LoggedIn && false)
             {
                 html += "<br>" + sCommentButton;

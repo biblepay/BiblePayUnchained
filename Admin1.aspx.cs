@@ -9,37 +9,27 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 using System.Linq;
 using static BiblePayCommon.EntityCommon;
+using static BiblePayCommonNET.CommonNET;
 
 namespace Unchained
 {
-    public partial class Admin1 : Page
+    public partial class Admin1 : BBPPage
     {
-        protected void Page_Load(object sender, EventArgs e)
+        protected new void Page_Load(object sender, EventArgs e)
         {
 
          
         }
-        public void GetNotesHTML(string data, out string sTitle, out string sNotes)
-        {
-            string[] vData = data.Split("\r\n");
-            if (vData.Length < 2)
-            {
-                sTitle = data;
-                sNotes = "";
-                return;
-            }
-            sTitle = vData[0];
 
-            sNotes = "";
-            for (int i = 1; i < vData.Length; i++)
+        private static int ctr = 0;
+        protected override void Event(BBPEvent e)
+        {
+            if (e.EventName == "PerfCounter_Click")
             {
-                if (vData[i] != "")
-                {
-                    sNotes += vData[i] + "<br>";
-                }
+                ctr++;
+
             }
-            
-            return;
+
         }
 
 
@@ -118,30 +108,43 @@ namespace Unchained
 
         }
 
+
+        protected string GetPerfSection()
+        {
+            string sLbl = "<span>" + ctr.ToString() + "</span>";
+            string sBt = UICommon.GetStandardButton("1",
+                    "<i class='fa fa-file'></i>", "PerfCounter", "Perf Counter");
+
+
+            string sAnchor = "<a id='2' onclick=\"var e={};e.Event='PerfCounter_Click';e.Value='2';e.Table='"
+                + "3';BBPPostBack2(null, e);BBPPostBack2(null, e);BBPPostBack2(null, e);BBPPostBack2(null, e);" + "\" title='myclick1'>myclick1</a>";
+
+            return sLbl + "<br>" + sBt + "<br>" + sAnchor;
+
+
+        }
+
         protected void btnSave_Click(object sender, EventArgs e)
         {
 
-            InnerJoinExample();
-
-            return;
-
-
             List<dynamic> lv = new List<dynamic>();
-            for (int i = 26; i < 35; i++)
+            for (int i = 1000; i < 1256; i++)
             {
-                BiblePayCommon.Entity.video1 v= new BiblePayCommon.Entity.video1();
-                v.id = i.ToString();
+                BiblePayCommon.Entity.NewsFeedItem v = new BiblePayCommon.Entity.NewsFeedItem();
                 v.URL = "https://" + i.ToString() + ".com";
+                v.NewsFeedSourceID = "CNN";
+                v.Title = v.URL;
+                string sKey = BiblePayCommon.Encryption.GetSha256HashI(v.NewsFeedSourceID + v.URL);
+                v.id = sKey;
                 v.time = i;
+                v.Expiration = (int)(UnixTimestampUTC() + (60 * 60 * 24 * 30));
                 lv.Add(v);
             }
-            // mission critical - deleted flag <> 1 throughout
-            var t = BiblePayDLL.Sidechain.SpeedyInsertMany(false, "customvideo1", lv, SERVICE_TYPE.PRIVATE_CHAIN, gUser(this));
-
-  
-            //IList<BiblePayCommon.Entity.video1> l1 = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(false, "customvideo", filter, SERVICE_TYPE.PUBLIC_CACHE);
-            IList<BiblePayCommon.Entity.video1> l1 = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(false, 
-                "customvideo1", null, SERVICE_TYPE.PRIVATE_CHAIN);
+            // Insert the list
+            var t = BiblePayDLL.Sidechain.SpeedyInsertMany(false, "newsfeeditems", lv, SERVICE_TYPE.PRIVATE_CACHE, gUser(this));
+            // Retrieve the list
+            IList<BiblePayCommon.Entity.NewsFeedItem> l1 = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.NewsFeedItem>(false, 
+                "newsfeeditems", null, SERVICE_TYPE.PRIVATE_CACHE);
             return;
         }
     }

@@ -117,7 +117,7 @@ namespace BiblePayCommonNET
             }
             return false;
         }
-        public static void MsgModal(Page p, string sTitle, string sNarrative, int nWidth, int nHeight, bool fUseScriptManager = false, bool fRedirectToPage = false)
+        public static void MsgModal(Page p, string sTitle, string sNarrative, int nWidth, int nHeight, bool fUseScriptManager = true, bool fRedirectToPage = false)
         {
             sTitle = BiblePayCommon.Encryption.CleanModalString(sTitle);
             sNarrative = sNarrative.Replace("\r\n", "<br>");
@@ -133,7 +133,7 @@ namespace BiblePayCommonNET
         }
 
 
-        public static void MsgModalWithLinks(Page p, string sTitle, string sNarrative, int nWidth, int nHeight, bool fUseScriptManager = false, bool fShowCancelButton = false)
+        public static void MsgModalWithLinks(Page p, string sTitle, string sNarrative, int nWidth, int nHeight, bool fUseScriptManager = true, bool fShowCancelButton = false)
         {
             sTitle = BiblePayCommon.Encryption.CleanModalString(sTitle);
             sNarrative = sNarrative.Replace("\r\n", "<br>");
@@ -154,14 +154,22 @@ namespace BiblePayCommonNET
                 p.ClientScript.RegisterStartupScript(p.GetType(), "modalid1" + Guid.NewGuid().ToString(), sJavascript, true);
         }
 
-        public static void ModalEmpty(Page p, string sCallerDivID,  string sTitle, string sHTML, int nWidth, int nHeight, bool fUseScriptManager = false)
+        public static void ModalEmpty(Page p, string sCallerDivID,  string sTitle, string sHTML, int nWidth, int nHeight, bool fUseScriptManager = true, bool fUpdate = false , string sOptJS = "")
         {
             string sJavascript = "";
             sHTML = sHTML.Replace("'", "\\'");
             sHTML = sHTML.Replace("\"", "\\\"");
+            sHTML = sHTML.Replace("\n", "<br>");
+            sHTML = sHTML.Replace("\r", "");
 
-            sJavascript = "function closeModalDialog() { $('#divdialog').dialog('close');  }"
-                    + "showModalEmptyDialog(\"" + sCallerDivID + "\",\"" + sTitle + "\",\"" + sHTML + "\", " + nWidth.ToString() + ", " + nHeight.ToString() + ",\"\");";
+            if (fUpdate)
+            {
+                sJavascript = sOptJS + "updateModalEmptyDialog(\"" + sHTML + "\");";
+            }
+            else
+            {
+                sJavascript = sOptJS + "showModalEmptyDialog(\"" + sCallerDivID + "\",\"" + sTitle + "\",\"" + sHTML + "\", " + nWidth.ToString() + ", " + nHeight.ToString() + ",\"\");";
+            }
             if (fUseScriptManager)
                 ScriptManager.RegisterStartupScript(p, p.GetType(), "modalid1" + Guid.NewGuid().ToString(), sJavascript, true);
             else

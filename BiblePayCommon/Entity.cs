@@ -403,7 +403,6 @@ namespace BiblePayCommon
 
             /* End of BiblePay internal fields */
 
-
             public virtual string GetHash()
             {
                 return GetSha256HashI(id);
@@ -416,7 +415,38 @@ namespace BiblePayCommon
             {
                 return GetSha256HashI(ParentID + UserID + Body);
             }
+
         }
+
+
+        public class NewsFeedItem : BaseEntity, IBBPObject
+        {
+            public string NewsFeedSourceID { get; set; }
+            public string URL { get; set; }
+            public string Title { get; set; }
+            public string Body { get; set; }
+            public int Expiration { get; set; }
+            public override string GetHash()
+            {
+                return GetSha256HashI(organization + NewsFeedSourceID + URL);
+            }
+        }
+
+
+        public class NewsFeedSource : BaseEntity, IBBPObject
+        {
+            public string FeedName { get; set; }
+            public int Enabled { get; set; }
+            public string Notes { get; set; }
+            public string URL { get; set; }
+            public double Weight { get; set; }
+            public override string GetHash()
+            {
+                return GetSha256HashI(organization + URL);
+            }
+        }
+
+       
 
         public class video1 : BaseEntity, IBBPObject
         {
@@ -473,17 +503,29 @@ namespace BiblePayCommon
             }
         }
 
+        public class Notification : BaseEntity, IBBPObject
+        {
+            public int Read { get; set; }
+            public string Body { get; set; }
+            public string Title { get; set; }
+            public string ObjectType { get; set; }
+            public string ObjectID { get; set; }
+            public string NotifierID { get; set; }
+            public string Anchor { get; set; }
+
+        }
+
         public class Timeline : BaseEntity, IBBPObject
         {
             public string Subject { get; set; }
             public string Body { get; set; }
             public string Privacy { get; set; }
-            public string Category { get; set; }
             public string URL { get; set; }
             public string URLTitle { get; set; }
             public string URLDescription { get; set; }
             public string URLPreviewImage { get; set; }
-            
+            public string Category { get; set; }
+
             public override string GetHash()
             {
                 return GetSha256HashI(Subject + Body + UserID);
@@ -538,6 +580,8 @@ namespace BiblePayCommon
 
         public class user1 : BaseEntity, IBBPObject
         {
+            public static string SENSITIVE_FIELDS = "EmailAddress";
+
             public string UserName { get; set; }
             public string FirstName { get; set; }
             public string LastName { get; set; }
@@ -546,6 +590,7 @@ namespace BiblePayCommon
             public string RSAKey { get; set; }
             public string Shared2FA { get; set; }
             public string PasswordHash { get; set; }
+            // Mission Critical: Attribute Sensitive
             public string EmailAddress { get; set; }
             public int Verified { get; set; }
             public int FA2Verified { get; set; }
@@ -852,6 +897,7 @@ namespace BiblePayCommon
             public string Action { get; set; }
             public string Description { get; set; }
             public string LowQualityURL { get; set; }
+            // Sensitive
             public string HighQualityURL { get; set; }
             public string Type { get; set; }
             public string XML { get; set; }
@@ -897,6 +943,5 @@ namespace BiblePayCommon
             }
 
         }
-    
     }
 }

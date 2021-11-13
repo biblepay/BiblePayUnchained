@@ -6,6 +6,7 @@ using System.Web;
 using static BiblePayCommon.Common;
 using static BiblePayCommonNET.DataTableExtensions;
 using static BiblePayCommon.DataTableExtensions;
+using System.Text;
 
 namespace Unchained
 {
@@ -25,7 +26,10 @@ namespace Unchained
 
         public static string GetTableHTML(string sReportName, DataTable dt, string sCols, string sTotalCol)
         {
-            string HTML = GetTableBeginning(sReportName);
+            StringBuilder HTML = new StringBuilder();
+
+            HTML.Append(GetTableBeginning(sReportName));
+
             string[] vCols = sCols.Split(new string[] { ";" }, StringSplitOptions.None);
             string sHeader = "<tr>";
             for (int i = 0; i < vCols.Length; i++)
@@ -34,12 +38,14 @@ namespace Unchained
             }
             sHeader += "</tr>";
 
-            HTML += "<table width=100%>" + sHeader + "<tr><td colspan=5 width=100%><hr></tr>";
-            double nTotal = 0;
-            string sRow = "<tr>";
+            HTML.Append("<table width=100%>" + sHeader + "<tr><td colspan=5 width=100%><hr></tr>");
 
+            double nTotal = 0;
+            
             for (int i = 0; i < dt.Rows.Count; i++)
             {
+                string sRow = "<tr>";
+
                 for (int j = 0; j < vCols.Length; j++)
                 {
                     string sValueControl = dt.Rows[i][vCols[j]].ToString();
@@ -47,6 +53,9 @@ namespace Unchained
                     {
                         sValueControl = BiblePayCommon.Common.ConvertFromUnixTimestamp((int)dt.GetColDouble(i, "time")).ToShortDateString();
                     }
+                    if (sValueControl.Length > 255)
+                        sValueControl = Mid(sValueControl, 0, 254);
+
                     sRow += "<td align=right>" + sValueControl + "</td>";
                 }
                 sRow += "</tr>";
@@ -54,13 +63,17 @@ namespace Unchained
                 {
                     nTotal += GetDouble(dt.Rows[i][sTotalCol]);
                 }
-            }
-            HTML += sRow;
+                HTML.Append(sRow);
 
-            HTML += "<tr><td>&nbsp;</td></tr>";
-            HTML += "<tr><td>TOTAL:<td><td>" + nTotal.ToString() + "</tr>";
-            HTML += "</body></html>";
-            return HTML;
+            }
+
+
+            HTML.Append("<tr><td>&nbsp;</td></tr>");
+            HTML.Append("<tr><td>TOTAL:<td><td>" + nTotal.ToString() + "</tr>");
+
+            HTML.Append("</body></html>");
+            return HTML.ToString();
+
         }
 
     }

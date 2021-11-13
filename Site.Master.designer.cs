@@ -33,15 +33,6 @@ namespace Unchained
         protected global::System.Web.UI.HtmlControls.HtmlLink admin_css;
 
         /// <summary>
-        /// hidSourceID control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hidSourceID;
-
-        /// <summary>
         /// UpdatePanel9 control.
         /// </summary>
         /// <remarks>
@@ -49,6 +40,15 @@ namespace Unchained
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.UpdatePanel UpdatePanel9;
+
+        /// <summary>
+        /// hidSourceID control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hidSourceID;
 
         /// <summary>
         /// MainContent control.

@@ -19,7 +19,9 @@
         
       <input type="button" onclick="var e = RSAEncrypt('this is a test.');showModalDialog('This is my title', e, true);" value="showmodal"/>
       <input type="button" onclick="<%=Unchained.UICommon.Toast("title", "thetoast")%>" value="The Toast" />
+      <input type="button" onclick="testPerformance();" value="Performance Test" />
 
+      <%=GetPerfSection() %>
 
   </div>
 

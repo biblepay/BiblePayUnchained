@@ -20,7 +20,7 @@ namespace Unchained
 {
     public partial class Person : BBPPage
     {
-         protected User user;
+        protected User user;
         protected bool IsMe;
         protected bool IsTestNet;
         protected bool fHomogenized;
@@ -59,7 +59,8 @@ namespace Unchained
                 string s1 = Request.Headers["headeraction"].ToNonNullString();
                 string parentId = Common.GetElement(s1, "|", 1);
                 string voteType = Common.GetElement(s1, "|", 0);
-                var status = Voting(parentId, voteType);
+                string sParentType = Common.GetElement(s1, "|", 2);
+                var status = Voting(parentId, voteType, sParentType);
                 VoteSums v = GetVoteSum(IsTestNet(this), parentId);
                 object o = new { status, nUpvotes = v.nUpvotes, nDownvotes = v.nDownvotes };
                 Response.Write(Newtonsoft.Json.JsonConvert.SerializeObject(o));
@@ -223,10 +224,17 @@ namespace Unchained
             {
                 BiblePayCommon.Entity.comment1 o = new BiblePayCommon.Entity.comment1();
                 o.UserID = Common.gUser(this).id;
-
-
                 o.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(data.Body));
                 o.ParentID = data.ParentID;
+
+
+    	        BiblePayCommon.Entity.Timeline t = (BiblePayCommon.Entity.Timeline)Common.GetObject(Common.IsTestNet(this), "Timeline", o.ParentID);
+                string sURL = "Person?id=" + t.UserID;
+                string sBlurb = t.URLTitle.ToNonNullString() + " " + t.Body.ToNonNullString();
+                sBlurb = "your timeline";
+
+                UICommon.SendNotification("Timeline", sBlurb, this, "commented on", sURL, t.UserID);
+
 
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), o, Common.gUser(this));
                 if (!r.fError())
@@ -246,7 +254,7 @@ namespace Unchained
             return result;
         }
 
-        public object Voting(string parentID, string sVoteType)
+        public object Voting(string parentID, string sVoteType, string sParentType)
         {
             var user = gUser(this);
             if (!user.LoggedIn)
@@ -265,10 +273,19 @@ namespace Unchained
                 if (sVoteType == "upvote")
                 {
                     o.VoteValue = 1;
+		         
+                    dynamic tParent = Common.GetObject(Common.IsTestNet(this), sParentType, o.ParentID);
+		            string sHRObject = " your " + sParentType;
+                    string sBlurb = "your " + sParentType;
+		            if (sBlurb == "")
+		               sBlurb = "N/A";
+		            string sAnchor = "Person?homogenized=1";
+                    SendNotification("Timeline", sBlurb, this, "liked", sAnchor, tParent.UserID);
                 }
                 else if (sVoteType == "downvote")
                 {
                     o.VoteValue = -1;
+                    // Verify the page refreshes
                 }
                 else
                 {
@@ -419,6 +436,7 @@ namespace Unchained
                     //UICommon.MsgBox("Error", "You Must be logged in first.", this);
                     //SendBlastOutForTimeline(this, t);
                     ToastLater(this, "Success", "Your timeline entry has been saved!");
+                    Response.Redirect("Person");
                 }
 
             }
@@ -545,6 +563,7 @@ namespace Unchained
                 if (fDeleted)
                 {
                     BiblePayCommonNET.UICommonNET.ToastNow(this.Page, "Success!", "Your object was deleted!");
+                    Response.Redirect("Person");
                 }
                 else
                 {
@@ -901,7 +920,7 @@ namespace Unchained
 
                 // Display the attachments
                 sTimeline += UICommon.GetAttachments(this, dt.Rows[i]["id"].ToString(), "", "Timeline Attachments", "style='background-color:white;padding-left:30px;'");
-                sTimeline += UICommon.GetComments(IsTestNet(this), dt.Rows[i]["id"].ToString(), this, true);
+                sTimeline += UICommon.GetComments(IsTestNet(this), dt.Rows[i]["id"].ToString(), this, "Timeline", true);
                 // Display the comments for the timeline entry
                 html += sTimeline;
             }

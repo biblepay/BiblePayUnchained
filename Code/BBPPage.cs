@@ -25,13 +25,46 @@ namespace Unchained
             this.LoadComplete += new EventHandler(this.Page_LoadComplete);
         }
 
+        private void FLO()
+        {
+
+            if (Common.gUser(this).LoggedIn == false)
+            {
+                UICommon.MsgBox("Error", "Sorry you must be logged on first.", this);
+            }
+
+        }
         protected void ProcessComments()
         {
+
+            // Logged off or in:
+
+            if (_bbpevent.EventName == "LogIn_Click")
+            {
+                // top banner
+                Response.Redirect("LogIn.aspx");
+            }
+            else if (_bbpevent.EventName == "SignUp_Click")
+            {
+                // top banner
+                Response.Redirect("RegisterMe.aspx");
+            }
+            else if (_bbpevent.EventName == "WatchVideos_Click")
+            {
+                Response.Redirect("VideoList");
+            }
+            else if (_bbpevent.EventName == "PeopleModule_Click")
+            {
+                Response.Redirect("Person?homogenized=1");
+            }
+
+            // Logged in:
+
             if (_bbpevent.EventName == "DeleteObject_Click")
             {
+                FLO();
                 string sID = _bbpevent.EventValue;
-                bool fDeleted = BiblePayDLL.Sidechain.DeleteObject(Common.IsTestNet(this), _bbpevent.Extra.Table.ToString(),
-                          sID, Common.gUser(this));
+                bool fDeleted = BiblePayDLL.Sidechain.DeleteObject(Common.IsTestNet(this), _bbpevent.Extra.Table.ToString(), sID, Common.gUser(this));
                 if (fDeleted)
                 {
                     BiblePayCommonNET.UICommonNET.ToastNow(this.Page, "Success!", "Your object was deleted!");
@@ -41,14 +74,39 @@ namespace Unchained
                     UICommon.MsgBox("Error", "Sorry, the object could not be deleted. ", this);
                 }
             }
+            else if (_bbpevent.EventName == "DeleteNotification_Click")
+            {
+                FLO();
+                string sID = _bbpevent.EventValue;
+                bool fDeleted = BiblePayDLL.Sidechain.DeleteObject(Common.IsTestNet(this), _bbpevent.Extra.Table.ToString(), sID, Common.gUser(this));
+                /*
+                if (fDeleted)
+                {
+                    BiblePayCommonNET.UICommonNET.ToastNow(this.Page, "Success!", "Your object was deleted!");
+                }
+                else
+                {
+                    UICommon.MsgBox("Error", "Sorry, the object could not be deleted. ", this);
+                }
+                */
+
+                double nlu = 0;
+                UICommon.ShowNotificationConsole(this,true,ref nlu);
+                BiblePayCommonNET.CommonNET.SetSessionDouble(this, "unread_notifications", nlu);
+
+
+            }
             else if (_bbpevent.EventName == "GetNotifications_Click")
             {
-                // Show the Notifications console.
-                string sHTML = "<br>This is a sample notification area.";
-                BiblePayCommonNET.UICommonNET.ModalEmpty(this, "iconBell", "Notification Console", sHTML, 400, 600, true);
+                FLO();
+                double nlu = 0;
+                UICommon.ShowNotificationConsole(this, false, ref nlu);
+                BiblePayCommonNET.CommonNET.SetSessionDouble(this, "unread_notifications", nlu);
+                
             }
             else if (_bbpevent.EventName == "CloseChat_Click")
             {
+                FLO();
 
                 UICommon.ChatStructure c = new UICommon.ChatStructure();
                 bool fGot = UICommon.dictChats.TryGetValue(Common.gUser(this).id, out c);
@@ -65,6 +123,8 @@ namespace Unchained
             }
             else if (_bbpevent.EventName == "BanUser_Click")
             {
+                FLO();
+
                 User uBanned = Common.gUserById(this, _bbpevent.EventValue);
                 uBanned.Banned = 1;
                 BiblePayCommon.Entity.user1 o = Common.ConvertUserToUserEntity(uBanned);
@@ -74,6 +134,8 @@ namespace Unchained
             }
             else if(_bbpevent.EventName == "ChatNow_Click")
             {
+                FLO();
+
                 Session["chatactiveuser"] = _bbpevent.EventValue;
                 UICommon.ChatStructure c = new UICommon.ChatStructure();
                 c.chattingWithUser = _bbpevent.EventValue;
@@ -85,10 +147,12 @@ namespace Unchained
                 string sURL = "Meeting?id=" + c.chatGuid.ToString() + "&type=private";
                 string sClose = "onclick='closeModalDialog();'";
                 string sNarr = "Click <a " + sClose + " href='" + sURL + "' target='_blank'>here to page " + uOther.FullUserName() + " and enter the chat room.  ";
-                UICommonNET.MsgModalWithLinks(this, "Enter Chat Room", sNarr, 320, 200, false, true);
+                UICommonNET.MsgModalWithLinks(this, "Enter Chat Room", sNarr, 320, 200, true, true);
             }
             else if (_bbpevent.EventName=="RearrangeObjectUp_Click")
             {
+                FLO();
+
                 if (!Common.gUser(this).LoggedIn)
                 {
                     UICommon.MsgBox("Error", "You Must be logged in first.", this);
@@ -115,6 +179,8 @@ namespace Unchained
             }
             else if (_bbpevent.EventName == "RearrangeObjectDown_Click")
             {
+                FLO();
+
                 if (!Common.gUser(this).LoggedIn)
                 {
                     UICommon.MsgBox("Error", "You Must be logged in first.", this);
@@ -140,6 +206,8 @@ namespace Unchained
             }
             else if (_bbpevent.EventName == "EditObject_Click")
             {
+                FLO();
+
                 BiblePayCommon.Entity.comment1 c = (BiblePayCommon.Entity.comment1)Common.GetObject(Common.IsTestNet(this), "comment1", _bbpevent.EventValue);
                 if (c == null)
                 {
@@ -147,12 +215,14 @@ namespace Unchained
                     return;
                 }
 
-                UICommon.MsgInput(this, "EditedComment_Click", "Edit Comment", "Edit your comment:"
-                         , 700, "", "", UICommon.InputType.multiline, false, _bbpevent.EventValue, c.Body);
+                UICommon.MsgInputRichText(this, "EditedComment_Click", "Edit Comment", "Edit your comment:"
+                         , 1000, "", "", UICommon.InputType.multiline, false, _bbpevent.EventValue, c.Body);
 
             }
             else if (_bbpevent.EventName == "EditedComment_Click")
             {
+                FLO();
+
                 if (!Common.gUser(this).LoggedIn)
                 {
                     UICommon.MsgBox("Error", "You Must be logged in first.", this);
@@ -167,7 +237,8 @@ namespace Unchained
                     UICommon.MsgBox("Error", "Sorry, cannot locate object.", this.Page);
                     return;
                 }
-                c.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(_bbpevent.Extra.Output.ToString()));
+
+                c.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeStandard(_bbpevent.Extra.Output.ToString()));
                 
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), c, Common.gUser(this));
                 if (!r.fError())
@@ -181,15 +252,9 @@ namespace Unchained
             }
             else if (_bbpevent.EventName=="UploadVideo_Click")
             {
+                FLO();
+
                 Response.Redirect("UnchainedUpload");
-            }
-            else if (_bbpevent.EventName == "WatchVideos_Click")
-            {
-                Response.Redirect("VideoList");
-            }
-            else if (_bbpevent.EventName == "PeopleModule_Click")
-            {
-                Response.Redirect("Person?homogenized=1");
             }
             else if (_bbpevent.EventName == "LogOut_Click")
             {
@@ -198,27 +263,12 @@ namespace Unchained
                 this.Page.Session["stack"] = UICommon.Toast("Logging Off", "You are now logged off.");
                 Response.Redirect("Login");
             }
-            else if (_bbpevent.EventName == "LogIn_Click")
-            {
-                // top banner
-
-                Response.Redirect("LogIn.aspx");
-            }
-            else if (_bbpevent.EventName == "SignUp_Click")
-            {
-                // top banner
-                Response.Redirect("RegisterMe.aspx");
-            }
             else if (_bbpevent.EventName == "SaveComments_Click")
             {
+                FLO();
+
                 string id = Request.QueryString["id"] ?? "";
                 
-                if (!Common.gUser(this).LoggedIn)
-                {
-                      UICommon.MsgBox("Error", "Sorry, you must be logged in.", this);
-                      return;
-                }
-
                 if (id == "")
                 {
                     UICommon.MsgBox("Error", "Unable to locate the object.", this.Page);
@@ -227,17 +277,46 @@ namespace Unchained
 
                 BiblePayCommon.Entity.comment1 o = new BiblePayCommon.Entity.comment1();
                 o.UserID = Common.gUser(this).id;
-                o.Body = Request.Form["txtComment"].ToString();
+                string sURL = HttpContext.Current.Request.Url.AbsoluteUri;
+                string sParentType = Request.QueryString["Entity"] ?? "";
+
+                if (sURL.Contains("Media"))
+                {
+                    sParentType = "video1";
+                }
+                string sOrig = Request.Form["txtComment"].ToNonNullString();
+                string sDecoded = sOrig.Replace(@"&lt;", @"<").Replace(@"&gt;", @">");
+                o.Body = sDecoded;
                 o.ParentID = id;
+                dynamic o1 = Common.GetObject(Common.IsTestNet(this), sParentType, o.ParentID);
+                if (o1 == null || sOrig==null || sOrig=="")
+                {
+                    UICommon.MsgBox("Error", "Unable to locate the parent object.", this.Page);
+                    return;
+
+                }
+                string sOriginalPosterID = o1.UserID;
+                string sBlurb = "";
+                if (sParentType == "video1")
+                {
+                    sBlurb = o1.Title;
+                }
+                else
+                {
+                    sBlurb = o1.Subject;
+                }
+
 
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), o, Common.gUser(this));
                 if (!r.fError())
                 {
-                      BiblePayCommonNET.UICommonNET.ToastNow(this.Page, "Saved", "Your comment has been Saved!");
+                    // Add a notification also...
+                    UICommon.SendNotification(sParentType, sBlurb, this, "commented on", sURL, sOriginalPosterID);
+                    BiblePayCommonNET.UICommonNET.ToastNow(this.Page, "Saved", "Your comment has been Saved!");
                 }
                 else
                 {
-                      UICommon.MsgBox("Error while saving", "Sorry, the comment was not saved: " + r.Error, this);
+                    UICommon.MsgBox("Error while saving", "Sorry, the comment was not saved: " + r.Error, this);
                 }
             }
         }
@@ -360,20 +439,26 @@ namespace Unchained
         protected string _EntityName = "";
         private void SetEntityInformation(string sEntity)
         {
-            if ((this.Page.Title == "Prayer Blog" || this.Page.Title == "Prayer View" || this.Page.Title == "Prayer Add") && sEntity == "")
-                _EntityName = "pray1";
-            else
+            try
             {
-                _EntityName = sEntity;
-            }
+                if ((this.Page.Title == "Prayer Blog" || this.Page.Title == "Prayer View" || this.Page.Title == "Prayer Add") && sEntity == "")
+                    _EntityName = "pray1";
+                else
+                {
+                    _EntityName = sEntity;
+                }
 
-            if (_EntityName == "")
-                return;
-            
-            BiblePayCommon.IBBPObject o = (BiblePayCommon.IBBPObject)BiblePayCommon.EntityCommon.GetInstance("BiblePayCommon.Entity+" + _EntityName);
-            Dictionary<string, string> _oDict = BiblePayCommon.EntityCommon.GetStaticFieldValues(o);
-            _CollectionName = _oDict["CollectionName"].ToString();
-            _ObjectName = _oDict["ObjectName"].ToString();
+                if (_EntityName == "")
+                    return;
+
+                BiblePayCommon.IBBPObject o = (BiblePayCommon.IBBPObject)BiblePayCommon.EntityCommon.GetInstance("BiblePayCommon.Entity+" + _EntityName);
+                Dictionary<string, string> _oDict = BiblePayCommon.EntityCommon.GetStaticFieldValues(o);
+                _CollectionName = _oDict["CollectionName"].ToString();
+                _ObjectName = _oDict["ObjectName"].ToString();
+            }catch(Exception ex)
+            {
+                Log2("SetEntityInformation::" + sEntity + " :: " + ex.Message);
+            }
         }
         protected void Page_LoadComplete(object sender, EventArgs e)
         {
@@ -384,8 +469,12 @@ namespace Unchained
                 if (sURL.Contains("VideoList"))
                     fOK = true;
 
+                /*
                 if (fOK)
                     Response.Redirect(sURL);
+                    *
+                    */
+
             }
         }
         protected void Page_Load(object sender, EventArgs e)

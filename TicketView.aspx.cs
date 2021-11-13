@@ -221,8 +221,10 @@ namespace Unchained
                 sHistory += sRow;
 
                 // Display the attachments
-                string sAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetAttachments(this, th.Rows[i]["id"].ToString(), "", "Ticket Attachments", "") 
-                    + "</td></tr></table></td></tr>";
+                //string sAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetAttachments(this, th.Rows[i]["id"].ToString(), "", "Ticket Attachments", "") + "</td></tr></table></td></tr>";
+                string sAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetLightboxGallery(this,
+                    th.Rows[i]["id"].ToString(), "", "Ticket Attachments", "") + "</td></tr></table></td></tr>";
+
                 sHistory += sAttachments;
             }
 

@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using static Unchained.Common;
 using MongoDB.Driver;
 using static BiblePayCommon.EntityCommon;
+using System.Net.Sockets;
 
 namespace Unchained.WebApis
 {
@@ -23,6 +24,68 @@ namespace Unchained.WebApis
     {
 
         #region Functions
+        
+        
+        
+        
+	
+	 bool IsShadyAddress(string url)
+	 {
+	            try
+	            {
+	
+	                Uri myUri = new Uri(url);
+	                string host = myUri.Host;  
+	                bool fContainsNumbers = host.All(char.IsDigit);
+	                if (fContainsNumbers)
+	                {
+	                    return true;
+	                }
+	
+	                IPHostEntry hostEntry;
+	                hostEntry = Dns.GetHostEntry(host);
+	                IPAddress[] ipv4Addresses = Array.FindAll(
+	                        Dns.GetHostEntry(host).AddressList,
+	                            a => a.AddressFamily == AddressFamily.InterNetwork);
+	
+	                IPAddress[] ipv4MyAddresses = Dns.GetHostAddresses(Dns.GetHostName());
+	                //DNS supports more than one record
+	                for (int i = 0; i < hostEntry.AddressList.Length; i++)
+	                {
+	                    bool fIsLoopback = IPAddress.IsLoopback(hostEntry.AddressList[i]);
+	                    if (fIsLoopback)
+	                    {
+	                        return true;
+	                    }
+	
+	                }
+	                for (int i = 0; i < ipv4Addresses.Length; i++)
+	                {
+	                    bool fIsLoopback = IPAddress.IsLoopback(ipv4Addresses[i]);
+	                    if (fIsLoopback)
+	                    {
+	                        return true;
+	                    }
+	                    for (int j = 0; j < ipv4MyAddresses.Length; j++)
+	                    {
+	                        if (ipv4Addresses[i].ToString() == ipv4MyAddresses[j].ToString())
+	                            return true;
+	                    }
+	
+	                }
+	                string s99 = "";
+	
+	            }
+	            catch (Exception ex)
+	            {
+	                return true;
+	            }
+	            return false;
+	
+        }
+        
+        
+        
         public static VoteSums GetVoteSum(bool fTestNet, string sParentID)
         {
             VoteSums v = new VoteSums();
@@ -85,7 +148,7 @@ namespace Unchained.WebApis
                 DataTable dtAttachments = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "video1");
 
                 dtAttachments = dtAttachments.FilterDataTable("parentid='" + fields.Field<string>("id") + "'");
-                dtAttachments = dtAttachments.FilterDataTable("attachment=1");
+                dtAttachments = dtAttachments.FilterDataTable("Attachment=1");
 
                 var p = new
                 {
@@ -105,7 +168,7 @@ namespace Unchained.WebApis
                 };
 
                 
-                var attch = UICommon.GetAttachments(null, p.id, "", "", "");
+                //var attch = UICommon.GetAttachments(null, p.id, "", "", "");
                  DataTable dt2 = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "comment1");
 
                 dt2 = dt2.FilterDataTable("parentid='" + fields.Field<string>("id") + "'");
@@ -260,8 +323,24 @@ namespace Unchained.WebApis
             url = HttpUtility.UrlDecode(url);
             ScrapingBrowser browser = new ScrapingBrowser();
             WebPage page;
+            bool fShady = IsShadyAddress(url);
+            
+            
+	    bool fHTTProtocols = false;
+	    if (url.Contains("https://") || url.Contains("http://"))
+	    {
+	                    fHTTProtocols = true;
+	    }
+	    if (url.Contains("127.0.0.1") || url.Contains("localhost") || url.Contains("//127") || url.Contains("local"))
+	    {
+	                    url = "";
+	    }
+	    if (fShady || !fHTTProtocols)
+	    {
+	                    url = "";
+	    }
             string webUrl = url;
-            page =await browser.NavigateToPageAsync(new Uri(webUrl));
+            page = await browser.NavigateToPageAsync(new Uri(webUrl));
 
             var title = page.Html.SelectSingleNode("//meta[@property='og:title']")?.GetAttributeValue("content", string.Empty);
             if (string.IsNullOrEmpty(title))

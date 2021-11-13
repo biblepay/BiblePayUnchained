@@ -1,4 +1,4 @@
-﻿<%@ Page Title="View Person" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" EnableEventValidation="false" CodeBehind="Person.aspx.cs" Inherits="Unchained.Person" %>
+<%@ Page Title="View Person" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" EnableEventValidation="false" CodeBehind="Person.aspx.cs" Inherits="Unchained.Person" %>
 
 <%@ Register TagPrefix="BBP" Namespace="BiblePayPaginator" Assembly="BiblePayPaginator" %>
 <%@ Register TagPrefix="telerik" Namespace="Telerik.Web.UI" Assembly="Telerik.Web.UI" %>
@@ -232,7 +232,7 @@
 
   <input type="radio" class="btn-check"  value="SP" name="rdopostcategory" id="btnradioF" autocomplete="off">
   <label class="btn btn-outline-secondary cate-type" for="btnradioF">
-     <span class="d-none d-md-inline">Spiritual</span> 
+     <span class="d-none d-md-inline">Faith/Spiritual</span> 
             <img src="Content/pages/sp.png" class="icon-post d-inline d-md-none" title="Spiritual" alt="Spiritual"/>
 <%--<i class="d-inline d-md-none fa fa-blind" title="Faith"></i>--%>
 
@@ -240,18 +240,26 @@
 
   <input type="radio" class="btn-check"  value="CV" name="rdopostcategory" id="btnradioC" autocomplete="off">
   <label class="btn btn-outline-secondary cate-type" for="btnradioC">
-     <span class="d-none d-md-inline">Civic</span> 
+     <span class="d-none d-md-inline">Political/Activism</span> 
       <img src="Content/pages/cv.png" class="icon-post d-inline d-md-none" title="Civic" alt="Civic"/>
       <%--<i class="d-inline d-md-none fa fa-anchor" title="Civic"></i>--%>
           </label>
 
   <input type="radio" class="btn-check"  value="RQ" name="rdopostcategory" id="btnradioP" autocomplete="off">
   <label class="btn btn-outline-secondary cate-type" for="btnradioP">
-     <span class="d-none d-md-inline">Request</span> 
-            <img src="Content/pages/rq.png" class="icon-post d-inline d-md-none" title="Request" alt="Request"/>
-<%--<i class="d-inline d-md-none fa fa-hand-paper-o" title="Request"></i>--%>
+     <span class="d-none d-md-inline">Job Request</span> 
+            <img src="Content/pages/rq.png" class="icon-post d-inline d-md-none" title="Job Request" alt="Job Request"/>
+          </label>
+<!--
+
+  <input type="radio" class="btn-check"  value="PR" name="rdopostcategory" id="btnradioP" autocomplete="off">
+  <label class="btn btn-outline-secondary cate-type" for="btnradioP">
+     <span class="d-none d-md-inline">Prayer Request</span> 
+            <img src="Content/pages/sp.png" class="icon-post d-inline d-md-none" title="Prayer Request" alt="Prayer Request"/>
+            <%--<i class="d-inline d-md-none fa fa-hand-paper-o" title="Request"></i>--%>
 
   </label>
+    -->
 </div>
                         </div>
                     </div>
@@ -299,11 +307,13 @@
                                             </select>
                                                 <span class="small">Type:</span>
                                              <select id="category" style="width:auto; min-width:100px;" class="form-control postprivacy">
-                                                <option value="CV">CV - Civic</option> 
-                                                <option value="SC">SC- Social</option>
-                                                <option value="BZ">BZ - Bussiness</option>
-                                                <option value="SP">SP - Faith-Sipritual-Religious</option>
-                                                <option value="RQ">RQ - Prayer Request</option>
+                                                <option value="SC">SC - Social</option>
+                                                <option value="BZ">BZ - Business</option>
+                                                <option value="SP">SP - Faith-Spiritual-Religious</option>
+                                                <option value="CV">CV - Political/Activism</option> 
+                                                <option value="RQ">RQ - Job Request</option>
+                                                <!--<option value="PR">PR - Prayer Request</option>-->
+
                                             </select>
                                                 </div>
                                         </div>
@@ -796,10 +806,11 @@
                         html.find('.profilepic').attr('src', p);
                         html.find('.username').html(v.FullName);
                         html.find('.posttime').html(PrepareTime(v.PostedOn));
+                        if (v.Body == null) v.Body = "";
                         html.find('.postbody').html(v.Body?.replaceAll('\n', '<br\>'));
                         html.find('.postlikecount .count').html(v.Likes.nUpvotes);
                         html.find('.btnpostlike').on('click', function () {
-                            let param = 'upvote|' + v.id;
+                            let param = 'upvote|' + v.id + '|Timeline';
                             html.find('.postlikecount').addClass('saving')
                             $.ajax({
                                 type: "POST",
@@ -816,6 +827,7 @@
                                         else {
                                             html.find('.postlikecount').hide()
                                         }
+                                        updateNotificationCount();
                                         //chtml.find('.commentview .dislikecount .count').html(result.nDownvotes);
                                         //if (result.nDownvotes > 0) {
                                         //    chtml.find('.commentview .dislikecount').show()
@@ -869,13 +881,14 @@
                                                   success: function (response) {
                                                       var result = JSON.parse(response);
                                                       if (result.status) {
+                                                          updateNotificationCount();
                                                           let ncid = result.data;
                                                           $(chtml[0]).attr('id', 'comment' + ncid);
                                                           chtml.removeClass('saving');
 
                                                           //$(chtml[0]).attr('id', 'comment' + id);
                                                           chtml.find('.commentlike').on('click', function () {
-                                                              let param = 'upvote|' + ncid;
+                                                              let param = 'upvote|' + ncid + "|comment1";
                                                               chtml.addClass('saving')
                                                               $.ajax({
                                                                   type: "POST",
@@ -907,7 +920,7 @@
 
                                                           })
                                                           chtml.find('.commentdis').on('click', function () {
-                                                              let param = 'downvote|' + ncid;
+                                                              let param = 'downvote|' + ncid + "|comment1";
                                                               chtml.addClass('saving')
                                                               $.ajax({
                                                                   type: "POST",
@@ -1069,7 +1082,7 @@
                                 }
                                 $(chtml[0]).attr('id', 'comment' + v1.id);
                                 chtml.find('.commentlike').on('click', function () {
-                                    let param = 'upvote|' + v1.id;
+                                    let param = 'upvote|' + v1.id + "|comment1";
                                     chtml.addClass('saving')
                                     $.ajax({
                                         type: "POST",
@@ -1371,7 +1384,7 @@
                     });
 
                     $('#contentpopup .btnlike').on('click', function () {
-                        let param = 'upvote|' + v.id;
+                        let param = 'upvote|' + v.id + "|comment1";
                         $('#contentpopup .likecount').addClass('saving')
                         $.ajax({
                             type: "POST",
@@ -1438,7 +1451,7 @@
                             chtml.find('.commentdel').addClass('small')
                             chtml.find('.commentedit').addClass('small')
                             chtml.find('.commentlike').on('click', function () {
-                                let param = 'upvote|' + v1.id;
+                                let param = 'upvote|' + v1.id + "|comment1";
                                 chtml.addClass('saving')
                                 $.ajax({
                                     type: "POST",

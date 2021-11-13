@@ -18,15 +18,16 @@ namespace Unchained
         protected new void Page_Load(object sender, EventArgs e)
         {
 
-            if (IsPostBack)
-            {
-                Session["search"] = txtSearch.Text;
+                if (IsPostBack)
+                {
+                    Session["search"] = txtSearch.Text;
 
-            }
-            else
-            {
-                txtSearch.Text = Session["search"].ToNonNullString();
-            }
+                }
+                else
+                {
+                    txtSearch.Text = Session["search"].ToNonNullString();
+                }
+           
         }
         protected void btnSearch_Click(object sender, EventArgs e)
         {
@@ -161,10 +162,16 @@ namespace Unchained
             }
             else if (sAction == "following")
             {
-                // mission critical find out how to pull in a list
-                // dt = dt.FilterDataTable(GetFollowingList(IsTestNet(this), gUser(this).id));
-                var followFilter = GetFollowingList(IsTestNet(this), gUser(this).id);
-                filter &= followFilter;
+                try
+                {
+                    var followFilter = GetFollowingList(IsTestNet(this), gUser(this).id);
+                    filter &= followFilter;
+                }
+                catch(Exception ex)
+                {
+                    filter &= builder.Eq("id", "0");
+                    BiblePayCommonNET.UICommonNET.MsgModal(this, "Following Error", "Sorry, you are not following anyone yet.", 250, 200, true, false);
+                }
                 sType = "video";
             }
             else if (sAction == "popular" || sAction == "")

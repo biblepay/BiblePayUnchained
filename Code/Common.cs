@@ -235,7 +235,7 @@ namespace Unchained
 
         public static User RetrieveUser(Page p, FilterDefinition<dynamic> oFilter)
         {
-            IList<dynamic> dt = BiblePayDLL.Sidechain.GetChainObjects<dynamic>(false, "user1", oFilter, SERVICE_TYPE.PUBLIC_CHAIN);
+            IList<dynamic> dt = BiblePayDLL.Sidechain.GetChainObjects<dynamic>(IsTestNet(p), "user1", oFilter, SERVICE_TYPE.PUBLIC_CHAIN);
             Object o = new User();
             if (dt.Count < 1)
                 return (User)o;
@@ -265,7 +265,6 @@ namespace Unchained
             return u;
 
         }
-
         public static User gUser(Page p)
         {
 
@@ -335,7 +334,7 @@ namespace Unchained
             return 0;
         }
 
-        public static string GetObjectRating(bool fTestNet, string sID, string sTable, User u)
+        public static string GetObjectRating(bool fTestNet, string sID, string sTable, User u, string sParentType)
         {
             string sHTML = "";
             /*            Star Ratings... 1-5 stars...
@@ -346,12 +345,12 @@ namespace Unchained
             */
             // Voting buttons
             sHTML = "";
-            sHTML += "<a onclick='transmit(\"" + sID + "\", \"upvote\", \"upvote1" + sID + "\", \"downvote1" + sID + "\");'>"
+            sHTML += "<a onclick='transmitVote(\"" + sID + "\", \"upvote\", \"" + sTable + "\", \"" + sParentType + "\",\"upvote1" + sID + "\", \"downvote1" + sID + "\");'>"
                 + "<span class='fa fa-thumbs-up'></span></a>"
                 + "&nbsp;"
                 + "<span id='upvote1" + sID + "'>" + GetVoteCount(fTestNet, sID, 0).ToString() + "</span>"
                 + " &nbsp; "
-                + "<a onclick='transmit(\"" + sID + "\", \"downvote\", \"upvote1" + sID + "\", \"downvote1" + sID + "\");'>"
+                + "<a onclick='transmitVote(\"" + sID + "\", \"downvote\", \"" + sTable + "\",\"" + sParentType + "\",\"upvote1" + sID + "\", \"downvote1" + sID + "\");'>"
                 + "<span class='fa fa-thumbs-down'></span></a>&nbsp;"
                 + "<span id='downvote1" + sID + "'>"
                 + GetVoteCount(fTestNet, sID, 1).ToString() + "</span>";
@@ -435,15 +434,17 @@ namespace Unchained
                     MailMessage m = new MailMessage();
                     EmailNarr e = GetEmailFooter(p);
                     m.IsBodyHtml = true;
-                    //string sNarr = "Dear " + u.FullUserName() + ",<br><br>Thank you for registering with our platform."
-                    //    + "<br><br>" + sData + "<br><br><br>" +"The "+ e.DomainName + " Team<br>";
                     sData = sData.Replace("[FullUserName]", u.FullUserName());
+                    string sDomainReported = e.DomainName;
+                    if (e.DomainName.Contains("anrsocial.com"))
+                    {
+                        sDomainReported = "Truthbook.social";
+                    }
+                    m.Subject = "Welcome to " + sDomainReported + "!           [Transactional Message]";
 
-                    m.Subject = "[Transactional Message] Welcome to " + e.DomainName + "!";
                     m.Body = sData;
                     m.IsBodyHtml = true;
                     m.To.Add(new MailAddress(u.EmailAddress, u.FullUserName()));
-
 
                     string sNotifyExtra = Config("NotifyUser");
                     if (sNotifyExtra != "")
@@ -454,7 +455,8 @@ namespace Unchained
                    
                     DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(p), m, e.DomainName);
                 }
-            }catch(Exception ex)
+            }
+            catch(Exception ex)
             {
 
             }
@@ -565,6 +567,10 @@ namespace Unchained
 
             IList<dynamic> l1 = BiblePayDLL.Sidechain.GetChainObjects<dynamic>(fTestNet, sTable, filter,
                 SERVICE_TYPE.PUBLIC_CHAIN);
+            if (l1.Count == 0)
+            {
+                return null;
+            }
             //DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2Retired(fTestNet, sTable);
             //BiblePayCommon.IBBPObject o = BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, sTable, 0);
             BiblePayCommon.IBBPObject o = ExpandoToStronglyCastObject(l1[0], sTable);
@@ -611,5 +617,6 @@ namespace Unchained
         }
         */
 
+     
     }
 }

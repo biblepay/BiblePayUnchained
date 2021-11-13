@@ -35,7 +35,7 @@ namespace Unchained
                 return 0;
             }
         }
-        protected void Run_Click(object sender, System.EventArgs e)
+       protected void Run_Click(object sender, System.EventArgs e)
         {
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), "TicketHistory");
             string sDevID = Request.Form["ddDevelopers"].ToNonNullString();
@@ -54,6 +54,7 @@ namespace Unchained
                 dt = dt.FilterDataTable("time > '" + nStart.ToString() + "' and time < '" + nEnd.ToString() + "'");
             }
             string html = Report.GetTableHTML("Hours By Developer", dt, "UserID;Time;Body;Hours", "Hours");
+            
             var result = Pdf.From(html).Portrait().Content();
             Response.Clear();
             Response.ContentType = "application/pdf";

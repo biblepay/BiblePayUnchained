@@ -69,7 +69,7 @@ namespace Unchained
         public static void Executor()
         {
             Log("Starting Executor v1.3...");
-            System.Threading.Thread.Sleep(20000);
+            System.Threading.Thread.Sleep(60000);
             bool fAttached = System.Diagnostics.Debugger.IsAttached;
 
             while (true)

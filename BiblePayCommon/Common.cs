@@ -223,6 +223,12 @@ namespace BiblePayCommon
                 }
                 return sFullName;
             }
+
+            public string FullUserNameAnchor()
+            {
+                string sAnchor = "<a href='Person?id=" + id.ToString() + "'><b>" + FullUserName() + "</b></a>";
+                return sAnchor;
+            }
             public string GetAvatarImage()
             {
 
@@ -585,8 +591,98 @@ namespace BiblePayCommon
             return sClassification;
         }
 
+        public static string DisplayDateTime(long nUnixTime)
+        {
+            long nElapsed = BiblePayCommon.Common.UnixTimestampUTC() - nUnixTime;
+            DateTime theTime = BiblePayCommon.Common.ConvertFromUnixTimestamp(nUnixTime);
 
-        public enum FileType
+            if (nElapsed < (60 * 60 * 24))
+            {
+
+                String hourMinute = theTime.ToString("HH:mm");
+                return hourMinute;
+            }
+            else
+            {
+                string longDate = theTime.ToString();
+                return longDate;
+            }
+        }
+
+        public static string GetPrettyDate(double nUnixTime)
+        {
+            DateTime d = BiblePayCommon.Common.ConvertFromUnixTimestamp((long)nUnixTime);
+            TimeSpan s = DateTime.UtcNow.Subtract(d);
+            int dayDiff = (int)s.TotalDays;
+            int secDiff = (int)s.TotalSeconds;
+
+            // 4.
+            // Don't allow out of range values.
+            if (dayDiff < 0 || dayDiff >= 31)
+            {
+                return null;
+            }
+
+            // 5.
+            // Handle same-day times.
+            if (dayDiff == 0)
+            {
+                // A.
+                // Less than one minute ago.
+                if (secDiff < 60)
+                {
+                    return "just now";
+                }
+                // B.
+                // Less than 2 minutes ago.
+                if (secDiff < 120)
+                {
+                    return "1 minute ago";
+                }
+                // C.
+                // Less than one hour ago.
+                if (secDiff < 3600)
+                {
+                    return string.Format("{0} minutes ago",
+                        Math.Floor((double)secDiff / 60));
+                }
+                // D.
+                // Less than 2 hours ago.
+                if (secDiff < 7200)
+                {
+                    return "1 hour ago";
+                }
+                // E.
+                // Less than one day ago.
+                if (secDiff < 86400)
+                {
+                    return string.Format("{0} hours ago",
+                        Math.Floor((double)secDiff / 3600));
+                }
+            }
+            // 6.
+            // Handle previous days.
+            if (dayDiff == 1)
+            {
+                return "yesterday";
+            }
+            if (dayDiff < 7)
+            {
+                return string.Format("{0} days ago",
+                    dayDiff);
+            }
+            if (dayDiff < 31)
+            {
+                return string.Format("{0} weeks ago",
+                    Math.Ceiling((double)dayDiff / 7));
+            }
+            return null;
+        }
+    
+
+
+
+    public enum FileType
         {
             VIDEO,
             DSQL
@@ -641,7 +737,6 @@ namespace BiblePayCommon
             }
         }
     }
-
 
     public static class Encryption
     {
@@ -885,6 +980,11 @@ namespace BiblePayCommon
         {
             return Base64Decode0(b, true);
         }
+        public static string Base64DecodeStandard(string b)
+        {
+            return Base64Decode0(b, false);
+        }
+
 
         public static string CleanseXSS(string d)
         {

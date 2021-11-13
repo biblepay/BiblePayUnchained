@@ -189,7 +189,7 @@ namespace Unchained
 			_testingmemory.nTestingScore = 0;
 
 			Session["testingmemory"] = _testingmemory;
-			MsgModal(this, sTitle, sSummary, 500, 300);
+			MsgModal(this, sTitle, sSummary, 500, 300, true, false);
 		}
 
 		void UpdateDisplay()

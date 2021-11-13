@@ -13,6 +13,11 @@ namespace Unchained
     {
         protected new void Page_Load(object sender, EventArgs e)
         {
+
+			if (gUser(this).LoggedIn == false)
+			{
+				UICommon.MsgBox("Error", "Sorry, you must be logged in first.", this);
+			}
             if (!IsPostBack)
             {
                 ddNFTType.Items.Clear();
