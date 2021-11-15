@@ -470,6 +470,8 @@ namespace BiblePayCommon
             public int Size { get; set; }
             public double Order { get; set; }
             public string HashTags { get; set; }
+            public string AIHashTags { get; set; }
+            public string AISummary { get; set; }
             public string Category { get; set; }
             public string Subject { get; set; } //to be removed in favor of Category, Title and Body
             public override string GetHash()
