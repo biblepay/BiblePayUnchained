@@ -3,6 +3,8 @@
  
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
+       <asp:UpdatePanel runat="server" ID="UpdatePanel4">
+       <ContentTemplate>
 
    
         <script>
@@ -23,7 +25,8 @@
     
     
      <%=GetVideoList() %>
-
+     </ContentTemplate>
+     </asp:UpdatePanel>
 
     
          

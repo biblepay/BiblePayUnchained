@@ -2,6 +2,11 @@
 <%@ Register TagPrefix="BBP" Namespace="BiblePayPaginator"  Assembly="BiblePayPaginator"%>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+
+       <asp:UpdatePanel runat="server" ID="UpdatePanel6">
+       <ContentTemplate>
+
+
           <script>
               function search(ele) {
                   if (event.key === 'Enter') {
@@ -21,6 +26,7 @@
     <%=GetPeople()%>
 
     <BBP:Paginator id="paginator1" runat="server"></BBP:Paginator>
-
+    </ContentTemplate>
+    </asp:UpdatePanel>
 
 </asp:Content>
