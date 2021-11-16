@@ -3,7 +3,13 @@
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
    
-    <%=GetFriends()%>
-    
+    <input type="hidden" id="hfPostback" />
+      <link href="Content/pages/peopledirectory.css" rel="stylesheet" />
+   <div class="row position-relative" id="people-directory">
+                <div class="loader1">
+                    <i class="fa fa-sun fa-spin fa-4x"></i>
+                </div>
+                <%=GetFriends()%>
+            </div>
 
 </asp:Content>

@@ -65,8 +65,50 @@ namespace Unchained
                 }
             }
         }
-
         protected string GetFriendRequests()
+        {
+            string html = "";
+
+            var builder = Builders<BiblePayCommon.Entity.FriendRequest>.Filter;
+            var filter = builder.Eq("UserID", gUser(this).id);
+            IList<BiblePayCommon.Entity.FriendRequest> dtFriends = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.FriendRequest>(IsTestNet(this),
+                "FriendRequest", filter, SERVICE_TYPE.PUBLIC_CHAIN);
+
+            if (dtFriends.Count == 0)
+            {
+                html = "You do not have any friend requests.";
+                return html;
+            }
+            for (int i = 0; i < dtFriends.Count; i++)
+            {
+                User u = UICommon.GetUserRecord(IsTestNet(this), dtFriends[i].id);
+
+                string sApproveButton = UICommon.GetStandardButton(dtFriends[i].id,
+                    "<i style='color:black;' class='fa fa-check'></i> Accept Request", "ApproveFriendRequest", "Approve Friend Request","", "btnacceptfreindreq btn btn-sm p-0");
+                string personlink = "<a href = \"Person?id=" + u.id + "\" class=\"tile-link\"></a>";
+                string h = "<div class=\"col-md-6 col-xl-4\">"
+                + "<div class=\"card\">" +
+                "<div class=\"card-body d-flex align-items-center\">" +
+                  "<div class=\"flex-shrink-0 align-items-center\"><span style = \"background-image: url(" + u.GetAvatarUrl() + ")\" class=\"avatar avatar-xl mr-3\">" + personlink + "</span></div>"
+                    + "<div class=\"flex-grow-1 ms-2 overflow-hidden\">"
+                      + "<h6 class=\"card-text mb-0 position-relative\">" + u.FullUserName() + personlink + " </h6> "
+                      + "<p class=\"card-text small\"> "
+                        + BiblePayCommon.Common.UnixTimeStampToDateControl(dtFriends[i].time)
+                      + "</p>"
+                      + "<p class=\"card-link text-center border-top mb-0\"> "
+                       + sApproveButton
+                      + "</p>"
+                  + "</div>"
+                + "</div>"
+              + "</div>"
+            + "</div>";
+                html += h;
+
+            }
+            return html;
+        }
+
+        protected string GetFriendRequests1()
         {
             string html = "<table class=saved>";
             string sRow = "<tr><th>Requestor Name<th>Avatar<th>Request Date<th>Approve</tr>";

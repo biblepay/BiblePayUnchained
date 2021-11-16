@@ -53,8 +53,53 @@ namespace Unchained
             }
         }
 
-
         protected string GetFriends()
+        {
+            string html = "";
+
+            DataTable dtFriends = RetrieveDataTable3(IsTestNet(this), "Friend");
+            dtFriends = dtFriends.FilterDataTable("UserID='" + gUser(this).id + "' or RequesterID='" + gUser(this).id + "'");
+
+            if (dtFriends.Rows.Count == 0)
+            {
+                html = "You do not have any friends yet.";
+                return html;
+            }
+
+            for (int i = 0; i < dtFriends.Rows.Count; i++)
+            {
+                string sRequestor = dtFriends.Rows[i]["RequesterID"].ToString();
+                string sUserID = dtFriends.Rows[i]["UserID"].ToString();
+                User Friend = gUser(this).id == sUserID ? gUserById(this, sRequestor) : gUserById(this, sUserID);
+
+                string sUnfriendButton = UICommon.GetStandardButton(dtFriends.Rows[i]["id"].ToString(), "<i class='fa fa-user-minus'></i> Unfriend", "Unfriend",
+                    "Unfriend this person","", "btnunfriend btn btn-sm p-0");
+
+                string personlink = "<a href = \"Person?id=" + Friend.id + "\" class=\"tile-link\"></a>";
+                string h = "<div class=\"col-md-6 col-xl-4\">"
+                + "<div class=\"card\">" +
+                "<div class=\"card-body d-flex align-items-center\">" +
+                  "<div class=\"flex-shrink-0 align-items-center\"><span style = \"background-image: url(" + Friend.GetAvatarUrl() + ")\" class=\"avatar avatar-xl mr-3\">" + personlink + "</span></div>"
+                    + "<div class=\"flex-grow-1 ms-2 overflow-hidden\">"
+                      + "<h6 class=\"card-text mb-0 position-relative\">" + Friend.FullUserName() + personlink + " </h6> "
+                      + "<p class=\"card-text small\"> "
+                        + "Since: "+ dtFriends.GetColDateTime(i, "time").ToString()
+                      + "</p>"
+                      + "<p class=\"card-link text-center border-top mb-0\"> "
+                       + sUnfriendButton
+                      + "</p>"
+                  + "</div>"
+                + "</div>"
+              + "</div>"
+            + "</div>";
+                html += h;
+
+            }
+            return html;
+        }
+
+
+        protected string GetFriends1()
         {
 
             string html = "<table class=saved>";

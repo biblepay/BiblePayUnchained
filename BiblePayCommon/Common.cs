@@ -252,6 +252,20 @@ namespace BiblePayCommon
                     return "<img src='" + AvatarURL + "' class='" + sClass + "'>";
                 }
             }
+
+            public string GetAvatarUrl()
+            {
+                //images/emptyavatar.png
+
+                if (AvatarURL == "" || AvatarURL == null || AvatarURL.Contains("emptyavatar"))
+                {
+                    return "images/emptyavatar.png";
+                }
+                else
+                {
+                    return AvatarURL;
+                }
+            }
         }
 
         public static string RemoveCommas(string data)

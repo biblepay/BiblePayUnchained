@@ -1,0 +1,141 @@
+body {
+    margin-top: 20px;
+    background: #eee;
+}
+
+.avatar.avatar-xl {
+    width: 5rem;
+    height: 5rem;
+}
+
+.avatar {
+    width: 2rem;
+    height: 2rem;
+    line-height: 2rem;
+    border-radius: 50%;
+    display: inline-block;
+    background: #ced4da no-repeat center/cover;
+    position: relative;
+    text-align: center;
+    color: #868e96;
+    font-weight: 600;
+    vertical-align: bottom;
+}
+
+.card {
+    background-color: #fff;
+    border: 0 solid #eee;
+    border-radius: 0;
+}
+
+.card {
+    margin-bottom: 30px;
+    -webkit-box-shadow: 2px 2px 2px rgba(0,0,0,0.1), -1px 0 2px rgba(0,0,0,0.05);
+    box-shadow: 2px 2px 2px rgba(0,0,0,0.1), -1px 0 2px rgba(0,0,0,0.05);
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+.tile-link {
+    position: absolute;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    z-index: 30;
+}
+.card-link a {
+    margin-right: 15px;
+    color: green !important;
+}
+
+.domain-text{
+    font-size:12px;
+}
+
+ .inner-form {
+    width: 100%;
+    margin-bottom: 17px;
+}
+.inner-form .input-field {
+    width: 100%;
+    position: relative;
+}
+
+    .inner-form .input-field .choices {
+        margin-bottom: 0;
+    }
+
+.inner-form .input-field .choices .choices__inner {
+    min-height: 70px;
+    width: 100%;
+    background: transparent;
+    border: 0;
+    background: #fff;
+    display: block;
+    width: 100%;
+    padding: 10px 70px 10px 32px;
+    font-size: 18px;
+    color: #666;
+    border-radius: 34px;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+
+    .inner-form .input-field .btn-search {
+        width: 80px;
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-align: center;
+        align-items: center;
+        position: absolute;
+        right: 17px;
+        top: 0;
+        height: 100%;
+        background: transparent;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        display: flex;
+        -ms-flex-pack: center;
+        justify-content: center;
+        align-items: center;
+        border-left: 1px solid #dee2e6 !important;
+    }
+.choices__input {
+    width: 100%;
+    max-width: none;
+    border: none;
+    outline: none;
+}
+
+.loader1 {
+    display:none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 99;
+    text-align: center;
+    align-content: center;
+    bottom: 0;
+    background-color: rgba(255,255,255,.8);
+}
+.loader1 .fa{
+    position:absolute;
+    top:45%;
+}
+
+.loading .loader1{
+    display:initial;
+}
+.btnfreindreq{
+    margin-top:-8px;
+}

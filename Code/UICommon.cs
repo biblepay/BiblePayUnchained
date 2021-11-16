@@ -1073,7 +1073,7 @@ namespace Unchained
             return sData;
         }
 
-        public static string GetUserGallery(Page p, IList<BiblePayCommon.Entity.user1> dt, BiblePayPaginator.Paginator pag, int nCols)
+        public static string GetUserGallery2(Page p, IList<BiblePayCommon.Entity.user1> dt, BiblePayPaginator.Paginator pag, int nCols)
         {
             
             string html = "<table width='100%'><tr>";
@@ -1143,6 +1143,101 @@ namespace Unchained
                 return "";
             }
         }
+        public static string GetUserGallery(Page p, IList<BiblePayCommon.Entity.user1> dt, BiblePayPaginator.Paginator pag, int nCols)
+        {
+            string html = "";
+            int iCol = 0;
+            if (dt.Count < 1)
+            {
+                return html;
+            }
+            try
+            {
+                bool fMobile = BiblePayCommonNET.UICommonNET.fBrowserIsMobile(p);
+                pag.ColumnsPerRow = fMobile ? 1 : 3;
+                pag.Rows = dt.Count;
+                pag.RowsPerPage = 3;
+
+                for (int y = pag.StartRow; y <= pag.EndRow; y++)
+                {
+                    User u = UICommon.GetUserRecord(IsTestNet(p), dt[y].id);
+                    string sChatAnchor = GetStandardAnchor("ancChat", "ChatNow", u.id.ToString(),
+                           " <i class='fa fa-chat'></i>", "Chat with this user Now", "");
+                    string sBanAnchor = GetStandardAnchor("ancBan", "BanUser", u.id.ToString(), "<i class='fa fa-ban'></i>", "Ban this User", "user1");
+
+                    string links = "";
+                    if (u.id != gUser(p).id)
+                    {
+                        links += sChatAnchor;
+                        links += UICommon.GetTipControl(IsTestNet(p), u.id, u.id);
+                    }
+                    if (gUser(p).Administrator == 1)
+                    {
+                        links += sBanAnchor;
+                    }
+
+                    var builder = Builders<dynamic>.Filter;
+                    var filter = builder.Eq("userid", u.id) & builder.Eq("requesterid", gUser(p).id);
+                    IList<dynamic> l1 = BiblePayDLL.Sidechain.GetChainObjects<dynamic>(IsTestNet(p), "Friend", filter, SERVICE_TYPE.PUBLIC_CHAIN);
+                    bool isFriend = l1.Count > 0;
+
+                    DACResult r = People.AmIFriend(p, u.id, gUser(p).id);
+
+                    if (r.Result == "Me")
+                    {
+                        // No Friend Request button for SELF
+                    }
+                    else
+                    {
+                        if (r.TXID == "FRIEND_REQUEST_SENT")
+                        {
+                            links += "<span class='badge bg-info'>Request Sent</span>";
+                        }
+                        else if (r.TXID == "WAITING_FOR_MY_ACCEPTANCE")
+                        {
+                            links += GetStandardButton(u.id, "<i class='fa fa-check'></i> Accept Request", r.Event, r.Alt, "", "btnaccptfreindreq");
+                        }
+                        else if (r.TXID == "FRIENDS")
+                        {
+                            links += GetStandardButton(u.id, "<i class='fa fa-user-minus'></i> Unfriend", r.Event, r.Alt, "", "btnfreindreq btn btn-sm p-0");
+                        }
+                        else if (r.Event == "AddFriendRequest")
+                        {
+                            links += GetStandardButton(u.id, "<i class='fa fa-user-plus'></i> Make Friend", r.Event, r.Alt, "", "btnfreindreq btn btn-sm p-0");
+                        }
+                    }
+
+                    string personlink = "<a href = \"Person?id=" + u.id + "\" class=\"tile-link\"></a>";
+                    string h = "<div class=\"col-md-6 col-xl-4\">"
+              + "<div class=\"card\">" +
+        "<div class=\"card-body d-flex align-items-center\">" +
+          "<div class=\"flex-shrink-0 align-items-center\"><span style = \"background-image: url(" + u.GetAvatarUrl() + ")\" class=\"avatar avatar-xl mr-3\">" + personlink + "</span></div>"
+            + "<div class=\"flex-grow-1 ms-2 overflow-hidden\">"
+              + "<h6 class=\"card-text mb-0 position-relative\">" + u.FullUserName() + personlink + " </h6> "
+              + "<p class=\"card-text text-uppercase text-muted domain-text small mb-1\" > " + dt[y].domain + " </p> "
+              + "<p class=\"card-text\"> "
+               + " Since: " + BiblePayCommon.Common.UnixTimeStampToDateControl(dt[y].time)
+              + "</p>"
+              + "<p class=\"card-link text-center border-top mb-0\"> "
+               + links
+              + "</p>"
+          + "</div>"
+        + "</div>"
+      + "</div>"
+    + "</div>";
+                    html += h;
+                    iCol++;
+
+                }
+                return html;
+            }
+            catch (Exception ex)
+            {
+                Log("GetUserGallery: " + ex.Message);
+                return "";
+            }
+        }
+
 
         public static string GetComments(bool fTestNet, string id, Page z, string sParentType, bool fMaskIfNone = false)
         {

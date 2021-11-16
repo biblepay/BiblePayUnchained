@@ -729,6 +729,7 @@ namespace Unchained
             }
             else
             {
+                
                 sAddFriendButton = UICommon.GetStandardButton(u.id, r.Result, r.Event, r.Alt);
             }
 

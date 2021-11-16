@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Web;
+using System.Web.UI;
 using static BiblePayCommon.Common;
 using static BiblePayCommon.DataTableExtensions;
+using static BiblePayCommon.Entity;
 using static BiblePayCommonNET.CommonNET;
 using static BiblePayCommonNET.UICommonNET;
 using static Unchained.Common;
@@ -88,6 +91,34 @@ namespace Unchained
                     this.Page.Session["stack"] = Toast("Tipped", "You have tipped this channel on TXID " + r30.Result);
                 }
             }
+            else if (e.EventName == "AddFriendRequest_Click")
+            {
+                BiblePayCommon.Entity.FriendRequest f = new FriendRequest();
+                f.RequesterID = gUser(this).id;
+                f.UserID = e.EventValue;
+                if (e.EventValue == "" || f.UserID == f.RequesterID)
+                {
+                    UICommon.MsgBox("Error", "Sorry, you cannot be friends with yourself. ", this);
+                    return;
+                }
+                DACResult r = AmIFriend(this.Page, f.UserID, f.RequesterID);
+                if (r.fError())
+                {
+                    UICommon.MsgBox("Error", r.Error, this);
+                    return;
+                }
+                DACResult r1 = DataOps.InsertIntoTable(this, IsTestNet(this), f, gUser(this));
+                if (r1.fError())
+                {
+                    BiblePayCommonNET.UICommonNET.MsgModal(this, "Error", "Sorry, the friend request was not saved.", 500, 200, true);
+                    return;
+                }
+                else
+                {
+                    ToastLater(this, "Success", "Your Friends Request has been sent!");
+                }
+
+            }
         }
 
         protected string GetPeople()
@@ -119,6 +150,76 @@ namespace Unchained
         protected void btnSearch_Click(object sender, EventArgs e)
         {
             // Refine the query
+        }
+
+        public static DACResult AmIFriend(Page p, string sFriendUserGuid, string sMyUserGuid)
+        {
+            DACResult r = new DACResult();
+
+            DataTable dtOriginal = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "FriendRequest");
+            string sSnippet1 = "userid='" + sFriendUserGuid + "' and requesterid='" + sMyUserGuid + "'";
+            DataTable dt1 = dtOriginal.FilterDataTable(sSnippet1);
+            if (sMyUserGuid == sFriendUserGuid)
+            {
+                r.Result = "Me";
+                r.Alt = "Your profile";
+                r.Event = "";
+                r.TXID = "SELF";
+                r.Error = "Sorry, you cannot become a friend with yourself.";
+                return r;
+            }
+            if (dt1.Rows.Count > 0)
+            {
+                r.Result = "Waiting for their Acceptance";
+                r.Alt = "Waiting for them to accept your request.";
+                r.Event = "";
+                r.TXID = "FRIEND_REQUEST_SENT";
+                r.Error = "Sorry, you already have a friend request in to this person.";
+                return r;
+            }
+            string sSnippet2 = "requesterid='" + sFriendUserGuid + "' and userid='" + sMyUserGuid + "'";
+            dtOriginal = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "FriendRequest");
+
+            dt1 = dtOriginal.FilterDataTable(sSnippet2);
+            if (dt1.Rows.Count > 0)
+            {
+                r.Result = "Accept friend Request";
+                r.Alt = "Accept this person as a friend.";
+                r.Event = "AcceptFriendRequest";
+                r.TXID = "WAITING_FOR_MY_ACCEPTANCE";
+                r.Error = "Sorry, this person already has a friend request in to you.";
+                return r;
+            }
+
+            dtOriginal = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "Friend");
+            dt1 = dtOriginal.FilterDataTable(sSnippet1);
+            if (dt1.Rows.Count > 0)
+            {
+                r.Result = "Friends";
+                r.Alt = "You are friends with this person. ";
+                r.Event = "";
+                r.TXID = "FRIENDS";
+                r.Error = "Sorry, this person is already friends with you.";
+                return r;
+            }
+            dtOriginal = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(p), "Friend");
+
+            dt1 = dtOriginal.FilterDataTable(sSnippet2);
+            if (dt1.Rows.Count > 0)
+            {
+                r.Result = "Friends";
+                r.TXID = "FRIENDS";
+                r.Error = "Sorry, you are already friends with this person.";
+                r.Event = "";
+                r.TXID = "FRIENDS";
+                r.Alt = "You are friends with this person. ";
+                return r;
+            }
+            // By default, DACResult returns true if there is no error:
+            r.TXID = "";
+            r.Event = "AddFriendRequest";
+            r.Result = "Friend Request";
+            return r;
         }
 
     }
