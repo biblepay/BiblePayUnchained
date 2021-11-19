@@ -119,6 +119,67 @@ namespace Unchained
                 }
 
             }
+            else if (e.EventName == "ApproveFriendRequest_Click")
+            {
+                BiblePayCommon.Entity.FriendRequest f = new FriendRequest();
+                f.RequesterID = gUser(this).id;
+                f.UserID = e.EventValue;
+                if (e.EventValue == "" || f.UserID == f.RequesterID)
+                {
+                    UICommon.MsgBox("Error", "Sorry, you cannot be friends with yourself. ", this);
+                    return;
+                }
+                DACResult r = AmIFriend(this.Page, f.UserID, f.RequesterID);
+                if (r.fError())
+                {
+                    UICommon.MsgBox("Error", r.Error, this);
+                    return;
+                }
+                f.deleted = 1;
+                DACResult r1 = DataOps.InsertIntoTable(this, IsTestNet(this), f, gUser(this));
+                BiblePayCommon.Entity.Friend f1 = new Friend();
+                f1.RequesterID = f.RequesterID;
+                f1.UserID = f.UserID;
+                r1 = DataOps.InsertIntoTable(this, IsTestNet(this), f1, gUser(this));
+
+                if (r1.fError())
+                {
+                    BiblePayCommonNET.UICommonNET.MsgModal(this, "Error", "Sorry, the friend could not be added.", 500, 200, true);
+                    return;
+                }
+                else
+                {
+                    ToastLater(this, "Success", "You are now friends!"); 
+                    Response.Redirect(Request.Url.AbsoluteUri);
+
+                }
+
+            }
+           else if (e.EventName == "Unfriend_Click")
+            {
+                BiblePayCommon.Entity.Friend f = (Friend)GetObject(IsTestNet(this), "Friend", e.EventValue);
+                if (e.EventValue == "" || f == null)
+                {
+                    UICommon.MsgBox("Error", "Sorry, we cannot find the friend. ", this);
+                    return;
+                }
+
+                f.deleted = 1;
+
+                DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), f, gUser(this));
+                if (r.fError())
+                {
+                    BiblePayCommonNET.UICommonNET.MsgModal(this, "Error", "Sorry, we failed to remove your friend.", 500, 200, true);
+                    return;
+                }
+                else
+                {
+                    DataOps.InsertIntoTable(this, IsTestNet(this), f, gUser(this));
+                    BiblePayCommonNET.UICommonNET.ToastLater(this, "Complete", "You are no longer friends.");
+                    Response.Redirect(Request.Url.AbsoluteUri);
+                }
+            }
+
         }
 
         protected string GetPeople()

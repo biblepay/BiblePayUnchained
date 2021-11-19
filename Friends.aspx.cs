@@ -49,6 +49,7 @@ namespace Unchained
                 {
                     DataOps.InsertIntoTable(this, IsTestNet(this), f, gUser(this));
                     BiblePayCommonNET.UICommonNET.ToastLater(this, "Complete", "You are no longer friends.");
+                    Response.Redirect(Request.Url.AbsoluteUri);
                 }
             }
         }

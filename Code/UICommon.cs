@@ -1195,7 +1195,17 @@ namespace Unchained
                         }
                         else if (r.TXID == "WAITING_FOR_MY_ACCEPTANCE")
                         {
-                            links += GetStandardButton(u.id, "<i class='fa fa-check'></i> Accept Request", r.Event, r.Alt, "", "btnaccptfreindreq");
+                            string btnAccept = "<a id='" + u.id + "_accept' class=\"dropdown-item\" onclick=\"var e={};e.Event='ApproveFriendRequest_Click';e.Value='" + u.id + "';BBPPostBack2(null, e);"
+                                + "\" title='Accept '><i class='fa fa-check'></i> Accept Request</a>";
+                            string btnReject = "<a id='" + u.id + "_reject' class=\"dropdown-item\" onclick=\"var e={};e.Event='Unfriend_Click';e.Value='" + u.id + "';BBPPostBack2(null, e);"
+                                + "\" title='Accept '><i class='fa fa-close'></i> Delete Request</a>";
+                            string buttons = "<div class=\"dropdown\">"
+            + "<a class=\"btn btn-defualt p-1 dropdown-toggle\" href=\"#\" role=\"button\" id=\"dropdownMenuLink\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">  Respond To Request</a>"
+            + "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuLink\">"
+            + "<li>" + btnAccept + "</li>"
+            + "<li>" + btnReject + "</li></ul></div>";
+
+                            links += buttons;// GetStandardButton(u.id, "<i class='fa fa-check'></i> Accept Request", r.Event, r.Alt, "", "btnaccptfreindreq");
                         }
                         else if (r.TXID == "FRIENDS")
                         {

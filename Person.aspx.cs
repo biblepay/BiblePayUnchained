@@ -24,7 +24,7 @@ namespace Unchained
         protected bool IsMe;
         protected bool IsTestNet;
         protected bool fHomogenized;
-        protected DACResult IsMyFriend;
+        protected string FriendButton;
         protected User MySelf;
         protected new void Page_Load(object sender, EventArgs e)
         {
@@ -107,9 +107,9 @@ namespace Unchained
                     comment2.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(comment.Body));
                     //comment.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(_bbpevent.Extra.Output.ToString()));
 
-                    DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), 
+                    DACResult result2 = DataOps.InsertIntoTable(this, Common.IsTestNet(this), 
                         comment2, Common.gUser(this));
-                    if (!r.fError())
+                    if (!result2.fError())
                     {
                         result = new { status = true, data = comment2.id };
                     }
@@ -137,7 +137,31 @@ namespace Unchained
             IsMe = (this.user.id == gUser(this).id);
             IsTestNet = IsTestNet(this);
 
-            IsMyFriend = AmIFriend(this, user.id, gUser(this).id);
+            var r = AmIFriend(this, user.id, gUser(this).id);
+            if (r.Result == "Me")
+            {
+                FriendButton = "";
+                // No Friend Request button for SELF
+            }
+            else
+            {
+                if (r.TXID == "FRIEND_REQUEST_SENT")
+                {
+                    FriendButton = "<span class='btn btn-info text-light mb-4'>Request Sent</span>";
+                }
+                else if (r.TXID == "WAITING_FOR_MY_ACCEPTANCE")
+                {
+                    FriendButton  = GetStandardButton(user.id, "<i class='fa fa-check'></i> Accept Request", r.Event, r.Alt, "", "btnaccptfreindreq btn btn-info text-light mb-4");
+                }
+                else if (r.TXID == "FRIENDS")
+                {
+                    FriendButton  = GetStandardButton(user.id, "<i class='fa fa-user-minus'></i> Unfriend", r.Event, r.Alt, "", "btnfreindreq btn btn-info text-light mb-4");
+                }
+                else if (r.Event == "AddFriendRequest")
+                {
+                    FriendButton  = GetStandardButton(user.id, "<i class='fa fa-user-plus'></i> Make Friend", r.Event, r.Alt, "", "btnfreindreq btn btn-info text-light mb-4");
+                }
+            }
         }
 
        
@@ -516,7 +540,9 @@ namespace Unchained
                 }
                 else
                 {
-                    ToastLater(this, "Success", "You are now friends!");
+                    ToastLater(this, "Success", "You are now friends!"); 
+                    Response.Redirect(Request.Url.AbsoluteUri);
+
                 }
 
             }
@@ -544,7 +570,9 @@ namespace Unchained
                 }
                 else
                 {
-                    ToastLater(this, "Success", "Your Friends Request has been sent!");
+                    ToastLater(this, "Success", "Your Friends Request has been sent!"); 
+                    Response.Redirect(Request.Url.AbsoluteUri);
+
                 }
 
             }

@@ -28,6 +28,7 @@
                                         Edit profile
                                     </a>
                                     <% }  %>
+                                    <%=FriendButton %>
                                 </div>
                             </div>
                         </div>
@@ -377,6 +378,15 @@
                         <div class="col-md-12 grid-margin">
                             <div class="card rounded">
                                 <div class="card-body">
+                                    <h6 class="card-title">Friends</h6>
+                                    <div id="friends-container">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 grid-margin">
+                            <div class="card rounded">
+                                <div class="card-body">
                                     <h6 class="card-title">Latest Photos</h6>
                                     <div class="latest-photos">
                                         <div class="row" id="latest-images">
@@ -385,15 +395,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-12 grid-margin">
-                            <div class="card rounded">
-                                <div class="card-body">
-                                    <h6 class="card-title">Friends</h6>
-                                    <div id="friends-container">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                       
                     </div>
                 </div>
                 <!-- right wrapper end -->
@@ -804,7 +806,8 @@
                         }
                         let commentid = 'comment-' + v.id;
                         html.find('.profilepic').attr('src', p);
-                        html.find('.username').html(v.FullName);
+                        html.find('.unamelink').attr('href', 'Person?id=' + v.UserId);
+                        html.find('.username').html('<a class="unamelink" href="/Person?id=' + v.UserId + '">' + v.FullName + '</a>');
                         html.find('.posttime').html(PrepareTime(v.PostedOn));
                         if (v.Body == null) v.Body = "";
                         html.find('.postbody').html(v.Body?.replaceAll('\n', '<br\>'));
@@ -1060,7 +1063,7 @@
                                     p1 = v1.ProfilePicture;
                                 }
                                 chtml.find('.commenterpic').attr('src', p1);
-                                chtml.find('.commentername').html(v1.FullName);
+                                chtml.find('.commentername').html('<a class="unamelink" href="/Person?id=' + v1.UserId + '">' + v1.FullName + '</a>');//.html(v1.FullName);
                                 chtml.find('.commenttime').html(PrepareTime(v1.PostedOn));
                                 chtml.find('.commentbody').html(v1.Body?.replaceAll('\n', '<br\>'));
 
