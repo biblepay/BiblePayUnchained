@@ -122,18 +122,27 @@ body {
         list-style-type: none;
         margin: 0;
         padding: 0;
+        border:none;
     }
-
+        .profile-page .profile-header .header-links ul li{
+            border:none;
+        }
         .profile-page .profile-header .header-links ul li a {
             color: #000;
             -webkit-transition: all .2s ease;
             transition: all .2s ease;
         }
 
-        .profile-page .profile-header .header-links ul li:hover,
-        .profile-page .profile-header .header-links ul li.active {
-            color: #727cf5;
-        }
+            .profile-page .profile-header .header-links ul li a.active + svg + span,
+            .profile-page .profile-header .header-links ul li a.active + svg {
+                color: #727cf5;
+                fill: #727cf5;
+            }
+            
+            .profile-page .profile-header .header-links ul li:hover,
+            .profile-page .profile-header .header-links ul li.active {
+                color: #727cf5;
+            }
 
             .profile-page .profile-header .header-links ul li:hover a,
             .profile-page .profile-header .header-links ul li.active a {
@@ -270,7 +279,11 @@ textarea.newpost {
     box-shadow: none;
     resize: none;
 }
-textarea.newpost:focus{
+    textarea.newpost#sharenewpost {
+        height: 50px;
+    }
+
+    textarea .newpost:focus{
     outline:none !important;
 }
 .posturl-content {

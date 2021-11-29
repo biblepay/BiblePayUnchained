@@ -106,8 +106,10 @@ namespace Unchained.WebApis
         }
         #endregion
         [Route("api/post/posts")]
-        public object GetPosts(string category, string sID, bool fHomogenized, bool me, bool IsTestNet, int pno)
+        public object GetPosts(string category, string sID, bool fHomogenized, bool me, bool IsTestNet, int pno,string post="")
         {
+            int take = 5;
+            int skip = pno * take;
             // For each timeline entry...
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "Timeline");
 
@@ -115,18 +117,22 @@ namespace Unchained.WebApis
             {
                
             }
-            else
+            else if(post==null || string.IsNullOrEmpty(post))
             {
                 DataOps.FilterDataTable(ref dt, "userid='" + sID + "'");
             }
-
-            if (!category.ToLower().Equals("a"))
+            
+            if (category!=null)
+                if(!string.IsNullOrEmpty(category) & !category.ToLower().Equals("a"))
             {
                 DataOps.FilterDataTable(ref dt, "category='" + category + "'");
-
             }
-            int take = 5;
-            int skip = pno * take;
+            if (post!=null & !string.IsNullOrEmpty(post))
+            {
+                DataOps.FilterDataTable(ref dt, "id='" + post + "'");
+                skip = 0;
+                take = 1;
+            }
             
             dt = dt.OrderBy("time desc");
             var data = dt.AsEnumerable().Skip(skip).Take(take);
@@ -149,7 +155,43 @@ namespace Unchained.WebApis
 
                 dtAttachments = dtAttachments.FilterDataTable("parentid='" + fields.Field<string>("id") + "'");
                 dtAttachments = dtAttachments.FilterDataTable("Attachment=1");
+                string sharedPostId = string.Empty;
+                object sharedPost = null;
+                var idd = fields.Field<string>("id");
+                if (dt.Columns.Contains("SharedTimelineID"))
+                {
+                    sharedPostId = fields.Field<string>("SharedTimelineID");
+                    if (!string.IsNullOrEmpty(sharedPostId))
+                    {
+                        DataTable dtshared = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "Timeline");
+                        DataOps.FilterDataTable(ref dtshared, "id='" + sharedPostId + "'");
+                        if (dtshared.Rows.Count == 0)
+                            continue;
+                        var fieldshared = dtshared.Rows[0];
+                        string shareduserId = fieldshared.Field<string>("userid");
+                        var usershared = UICommon.GetUserRecord(IsTestNet, shareduserId);
 
+                        DataTable dtsharedAttachments = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "video1");
+
+                        dtsharedAttachments = dtsharedAttachments.FilterDataTable("parentid='" + fieldshared.Field<string>("id") + "'");
+                        dtsharedAttachments = dtsharedAttachments.FilterDataTable("Attachment=1");
+
+                        sharedPost = new
+                        {
+                            id = fieldshared.Field<string>("id"),
+                            ProfilePicture = string.IsNullOrEmpty(usershared.AvatarURL) ? "" : usershared.AvatarURL,
+                            FullName = user.FullUserName(),
+                            PostedOn = Encryption.UnixTimeStampToDateTime(BiblePayCommon.Common.GetDouble(fieldshared.Field<object>("time"))),
+                            Body = fieldshared.Field<string>("Body"),
+                            URL = fieldshared.Field<string>("URL"),
+                            URLPreviewImage = fieldshared.Field<string>("URLPreviewImage"),
+                            URLTitle = fieldshared.Field<string>("URLTitle"),
+                            UserId = usershared.id,
+                            URLDescription = fieldshared.Field<string>("URLDescription"),
+                            Attachments = dtsharedAttachments //.Select(s => new { s.id, s.ParentID, s.FileName })
+                        };
+                    }
+                }
                 var p = new
                 {
                     id = fields.Field<string>("id"),
@@ -164,6 +206,9 @@ namespace Unchained.WebApis
                     URLDescription = fields.Field<string>("URLDescription"),
                     Likes = GetVoteSum(IsTestNet, fields.Field<string>("id")),
                     Comments = new List<object>(),
+                    SharedPostId = sharedPostId,
+                    Shared = !string.IsNullOrEmpty(sharedPostId),
+                    SharedPost=sharedPost,
                     Attachments = dtAttachments //.Select(s => new { s.id, s.ParentID, s.FileName })
                 };
 
@@ -245,7 +290,7 @@ namespace Unchained.WebApis
         }
 
         [Route("api/media")]
-        public object GetImages(string sID, bool isTestNet, string type = "images", int count = 9, string id = "")
+        public object GetImages(string sID, bool isTestNet, string type = "images",int pno=0, int count = 9, string id = "")
         {
 
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(isTestNet, "video1");
@@ -257,8 +302,12 @@ namespace Unchained.WebApis
                 dt = dt.FilterDataTable("URL like '%.png%' or URL like '%.gif' or URL Like '%.jpeg' or URL like '%.jpg%' or URL like '%.jpeg%' or URL like '%.gif%'");
 
             dt = dt.OrderBy("time desc");
-
-            var result = dt.AsEnumerable().Take(count).Select(s => new { id = s.Field<string>("id"), URL = s.Field<string>("URL"), Title = s.Field<string>("Title"), ParentId = s.Field<string>("ParentID") });
+            int skip = 0;
+            if (pno > 0)
+            {
+                skip = count * pno;
+            }
+            var result = dt.AsEnumerable().Skip(skip).Take(count).Select(s => new { id = s.Field<string>("id"), URL = s.Field<string>("URL"), Title = s.Field<string>("Title"), ParentId = s.Field<string>("ParentID") });
 
             return result;
         }
@@ -320,7 +369,18 @@ namespace Unchained.WebApis
         [Route("api/web/scrap")]
         public async Task<object> Scrpper(string url)
         {
+
             url = HttpUtility.UrlDecode(url);
+            try
+            {
+                if (url.ToLower().Contains("media?embedid="))
+                {
+                    Uri u = new Uri(url);
+                    string template = $"<iframe width=\"100%\" height=\"300\" src=\"${url}\" style=\"border:0px;\" allowfullscreen></iframe>";
+                    return new { embed = true, template };
+                }
+            }
+            catch { }
             ScrapingBrowser browser = new ScrapingBrowser();
             WebPage page;
             bool fShady = IsShadyAddress(url);
@@ -354,7 +414,7 @@ namespace Unchained.WebApis
             if (string.IsNullOrEmpty(image))
                 image = page.Html.SelectNodes("//img").FirstOrDefault().GetAttributeValue("src", string.Empty);
 
-            return new { title, description, image };
+            return new {embed=false, title, description, image };
             //return null;
         }
 

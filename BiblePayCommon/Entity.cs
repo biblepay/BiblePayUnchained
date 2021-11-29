@@ -527,7 +527,7 @@ namespace BiblePayCommon
             public string URLDescription { get; set; }
             public string URLPreviewImage { get; set; }
             public string Category { get; set; }
-
+            public string SharedTimelineID { get; set; }
             public override string GetHash()
             {
                 return GetSha256HashI(Subject + Body + UserID);

@@ -26,6 +26,8 @@ namespace Unchained
         protected bool fHomogenized;
         protected string FriendButton;
         protected User MySelf;
+        protected bool SinglePost = false;
+        protected string postId = "";
         protected new void Page_Load(object sender, EventArgs e)
         {
             
@@ -127,6 +129,12 @@ namespace Unchained
             fHomogenized = Request.QueryString["homogenized"].ToNonNullString() == "1";
             string sUserID = Request.QueryString["id"].ToNonNullString();
 
+            string post = Request.QueryString["post"].ToNonNullString();
+            if(!string.IsNullOrEmpty(post))
+            {
+                SinglePost = true;
+                postId = post;
+            }
             MySelf = gUser(this);
             if (sUserID == "")
             {
@@ -406,8 +414,8 @@ namespace Unchained
 
                 Timeline t = new Timeline();
 
-                
-                    try
+
+                try
                 {
                     t.Privacy = e.Extra.Privacy.ToString();
                 }
@@ -451,6 +459,7 @@ namespace Unchained
                 }
                 else
                 {
+                    string url = Request.Url.AbsoluteUri;
                    var upload =  UploadAttachment(t.id, "", t.Body);
                     if (!(bool)upload.GetType().GetProperty("status").GetValue(upload))
                     {
@@ -460,10 +469,59 @@ namespace Unchained
                     //UICommon.MsgBox("Error", "You Must be logged in first.", this);
                     //SendBlastOutForTimeline(this, t);
                     ToastLater(this, "Success", "Your timeline entry has been saved!");
-                    Response.Redirect("Person");
+                    Response.Redirect(url);
                 }
 
             }
+            else if (e.EventName == "ShareTimeline_Click")
+            {
+                if (!Common.gUser(this).LoggedIn)
+                {
+                    UICommon.MsgBox("Error", "You Must be logged in first.", this);
+                    return;
+                }
+
+                Timeline t = new Timeline();
+
+
+                try
+                {
+                    t.Privacy = e.Extra.Privacy.ToString();
+                }
+                catch { }
+                try
+                {
+                    t.Category = e.Extra.Category.ToString();
+                }
+                catch { }
+                var body = e.Extra.Body.ToString();
+
+                t.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(body));
+                t.UserID = gUser(this).id;
+                t.SharedTimelineID = e.Extra.SharedTimelineID;
+                BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), t, gUser(this));
+                if (r.fError())
+                {
+                    BiblePayCommonNET.UICommonNET.MsgModal(this, "Error", "Sorry, the timeline was not saved.", 500, 200, true);
+                    return;
+                }
+                else
+                {
+                    string url = Request.Url.AbsoluteUri;
+                    var upload = UploadAttachment(t.id, "", t.Body);
+                    if (!(bool)upload.GetType().GetProperty("status").GetValue(upload))
+                    {
+                        UICommon.MsgBox("Error", upload.GetType().GetProperty("error").GetValue(upload).ToString(), this);
+                    }
+
+                    //UICommon.MsgBox("Error", "You Must be logged in first.", this);
+                    //SendBlastOutForTimeline(this, t);
+                    ToastLater(this, "Success", "Your timeline entry has been saved!");
+                    Response.Redirect(url);
+                }
+
+            }
+
             else if (e.EventName == "AddTimelineURL_Click")
             {
                 if (!Common.gUser(this).LoggedIn)

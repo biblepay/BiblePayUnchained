@@ -1,5 +1,4 @@
 <%@ Page Title="View Person" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" EnableEventValidation="false" CodeBehind="Person.aspx.cs" Inherits="Unchained.Person" %>
-
 <%@ Register TagPrefix="BBP" Namespace="BiblePayPaginator" Assembly="BiblePayPaginator" %>
 <%@ Register TagPrefix="telerik" Namespace="Telerik.Web.UI" Assembly="Telerik.Web.UI" %>
 
@@ -7,7 +6,9 @@
     <link href="Scripts/emoji/emojionearea.min.css" rel="stylesheet" />
     <link href="Content/pages/people.css" rel="stylesheet" />
     <div class="container">
-        <div class="profile-page tx-13">
+        <div class="<%= SinglePost?"":"profile-page" %> tx-13">
+            <% if (!SinglePost)
+                {%> 
             <div class="row">
                 <div class="col-12 grid-margin">
                     <div class="profile-header">
@@ -33,30 +34,39 @@
                             </div>
                         </div>
                         <div class="header-links">
-                            <ul class="links d-flex align-items-center mt-3 mt-md-0">
-                                <li class="header-link-item d-flex align-items-center active">
+                            <ul class="links d-flex align-items-center mt-3 mt-md-0 nav nav-tabs " id="myTab1" role="tablist">
+                                <li class="header-link-item d-flex align-items-center">
+                                    <a class="stretched-link nav-link tab-link" id="home-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#home"  role="tab" aria-controls="home" aria-selected="true"></a>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-columns me-1 icon-md">
                                         <path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"></path>
                                     </svg>
-                                    <a class="pt-1px d-none d-md-block" href="#">Timeline</a>
+                                    <span class="pt-1px d-none d-md-block">Timeline</span>
                                 </li>
-                                <li class="header-link-item ms-3 ps-3 border-start d-flex align-items-center">
+                                <li class="header-link-item ms-3 ps-3 border-start d-flex align-items-center" >
+                                <a class="stretched-link nav-link tab-link" id="about-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#about"  role="tab" aria-controls="about" aria-selected="true"></a>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user me-1 icon-md">
                                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                         <circle cx="12" cy="7" r="4"></circle>
                                     </svg>
-                                    <a class="pt-1px d-none d-md-block" href="#">About</a>
+                                 <span class="pt-1px d-none d-md-block">About</span>
+                                       
                                 </li>
-                                <li class="header-link-item ms-3 ps-3 border-start d-flex align-items-center">
+                                <li class="header-link-item ms-3 ps-3 border-start d-flex align-items-center" >
+                                <a class="stretched-link nav-link tab-link" id="friends-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#friends"  role="tab" aria-controls="friends" aria-selected="true"></a>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users me-1 icon-md">
                                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                                         <circle cx="9" cy="7" r="4"></circle>
                                         <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                                     </svg>
-                                    <a class="pt-1px d-none d-md-block" href="#">Friends <span id="friendscount" class="text-muted tx-12"></span></a>
-                                </li>
-                                <li class="header-link-item ms-3 ps-3 border-start d-flex align-items-center">
+                                    <span class="pt-1px d-none d-md-block" >Friends <span id="friendscount" class="text-muted tx-12"></span></span>   
+                              </li>
+                              <li class="header-link-item ms-3 ps-3 border-start d-flex align-items-center" >
+                                 <a class="stretched-link nav-link tab-link" id="photos-tab" data-bs-toggle="tab" 
+                                 data-bs-target="#photos"  role="tab" aria-controls="photos" aria-selected="true"></a>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-image me-1 icon-md">
                                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                         <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -65,20 +75,25 @@
                                     <a class="pt-1px d-none d-md-block" href="#">Photos</a>
                                 </li>
                                 <li class="header-link-item ms-3 ps-3 border-start d-flex align-items-center">
+                                 <a class="stretched-link nav-link tab-link" id="videos-tab" data-bs-toggle="tab" 
+                                  data-bs-target="#videos"  role="tab" aria-controls="videos" aria-selected="true"></a>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-video me-1 icon-md">
                                         <polygon points="23 7 16 12 23 17 23 7"></polygon>
                                         <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
                                     </svg>
-                                    <a class="pt-1px d-none d-md-block" href="#">Videos</a>
+                                    <span class="pt-1px d-none d-md-block" >Videos</span>
                                 </li>
                             </ul>
+                            
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="row profile-body">
+            <% } %>
+            <div class="row <%= SinglePost?"":"profile-body" %>">
                 <!-- left wrapper start -->
-                <div class="d-none d-md-block col-md-4 col-xl-3 left-wrapper">
+                 <% if (!SinglePost)
+                     {%><div class="d-none d-md-block col-md-4 col-xl-3 left-wrapper">
                     <div class="card rounded">
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between mb-2">
@@ -202,10 +217,15 @@
                         </div>
                     </div>
                 </div>
+                <%} %>
                 <!-- left wrapper end -->
                 <!-- middle wrapper start -->
-                <div class="col-md-8 col-xl-6 middle-wrapper">
-                    <div class="row">
+                <div class="col-md-8 col-xl-6 middle-wrapper <%= SinglePost?"mx-auto":"" %>">
+                    <div class="tab-content" id="myTabContent">
+                      <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                          
+                          <% if (!SinglePost)
+                    {%>     <div class="row">
                         <div class="col-12 mb-2 text-center">
                             
                             <div class="btn-group" role="group" aria-label="Filter post by category">
@@ -352,7 +372,7 @@
                         </div>
                     </div>
                     <%} %>
-
+                    <%} %>
                     <div class="row" id="post-container">
                     </div>
 
@@ -369,10 +389,31 @@
                         </div>
                     </div>
 
+                      </div>
+                      <div class="tab-pane fade" id="about" role="tabpanel" aria-labelledby="about-tab">
+                          <h3>About</h3>
+                      </div>
+                      <div class="tab-pane fade" id="friends" role="tabpanel" aria-labelledby="friends-tab">
+                          <h3>Friends List</h3>
+                      </div>
+                      <div class="tab-pane fade" id="photos" role="tabpanel" aria-labelledby="photos-tab">
+                          
+                          <div class="row" id="my-images">
+                              <h3 class="col-12">Photos</h3>
+                                        </div>
+                      </div>
+                      <div class="tab-pane fade" id="videos" role="tabpanel" aria-labelledby="videos-tab">
+                          <h3>Videos</h3>
+                      </div>
+                    </div>
+
+                    
                     
                 </div>
                 <!-- middle wrapper end -->
                 <!-- right wrapper start -->
+                <% if (!SinglePost)
+                    {%>
                 <div class="d-none d-xl-block col-xl-3 right-wrapper">
                     <div class="row">
                         <div class="col-md-12 grid-margin">
@@ -398,9 +439,70 @@
                        
                     </div>
                 </div>
+             <%} %>
                 <!-- right wrapper end -->
             </div>
         </div>
+
+        <!-- Modal -->
+                    <div class="modal fade" id="sharepostModal" tabindex="-1" aria-labelledby="sharepostModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title text-center" id="sharepostModalLabel">Share Post</h4>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="d-flex align-items-center hover-pointer flex-fill">
+                                        <%= MySelf.GetAvatarImageNoDims("img-xs rounded-circle") %>
+                                        <div class="ms-2 flex-fill">
+
+                                            <span class=""><%= MySelf.FullUserName() %></span>
+                                            <div>
+                                            <select id="sharevisibility" class="form-control postprivacy">
+                                                <option value="public">Public</option>
+                                                <option value="Friends">Friends Only</option>
+                                                <option value="private">Private</option>
+                                                <option value="me">Only Me</option>
+                                            </select>
+                                                <span class="small">Type:</span>
+                                             <select id="sharecategory" style="width:auto; min-width:100px;" class="form-control postprivacy">
+                                                <option value="SC">SC - Social</option>
+                                                <option value="BZ">BZ - Business</option>
+                                                <option value="SP">SP - Faith-Spiritual-Religious</option>
+                                                <option value="CV">CV - Political/Activism</option> 
+                                                <option value="RQ">RQ - Job Request</option>
+                                                <!--<option value="PR">PR - Prayer Request</option>-->
+
+                                            </select>
+                                                </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-fill pt-2">
+                                        <textarea class="form-control newpost" name="newpost" id="sharenewpost" rows="3" placeholder="What's on your mind, <%= user.FirstName %>?"></textarea>
+
+                                    </div>
+                                    <div class="d-flex-fill mt-2 border position-relative posturl-content" id="sharepost-content">
+                                        
+                                    </div>
+                                    
+                                    <%--<div class="">
+                                        <telerik:RadAsyncUpload  runat="server"  RenderMode="Classic" HideFileInput="true"
+                     ID="RadAsyncUpload1" MultipleFileSelection="Automatic" 
+                    AllowedFileExtensions=".jpeg,.jpg,.bmp,.svg,.png,.pdf,.gif,.mp3,.webm,.mp4" >
+                                            <Localization Select="Add Media" />
+                                        </telerik:RadAsyncUpload>
+                                    </div>--%>
+                                </div>
+                                <div class="modal-footer">
+
+                                    <div class="mb-2" id="shareresponse"></div>
+                                    <button type="button" id="btnSharePost" class="btn btn-primary w-100 text-center">Post</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
         <div id="post-template" style="display: none;">
 
             <div class="col-md-12 grid-margin singlepost" id="">
@@ -456,23 +558,21 @@
                                 <a href="#" target="_blank" class="urllink stretched-link"></a>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="row attachment-container mt-2">
-
-                                </div>
+                        <div class="row attachment-container mt-2" > </div>
+                        <div class="row shared-post-content mt-2" > </div>
+                    </div>
+                    <div class="card-footer pt-1">
+                        <div class="row mb-3">
                             <div class="col-12 small ">
-                            <hr class="my-2" />
+                            
                                 <span class="postlikecount">
                                     <i class="fa fa-thumbs-up" aria-hidden="true"></i> <span class="count"> 0 </span> Like this
                                 </span>
                                 <%--<span class="postdislikecount">
                                     <i class="fa fa-thumbs-up" aria-hidden="true"></i> <span class="count"></span> Dislike this
                                 </span>--%>
-                                
                             </div>
                         </div>
-                    </div>
-                    <div class="card-footer">
                         <div class="d-flex post-actions flex-fill">
                             <a href="javascript:;" class="d-flex align-items-center text-muted me-4 btnpostlike">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart icon-md">
@@ -486,7 +586,7 @@
                                 </svg>
                                 <p class="d-none d-md-block ms-2 mb-0">Comment</p>
                             </a>
-                            <a href="javascript:;" class="d-flex align-items-center text-muted">
+                            <a href="javascript:;" class="sharebtn d-flex align-items-center text-muted">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-share icon-md">
                                     <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
                                     <polyline points="16 6 12 2 8 6"></polyline>
@@ -574,7 +674,7 @@
 
 
          <!-- Modal -->
-                    <div class="modal fade" id="contentpopup" tabindex="-1"  aria-hidden="true">
+         <div class="modal fade" id="contentpopup" tabindex="-1"  aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered modal-fullscreen">
                             <div class="modal-content">
                                 <div class="modal-body py-0">    
@@ -648,16 +748,102 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="Scripts/emoji/emojionearea.min.js"></script>
         <script>
+            //var tabEl = document.querySelector('a[data-bs-toggle="tab"]')
+            //console.info(tabEl);
+            //tabEl.addEventListener('shown.bs.tab', function (event) {
+            //    event.target // newly activated tab
+            //    event.relatedTarget // previous active tab
+            //    alert(event.target);
+
+            //})
+            let loadingvid = false, vidfinished = false, vidpno=0;
+            function LoadVideos() {
+                if (loadingvid || vidfinished)
+                    return false;
+
+                vidpost = true;
+                let posturl = `api/media?type=videos&count=9&sID=${userId}&isTestNet=${isTestNet}&pno=${phpno}`;
+                 $.get(posturl, function (response) {
+                    if (response.length == 0) {
+                        $('#no-vid').show();
+                        postfinished = true;
+                        if (waypoint) {
+                            waypoint.destroy();
+                        }
+                    }
+                    else {
+                        $('#no-vid').hide();
+                        vidpno += 1;
+                    }
+                    $.each(response, function (i, v, a) {
+
+                    })
+                })
+            }
+
+
+            let loadingph = false, phfinished = false, phpno = 0;
+            function LoadPhotos() {
+                if (loadingph || phfinished)
+                    return false;
+
+                phpost = true;
+                let posturl = `api/media?type=images&count=9&sID=${userId}&isTestNet=${isTestNet}&pno=${phpno}&count=12`;
+                
+                $.get(posturl, function (response) {
+                    if (response.length == 0) {
+                        $('#no-ph').show();
+                        postfinished = true;
+                        if (waypoint) {
+                            waypoint.destroy();
+                        }
+                    }
+                    else {
+                        $('#no-ph').hide();
+                        vidpno += 1;
+                    }
+                    $.each(response, function (i, v) {
+                        let temp = '<div class="col-md-3" ><figure><img data-id="' + v.id + '" data-parentid="' + v.ParentId + '" class="img-fluid preview" src="' + v.URL + '" alt="' + v.Title + '"></figure></div>'
+                        $('#my-images').append(temp);
+                    })
+                })
+            }
+
+            function LoadAbout() {
+
+            }
+            
 
             $(function () {
+                $('.stretched-link.nav-link.tab-link').each(function () {
+                    $(this).on('shown.bs.tab', function (e) {
+                        console.log(e);
+                        let t = e.target.attributes["data-bs-target"].value;
+                        if (t == 'about') {
+                            LoadAbout()
+                        }
+                        else if (t == 'videos') {
+                            LoadVideos()
+                        }
+                        else if (t == 'photos') {
+                            LoadPhotos()
+                        }
+                        else if (t == 'home') {
 
+                        }
+
+                    });
+                })
+                
                 let visi = localStorage.getItem("post_visitbility");
                 if (visi & visi != '')
                     $('#visibility').val(visi);
 
-
+                let visi2 = localStorage.getItem("sharepost_visitbility");
+                if (visi2 & visi2 != '')
+                    $('#sharevisibility').val(visi);
             });
-            <%if (IsMe)
+            <%if (IsMe & !SinglePost)
             {%>
             $("#newpost").emojioneArea({
                 autoHideFilters: true,
@@ -673,6 +859,7 @@
                     $('#url-content h3').html('');
                     $('#url-content p').html('');
                     $('#url-content a').attr('href', '#');
+                    $('#url-content iframe').remove();
                     $('#url-content').hide();
                     urlfetchd = false;
                     return;
@@ -689,6 +876,7 @@
                         $('#url-content h3').html('');
                         $('#url-content p').html('');
                         $('#url-content a').attr('href', '#');
+                        $('#url-content iframe').remove();
                         $('#url-content').hide();
                         urlfetchd = false;
                         return false;
@@ -700,12 +888,17 @@
                             let url1 = "api/web/scrap?url=" + encodeURIComponent(urls[0]);
 
                             $.post(url1, function (v) {
-                                $('#url-content img').attr('src', v.image);
-                                $('#url-content h3').html(v.title);
-                                $('#url-content p').html(v.description);
-                                $('#url-content').show();
-                                $('#url-content a').attr('href', url);
-
+                                if (!v.embed) {
+                                    $('#url-content img').attr('src', v.image);
+                                    $('#url-content h3').html(v.title);
+                                    $('#url-content p').html(v.description);
+                                    $('#url-content').show();
+                                    $('#url-content a').attr('href', url);
+                                }
+                                else {
+                                    $('#url-content').append(v.template);
+                                    $('#url-content').show();
+                                }
                             });
                             urlfetchd = true;
                         }
@@ -719,8 +912,10 @@
                             $('#url-content img').attr('src', '');
                             $('#url-content h3').html('');
                             $('#url-content p').html('');
-                            $('#url-content').hide();
                             $('#url-content a').attr('href', '#');
+
+                            $('#url-content iframe').remove();
+                            $('#url-content').hide();
                             urlfetchd = false;
                             return;
                         }
@@ -751,15 +946,53 @@
 
                 }
             }
-
+           
+           
+            <%}%>
             function getAttachmentCount() {
                 var upload = $find("<%=AsyncUpload1.ClientID%>");
+                if (!upload)
+                    return 0;
+
                 return upload.getUploadedFiles().length;
             }
-            <%}%>
+            function SharePost(postid) {
+                let toshare = $('#post-' + postid).html().toString();
+                let html = $(toshare);
+                $(html).find('.card-footer').remove();
+                $(html).find('.dropdown.mainpostaction').remove();
+                $('#sharepostModal').find('#btnSharePost').on('click', function () {
+                    SaveSharePost(postid);
+                })
+                $('#sharepostModal #sharepost-content').html(html)
+                $('#sharepostModal').modal('show');
 
+            }
+            function SaveSharePost(postid) {
+                let body = $('#sharenewpost').emojioneArea()[0].emojioneArea.getText();
+                if (postid == '') {
+                    return false;
+                } else {
+                    body = XSS(escape(body));
+                    var e = {};
+                    //let url = '';
+                    //if (url != '') {
+                    //    e.URL = encodeURIComponent(url);
+                    //    e.URLTitle = XSS(escape($('#shareurl-content h3').html()));
+                    //    e.URLDescription = XSS(escape($('#shareurl-content p').html()));
+                    //    e.URLPreviewImage = encodeURIComponent($('#shareurl-content img').attr('src'));
+                    //}
+                    e.Event = 'ShareTimeline_Click';
+                    e.Value = sID;
+                    e.Privacy = $('#sharevisibility').val();
+                    e.SharedTimelineID = postid;
+                    localStorage.setItem("sharepost_visitbility", e.Privacy);
+                    e.Category = $('#sharecategory').val();
+                    e.Body = body; //window.btoa(escape(body));
+                    BBPPostBack2(null, e);
 
-
+                }
+            }
             let pno = 0;
             let me = '<%= IsMe %>';
             let homogenized = '<%= fHomogenized %>';
@@ -782,7 +1015,13 @@
                     return false;
                let category = $('input[name="rdopostcategory"]:checked').val();
                 loadingpost = true;
-                $.get(`api/post/posts?category=${category}&sID=${userId}&fHomogenized=${homogenized}&me=${me}&IsTestNet=${isTestNet}&pno=${pno}`, function (response) {
+                let posturl = `api/post/posts?category=${category}&sID=${userId}&fHomogenized=${homogenized}&me=${me}&IsTestNet=${isTestNet}&pno=${pno}`;
+<%if (SinglePost)
+            {%>
+                let postid = '<%=postId %>';
+                posturl = `api/post/posts?category=&post=${postid}&sID=${userId}&fHomogenized=${homogenized}&me=${me}&IsTestNet=${isTestNet}&pno=${pno}`;
+                <%}%>
+                $.get(posturl, function (response) {
                     if (response.length == 0) {
                         $('#no-post').show();
                         postfinished = true;
@@ -811,6 +1050,55 @@
                         html.find('.posttime').html(PrepareTime(v.PostedOn));
                         if (v.Body == null) v.Body = "";
                         html.find('.postbody').html(v.Body?.replaceAll('\n', '<br\>'));
+                        if (v.Shared) {
+                            let template2 = $('#post-template').html().toString();
+                            let html2 = $(template2);
+                            $(html2).find('.card-footer').remove();
+                            $(html2).find('.dropdown.mainpostaction').remove();
+                            let p2 = '';
+                            if (v.SharedPost.ProfilePicture.startsWith('<img'))
+                                p2 = $(v.SharedPost.ProfilePicture).attr('src');
+                            else {
+                                p2 = v.SharedPost.ProfilePicture;
+                            }
+                            html2.find('.profilepic').attr('src', p2);
+                            html2.find('.unamelink').attr('href', 'Person?id=' + v.SharedPost.UserId);
+                            html2.find('.username').html('<a class="unamelink" href="/Person?id=' + v.SharedPost.UserId + '">' + v.SharedPost.FullName + '</a>');
+                            html2.find('.posttime').html(PrepareTime(v.SharedPost.PostedOn));
+                            if (v.SharedPost.Body == null) v.SharedPost.Body = "";
+                            html2.find('.postbody').html(v.SharedPost.Body?.replaceAll('\n', '<br\>'));
+                            if (v.SharedPost.URL != null & v.SharedPost.URL != '') {
+                                //   
+                                html2.find('.posturl-content img.urlimage').attr('src', decodeURIComponent(v.SharedPost.URLPreviewImage));
+                                html2.find('.posturl-content .urltitle').html(v.SharedPost.URLTitle);
+                                html2.find('.posturl-content .urldescription').html(v.SharedPost.URLDescription);
+                                html2.find('.posturl-content a.urllink').attr('href', decodeURIComponent(v.SharedPost.URL));
+                                html2.find('.posturl-content').show();
+                            }
+                            html.find('.shared-post-content').html(html2);
+
+                            if (v.SharedPost.Attachments && v.SharedPost.Attachments.length > 0) {
+                                let attcount = v.SharedPost.Attachments.length;
+                                let cssClass = 'col-12';
+                                if (attcount > 1)
+                                    cssClass = 'col-6';
+                                $.each(v.SharedPost.Attachments, function (ii, vv) {
+                                    let atthtml2 = '<div class="' + cssClass + '"><img src="' + vv.URL + '" data-id="' + vv.id + '" data-parentid="' + vv.ParentID + '" class="img-fluid preview"></div>';
+                                    html2.find('.attachment-container').append(atthtml2);
+                                });
+                            }
+
+                            //Post Share Button
+                            html.find('.sharebtn').on('click', function () {
+                                SharePost(v.SharedPostId)
+                            });
+                        }
+                        else {
+                            //Post Share Button
+                            html.find('.sharebtn').on('click', function () {
+                                SharePost(v.id)
+                            });
+                        }
                         html.find('.postlikecount .count').html(v.Likes.nUpvotes);
                         html.find('.btnpostlike').on('click', function () {
                             let param = 'upvote|' + v.id + '|Timeline';
@@ -845,12 +1133,13 @@
                             });
 
                         })
-
+                        //Post Comment Button
                         html.find('.commentbtn').on('click', function () {
                             console.log(emojin[0].getBoundingClientRect().top);
                             //console.log($(emojin[0].getBoundingClientRect().top).offset().top);
                             emojin.data("emojioneArea").setFocus();
                         });
+                        
                         html.find('.singlecomment').attr('id', commentid);
                         let emojin = html.find('.writecomment').emojioneArea({
                             autoHideFilters: true,
@@ -1266,7 +1555,7 @@
                         $('#post-container').append(html);
                     })
                     loadingpost = false;
-
+                    <%if(!SinglePost){%>
                     if (waypoint) {
                         waypoint.destroy();
                     }
@@ -1278,12 +1567,15 @@
                         },
                         offset: 'bottom-in-view'
                     })
+                    <%}%>
                 });
 
             }
 
             $(function () {
                 getpost();
+                <%if (!SinglePost)
+            {%>
                 $.get(`api/media?type=images&count=9&sID=${userId}&isTestNet=${isTestNet}`, function (response) {
                     $.each(response, function (i, v) {
                         let temp = '<div class="col-md-4" ><figure><img data-id="' + v.id + '" data-parentid="' + v.ParentId +'" class="img-fluid preview" src="' + v.URL + '" alt="' + v.Title + '"></figure></div>'
@@ -1306,7 +1598,7 @@
                         $('#friends-container').append(template);
                     })
                 })
-            })
+         <%}%>   })
 
             $('body').on('click', 'img.preview', function () {
                let id = $(this).attr('data-id');

@@ -8,7 +8,11 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
-
+<style>
+    .RadUpload .ruFileProgress{
+        height:1px !important;
+    }
+</style>
     
 <script>
     function getCount() {
