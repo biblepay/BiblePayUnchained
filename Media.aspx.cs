@@ -53,8 +53,7 @@ namespace Unchained
             else if (e.EventAction == "ShareVideo_Click")
             {
                 string sDomainName = HttpContext.Current.Request.Url.Host;
-                string sShareLink = "<iframe width=\"500\" height=\"300\" src=\"https://" + sDomainName + "/Media?embedid="
-                + e.EventValue + "&width=480&height=280\" style=\"border:0px;\" allowfullscreen></iframe>";
+                string sShareLink = CreateVideoEmbedCode(e.EventValue, sDomainName);
                 string sNarrative = "<br><br><textarea class=pc90 readonly=true rows=10 columns=10>" + sShareLink + "</textarea><br>";
                 MsgModal(this, "Sharing this Video", sNarrative, 550, 450, true);
             }
@@ -228,7 +227,8 @@ namespace Unchained
             
             
             string sTheirChannel = "VideoList?channelid=" + dt[0].UserID;
-            string sShareAnchor = UICommon.GetStandardAnchor("share" + sID, "ShareVideo", sID, "Share&nbsp;<i class='fa fa-share'></i>", "Share this Video", "video1");
+            string sShareAnchor = UICommon.GetStandardAnchor("share" + sID, "ShareVideo", sID, "Share&nbsp;<i class='largeIcon fa fa-share'></i>", "Share this Video", "video1");
+            string sBanAnchor = UICommon.GetStandardAnchor("ancBan" + sID, "ReportItemAsInappropriate", sID, "<i class='fa fa-ban'></i>", "Report this item as inappropriate content", "video1");
 
             video1.Footer = "Uploaded by <a href='" + sTheirChannel + "'>"
                 + UICommon.GetUserAvatarAndName(this, dt[0].UserID, true)
@@ -237,7 +237,8 @@ namespace Unchained
                 + " • " + UICommon.GetTipControl(IsTestNet(this), dt[0].id, dt[0].UserID) + " • " + BiblePayCommon.Common.UnixTimeStampToDateControl(dt[0].time)
                 + "<br>" + UICommon.GetWatchSum(IsTestNet(this), sID) + " view(s) • "
                 + BiblePayCommon.Common.UnixTimeStampToDisplayAge(dt[0].time)
-                + " • " + sDownloadLink + " • " + sShareAnchor + " • " + dt[0].Category;
+                + " • " + sDownloadLink + " • " + sShareAnchor + " • " + dt[0].Category + " • " + sBanAnchor;
+
 
             video1.Footer += " • " + dt[0].domain;
             

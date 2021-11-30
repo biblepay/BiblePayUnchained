@@ -15,49 +15,40 @@ namespace Unchained
     {
 
         /// <summary>
-        /// txtOrganizationName control.
+        /// UpdatePanel61 control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtOrganizationName;
+        protected global::System.Web.UI.UpdatePanel UpdatePanel61;
 
         /// <summary>
-        /// txtDomainName control.
+        /// lblOrganizationName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtDomainName;
+        protected global::System.Web.UI.WebControls.Label lblOrganizationName;
 
         /// <summary>
-        /// btnSaveOrganization control.
+        /// lblRoles control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSaveOrganization;
+        protected global::System.Web.UI.WebControls.Label lblRoles;
 
         /// <summary>
-        /// txtRoleName control.
+        /// btnRetrieveRoles control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtRoleName;
-
-        /// <summary>
-        /// btnSaveRole control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSaveRole;
+        protected global::System.Web.UI.WebControls.Button btnRetrieveRoles;
 
         /// <summary>
         /// btnSaveUserRole control.

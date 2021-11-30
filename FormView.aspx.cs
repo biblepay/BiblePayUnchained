@@ -89,7 +89,8 @@ namespace Unchained
 
                 if (!r.fError())
                 {
-                    Session["stack"] = UICommon.Toast("Saved", "Your " + sTable + " has been " + sMode + "(ed)!");
+                    //Session["stack"] = UICommon.Toast("Saved", "Your " + sTable + " has been " + sMode + "(ed)!");
+                    BiblePayCommonNET.UICommonNET.MsgModalWithRedirectToNewPage(this, "Saved", "Your " + sTable + " has been " + sMode + "(ed)!", 450, 200, "VideoList");
                 }
                 else
                 {
@@ -104,7 +105,9 @@ namespace Unchained
             string sID = Request.QueryString["id"] ?? "";
             string sMode = Request.QueryString["action"] ?? "";
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), sTable);
-            
+            if (sMode == "")
+                sMode = "view";
+
             if (sTable == "news1" && dt.Rows.Count == 0)
             {
                 BiblePayCommon.Entity.news1 o = new BiblePayCommon.Entity.news1();
@@ -134,7 +137,17 @@ namespace Unchained
             html += sNarrative;
 
             html += "<table width=90%>";
-            
+
+            bool fHasOwnership = HasOwnership(IsTestNet(this), sID, sTable, gUser(this).id);
+
+            bool fWhitelistedTable = false;
+            if (sTable == "video1")
+                fWhitelistedTable = true;
+
+            if (!fWhitelistedTable)
+                fHasOwnership = false;
+
+
             for (int i = 0; i < dt.Columns.Count; i++)
             {
                 string sColName = dt.Columns[i].ColumnName;
@@ -150,6 +163,11 @@ namespace Unchained
                 // if (System.Diagnostics.Debugger.IsAttached)
                 bool fHidden = BiblePayCommon.EntityCommon.IsHidden(sTable, sColName);
                 bool fReadonly = BiblePayCommon.EntityCommon.IsReadOnly(sTable, sColName);
+                if (!fHasOwnership)
+                {
+                    fReadonly = true;
+                }
+
                 string sReadOnly = (sMode == "view" || fReadonly) ? " readonly " : "";
                 if (sTable == "news1" && sColName == "URL")
                     sReadOnly = "";

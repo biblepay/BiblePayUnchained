@@ -2,8 +2,7 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
-   
-    <input type="hidden" id="hfPostback" />
+   <input type="hidden" id="hfPostback" />
       <link href="Content/pages/peopledirectory.css" rel="stylesheet" />
    <div class="row position-relative" id="people-directory">
                 <div class="loader1">
@@ -11,5 +10,6 @@
                 </div>
                 <%=GetFriends()%>
             </div>
+    
 
 </asp:Content>

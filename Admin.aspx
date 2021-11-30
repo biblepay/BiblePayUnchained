@@ -1,43 +1,46 @@
-﻿<%@ Page Title="Admin" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Admin.aspx.cs" Inherits="Unchained.Admin"  ValidateRequest="false" %>
+﻿<%@ Page Title="Admin" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Admin.aspx.cs" Inherits="Unchained.Admin"   %>
 
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-    <h3>Admin</h3>
 
 
-    <fieldset>
-        <legend>Add Organization:</legend>
+      <asp:UpdatePanel runat="server" ID="UpdatePanel61">
+        <ContentTemplate>
 
-        Organization Name: <asp:TextBox width="400px" ID="txtOrganizationName" runat="server"></asp:TextBox>
-        <br />
-        Domain Name: <asp:TextBox width="400px" ID="txtDomainName" runat="server"></asp:TextBox>
-        <br />
 
-        <asp:Button ID="btnSaveOrganization" runat="server" onclick="btnSaveOrganization_Click"  Text="Save Organization" />
-        
-    </fieldset>
+    <h3>Organization: <asp:Label ID="lblOrganizationName" runat="server" style="" Text="???"></asp:Label></h3>
+
+
+    
 
     <br />
     <br />
 
     <fieldset>
-        <legend>Add Role:</legend>
-        Organization:<%=Unchained.UICommon.GetDropDownOrganization(this, "ddorganization", "") %>
+        <legend>List User Roles:</legend>
+        User: <%=Unchained.UICommon.GetDropDownUser(this, "ddusers_list",Request.Form["ddusers_list"] ?? "", "", false) %>
         <br />
-        Name: <asp:TextBox width="400px" ID="txtRoleName" runat="server"></asp:TextBox>
-        <br />
-        <asp:Button ID="btnSaveRole" runat="server" onclick="btnSaveRole_Click"  Text="Save Role" />
-        
+
+        <hr />
+
+            <div>
+                 <asp:Label ID="lblRoles" runat="server" style="" Text=""></asp:Label>
+            </div>
+
+
+
+        <asp:Button ID="btnRetrieveRoles" runat="server" onclick="btnListUserRoles_Click"  Text="List User Roles" />
     </fieldset>
 
-    <br />
-    <br />
+            <br />
+            <br />
+
 
     <fieldset>
         <legend>Add User Role:</legend>
-        User:<%=Unchained.UICommon.GetDropDownUser(this, "ddusers", "", "", false) %>
+        User: <%=Unchained.UICommon.GetDropDownUser(this, "ddusers", "", "", false) %>
         <br />
-        Role:<%=Unchained.UICommon.GetDropDownRole(this, "ddroles", "") %>
+        Role: <%=Unchained.UICommon.GetDropDownRole(this, "ddroles", "") %>
         <br />
         <asp:Button ID="btnSaveUserRole" runat="server" onclick="btnSaveUserRole_Click"  Text="Save User Role" />
     </fieldset>
@@ -46,9 +49,9 @@
     <br />
     <fieldset>
         <legend>Add Role Permission:</legend>
-        Organization:<%=Unchained.UICommon.GetDropDownOrganization(this, "ddroleorganization", "") %>
+        Organization: <%=Unchained.UICommon.GetDropDownOrganization(this, "ddroleorganization", "") %>
         <br />
-        Role:<%=Unchained.UICommon.GetDropDownRole(this, "ddpermissionroles", "") %>
+        Role: <%=Unchained.UICommon.GetDropDownRole(this, "ddpermissionroles", "") %>
         <br />
         Entity Name: <asp:TextBox width="400px" ID="txtEntityName" runat="server"></asp:TextBox>
         <br />
@@ -61,7 +64,8 @@
         <br />
         <asp:Button ID="btnSavePerm" runat="server" onclick="btnSavePermission_Click"  Text="Save Permission" />
     </fieldset>
-
+            </ContentTemplate>
+          </asp:UpdatePanel>
 </asp:Content>
 
 

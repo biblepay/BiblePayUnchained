@@ -2,7 +2,9 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
   
- 
+  <asp:UpdatePanel runat="server" ID="UpdatePanel2">
+     <ContentTemplate>
+
 
      <h3>BiblePay University - Final Exam - <asp:Label ID="lblTitle" runat="server" Text=""></asp:Label>                    &nbsp;  <small>v1.2</small></h3>
 
@@ -62,9 +64,9 @@
     <asp:Timer ID="Timer1" runat="server" Interval="5000" ontick="Timer1_Tick">
     </asp:Timer> 
 
-<asp:UpdatePanel ID="UpdatePanel1"
-    runat="server">
-    <ContentTemplate>
+
+
+
 
     <table width="100%">
 

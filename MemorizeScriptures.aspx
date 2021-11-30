@@ -2,7 +2,9 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
   
- 
+     <asp:UpdatePanel runat="server" ID="UpdatePanel1">
+     <ContentTemplate>
+
 
      <h3>Memorize Scriptures Tool <small>v1.1</small></h3>
     
@@ -62,5 +64,7 @@
          <li> Where do these scriptures come from?  The scripture reference is stored in the sidechain and new ones may be submitted and suggested on our forum expanding and contracting the list.  
         
     </ul>
-        
+   </ContentTemplate>
+ </asp:UpdatePanel>
+                     
 </asp:Content>

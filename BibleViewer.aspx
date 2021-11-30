@@ -1,6 +1,9 @@
 ﻿<%@ Page Title="Bible Viewer" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="BibleViewer.aspx.cs" Inherits="Unchained.BibleViewer" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+   
+  <asp:UpdatePanel runat="server" ID="UpdatePanel2">
+     <ContentTemplate>
 
 <h2>Bible Viewer - English - KJV</h2>
 
@@ -27,4 +30,7 @@
      </table>
 <br />
 
+    </ContentTemplate>
+
+   </asp:UpdatePanel>
 </asp:Content>

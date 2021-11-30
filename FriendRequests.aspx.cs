@@ -88,7 +88,10 @@ namespace Unchained
                 }
             }
 
+
+
         }
+
         protected string GetFriendRequests()
         {
             string html = "";
@@ -108,24 +111,28 @@ namespace Unchained
                 User u = UICommon.GetUserRecord(IsTestNet(this), dtFriends[i].id);
 
                 string sApproveButton = UICommon.GetStandardButton(dtFriends[i].id,
-                    "<i style='color:black;' class='fa fa-check'></i> Accept Request", "ApproveFriendRequest", "Approve Friend Request","", "btnacceptfreindreq btn btn-sm p-0");
+                    "<i style='color:black;' class='fa fa-check'></i> Accept Request", "ApproveFriendRequest", "Approve Friend Request", "", "btnacceptfreindreq btn btn-sm p-0");
+
 
                 string btnAccept = "<a id='" + dtFriends[i].id + "_accept' class=\"dropdown-item\" onclick=\"var e={};e.Event='ApproveFriendRequest_Click';e.Value='" + dtFriends[i].id + "';BBPPostBack2(null, e);"
                                 + "\" title='Accept '><i class='fa fa-check'></i> Accept Request</a>";
                 string btnReject = "<a id='" + dtFriends[i].id + "_reject' class=\"dropdown-item\" onclick=\"var e={};e.Event='Unfriend_Click';e.Value='" + dtFriends[i].id + "';BBPPostBack2(null, e);"
                     + "\" title='Accept '><i class='fa fa-close'></i> Delete Request</a>";
                 string buttons = "<div class=\"dropdown\">"
-+ "<a class=\"btn btn-defualt p-1 dropdown-toggle\" href=\"#\" role=\"button\" id=\"dropdownMenuLink\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">  Respond To Request</a>"
-+ "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuLink\">"
-+ "<li>" + btnAccept + "</li>"
-+ "<li>" + btnReject + "</li></ul></div>";
+                    + "<a class=\"btn btn-defualt p-1 dropdown-toggle\" href=\"#\" role=\"button\" id=\"dropdownMenuLink\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">  Respond To Request</a>"
+                    + "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuLink\">"
+                    + "<li>" + btnAccept + "</li>"
+                    + "<li>" + btnReject + "</li></ul></div>";
 
-                
+
                 string personlink = "<a href = \"Person?id=" + u.id + "\" class=\"tile-link\"></a>";
+
+
                 string h = "<div class=\"col-md-6 col-xl-4\">"
                 + "<div class=\"card\">" +
                 "<div class=\"card-body d-flex align-items-center\">" +
-                  "<div class=\"flex-shrink-0 align-items-center\"><span style = \"background-image: url(" + u.GetAvatarUrl() + ")\" class=\"avatar avatar-xl mr-3\">" + personlink + "</span></div>"
+                  "<div class=\"flex-shrink-0 align-items-center\"><span style = \"background-image: url(" 
+                  + u.GetAvatarUrl() + ")\" class=\"avatar avatar-xl mr-3\">" + personlink + "</span></div>"
                     + "<div class=\"flex-grow-1 ms-2\">"
                       + "<h6 class=\"card-text mb-0 position-relative\">" + u.FullUserName() + personlink + " </h6> "
                       + "<p class=\"card-text small\"> "

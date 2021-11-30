@@ -12,23 +12,19 @@ namespace Unchained
         // List of Notification Events
         // Upvote Comment for Prayer, Town Hall, Video
         // Upvote Video
-        // 
-        protected bool StoreVote(string parentID, string sVoteType, string sVotingOn, string sParentType)
-        {
-            if (!gUser(this).LoggedIn)
-            {
-                return false;
-            }
 
+
+        protected void StoreNotification(BiblePayCommon.IBBPObject oParent, string sParentType, string sVotingOn, string sVoteType)
+        {
+            string sHRObject = String.Empty;
             string sBlurb = "";
-            string sHRObject = "";
             string sAnchor = "";
-            // First get the object (for the narrative)
-            BiblePayCommon.IBBPObject oParent = GetObject(IsTestNet(this), sVotingOn, parentID);
+            string sSourcePage = String.Empty;
+            if (sVoteType != "upvote")
+                return;
             if (sVotingOn == "video1")
             {
                 sHRObject = " your Video";
-
                 BiblePayCommon.Entity.video1 v = (BiblePayCommon.Entity.video1)oParent;
                 sBlurb = v.Title;
                 sAnchor = "Media?id=" + v.id + "";
@@ -37,10 +33,7 @@ namespace Unchained
             {
                 BiblePayCommon.Entity.comment1 c = (BiblePayCommon.Entity.comment1)oParent;
                 dynamic oGrandParent = GetObject(IsTestNet(this), sParentType, c.ParentID);
-
-
                 sHRObject = " your Comment";
-                string sSourcePage = "";
                 if (sParentType == "townhall1")
                 {
                     sSourcePage = "PrayerView";
@@ -60,21 +53,30 @@ namespace Unchained
                     sSourcePage = "PrayerView";
                     sAnchor = "PrayerView?id=" + c.ParentID + "&entity=" + sParentType + "";
                     sBlurb = Mid(oGrandParent.Subject, 0, 100);
-
                 }
                 else if (sParentType == "video1")
                 {
                     sSourcePage = "Media";
                     sAnchor = "Media?id=" + c.ParentID + "";
                     BiblePayCommon.Entity.video1 v1 = (BiblePayCommon.Entity.video1)oGrandParent;
-
                     sBlurb = Mid(v1.Title, 0, 100);
-
                 }
             }
+
+            UICommon.SendNotification(sVotingOn, sBlurb, this, "liked", sAnchor, oParent.UserID);
+        }
+        protected bool StoreVote(string parentID, string sVoteType, string sVotingOn, string sParentType)
+        {
+            if (!gUser(this).LoggedIn)
+            {
+                return false;
+            }
+            BiblePayCommon.IBBPObject oParent = GetObjectWithFilter(IsTestNet(this), sVotingOn, "id='" + parentID +"'");
             // If they already voted, use that object
             BiblePayCommon.Entity.vote1 o = (BiblePayCommon.Entity.vote1)GetObjectWithFilter(IsTestNet(this), "vote1", "userid='" + gUser(this).id 
                 + "' and parentid='" + parentID + "'");
+            StoreNotification(oParent, sParentType, sVotingOn, sVoteType);
+
             if (o == null || o.id == null)
             {
                 o.UserID = gUser(this).id;
@@ -84,10 +86,6 @@ namespace Unchained
             if (sVoteType == "upvote")
             {
                 o.VoteValue = 1;
-                //n.Body =  gUser(this).FullUserNameAnchor() + " " + n.Anchor + "liked " + sHRObject + " about " + sBlurb + ". </a>";
-                //n.NotifierID = gUser(this).id;
-                //BiblePayDLL.Sidechain.InsertIntoDSQL_Background(IsTestNet(this), n, gUser(this));
-                UICommon.SendNotification(sVotingOn, sBlurb, this, "liked", sAnchor, oParent.UserID);
             }
             else if (sVoteType == "downvote")
             {
@@ -99,10 +97,7 @@ namespace Unchained
             }
             if (o.UserID == "")
                 return false;
-            BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), o, gUser(this));
-
-            if (r.fError())
-                return false;
+            BiblePayCommon.Common.DACResult r = BiblePayDLL.Sidechain.InsertIntoDSQL(IsTestNet(this), o, gUser(this), true);
             return true;
         }
 
@@ -110,10 +105,8 @@ namespace Unchained
         {
             if (!gUser(this).LoggedIn)
                 return false;
-            // get object 
             // First get the object (for the narrative)
             BiblePayCommon.Entity.follow1 o = (BiblePayCommon.Entity.follow1)GetObjectWithFilter(IsTestNet(this), "follow1", "FollowedID='" + sFollowedID + "' and UserID='" + gUser(this).id + "'");
-
             if (o == null)
             {
                 o = new BiblePayCommon.Entity.follow1();
@@ -131,6 +124,8 @@ namespace Unchained
             public string Error;
             public string Div1;
             public string Div2;
+            public string CustomResponse;
+            public string CustomResponseValue;
         }
 
         protected new void Page_Load(object sender, EventArgs e)
@@ -153,6 +148,22 @@ namespace Unchained
                     Response.End();
                 }
             }
+            else if (Request.Path.Contains("read_notification"))
+            {
+
+                BiblePayCommon.Entity.Notification n = (BiblePayCommon.Entity.Notification)GetObjectWithFilter(IsTestNet(this), "Notification", "id='" + sID + "'");
+                if (n== null)
+                {
+                    response.Error = "Unable to find notification";
+                    string sJson = Newtonsoft.Json.JsonConvert.SerializeObject(response);
+                    Response.Write(sJson);
+                    Response.End();
+                }
+                n.Read = 1;
+                DACResult r = BiblePayDLL.Sidechain.InsertIntoDSQL(IsTestNet(this), n, gUser(this), true);
+
+
+            }
             else if (Request.Path.Contains("voting"))
             {
                 if (!gUser(this).LoggedIn)
@@ -169,7 +180,6 @@ namespace Unchained
                     response.Div1 = v.nUpvotes.ToString();
                     response.Div2 = v.nDownvotes.ToString();
                     string sJson = Newtonsoft.Json.JsonConvert.SerializeObject(response);
-
                     Response.Write(sJson);
                     Response.End();
                 }
@@ -203,6 +213,25 @@ namespace Unchained
                     Response.Write(sJson);
                     Response.End();
                 }
+                else if (sID == "pollchat")
+                {
+                    UICommon.ChatStructure myChat;
+                    bool fGot = UICommon.GetChatStruct(gUser(this).id, out myChat);
+                    if (fGot)
+                    {
+                        response.CustomResponse = "ChatResponse";
+                        response.CustomResponseValue = myChat.NeedsRefreshed && myChat.LastTyper != gUser(this).id ? "1" : "0";
+                        string sJson = Newtonsoft.Json.JsonConvert.SerializeObject(response);
+                        if (response.CustomResponseValue == "1")
+                        {
+                            myChat.NeedsRefreshed = false;
+                            UICommon.dictChats2[myChat.chatGuid] = myChat;
+                        }
+                        Response.Write(sJson);
+                        Response.End();
+                    }
+
+                }
                 else if (sID == "chat")
                 {
                     if (gUser(this).LoggedIn == false)
@@ -213,7 +242,7 @@ namespace Unchained
                     }
 
                     UICommon.ChatStructure myChat;
-                    bool fGot = UICommon.dictChats.TryGetValue(gUser(this).id, out myChat);
+                    bool fGot = UICommon.GetChatStruct(gUser(this).id, out myChat);
                     string sDec = BiblePayCommon.Encryption.Base64DecodeWithFilter(sAct1);
                     if (!fGot)
                     {

@@ -1,20 +1,43 @@
-﻿<%@ Page Title="Unchained-Upload" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" 
-    CodeBehind="UnchainedUpload.aspx.cs" Inherits="Unchained.UnchainedUpload"  ValidateRequest="true" %>
-
+﻿<%@ Page Title="Unchained-Upload" Language="C#"  AutoEventWireup="true"  CodeBehind="UnchainedUpload.aspx.cs" Inherits="Unchained.UnchainedUpload"  ValidateRequest="true" %>
 <%@ Register TagPrefix="telerik" Namespace="Telerik.Web.UI" Assembly="Telerik.Web.UI" %>
 
-
-
-
-<asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-
-<style>
-    .RadUpload .ruFileProgress{
-        height:1px !important;
-    }
-</style>
+<head runat="server">
+    <asp:PlaceHolder runat="server">
+       <%: Scripts.Render("/Scripts/jquery-3.4.1.js") %>
+    </asp:PlaceHolder>
+     <link rel="stylesheet" type="text/css" href="Content/telerikstyles.css" />
     
+    <link rel="stylesheet" type="text/css" href="Content/Site1.css" />
+   
+
+</head>
+
+
+<form runat="server">
+  <asp:ScriptManager runat="server">
+  </asp:ScriptManager>
+
+
 <script>
+
+    function validateForm() {
+        var oSubject = document.getElementById('txtSubject');
+        var oBody = document.getElementById('txtBody');
+        if (oSubject.value.length < 3 || oBody.value.length < 3) {
+            alert('Sorry, the Subject or Body must be greater than 3 characters.'); return false;
+        }
+
+        if (getCount() == 0)
+        {
+            alert('Please choose at least one file before saving the record. If you have already chosen files, please wait until they have uploaded (the dot will become green when they are finished).');
+            return false;
+        }
+        return true;
+    }
+    function doValidate() {
+        return true;
+    }
+
     function getCount() {
         var upload = $find("<%=AsyncUpload1.ClientID%>");
         return upload.getUploadedFiles().length;
@@ -65,80 +88,95 @@
     })();
 
 
-
-
-
 </script>
-   	<link rel="stylesheet" type="text/css" href="Content/telerikstyles.css" />
 
-    <h3>Decentralized Social Media - Upload your video or file</h3>
-    <br />
-    <small><font color="red"></font></small>
-    <fieldset>
-        <legend>
-           <asp:Label ID="lblPageHeading" runat="server" />
-        </legend>
-    
-         <br />
+   
 
-        <asp:Label ID="lblHideArea" runat="server" Text="">
-        
-        <asp:Label runat="server" ID="lblSubject">Title:</asp:Label>
-                         <br />
-                         <asp:TextBox ID="txtSubject" width="400px" runat="server"></asp:TextBox>
-                         <br />
+<style type="text/css">
+.RadUpload .ruBrowse
+{
+     display:none !important;
+     height: 64px !important;
+     width: 250px !important;
+     background-position-y: -25px !important;
+     background-position-x: -55px !important;
+     cursor:pointer !important;
+}
 
-                         <asp:Label runat="server" ID="lblBody">Body:</asp:Label>
-                         <br />
-                         <asp:TextBox ID="txtBody" runat="server" TextMode="MultiLine"  Rows="10" style="width: 900px">        </asp:TextBox>
-                         <br />
-                         <asp:Label runat="server" ID="Label1">Category:</asp:Label>
-                         <br />
-        </asp:Label>
+.largeBrowseButton .ruBrowse
+{
+    background-position-y: -45px !important;
+    height: 24px !important;
+    width: 115px !important;
+}
 
-        <%=GetVideoCategories()%>
+.RadUpload .ruStyled .ruFileInput
+{
+  position:relative !important;
+}
+
+.RadUpload .ruFileProgress
+{
+        height:2px !important;
+}
+
+.DropZone1 {
+    width: 320px;
+    height: 154px;
+    border-color: #CCCCCC;
+    float: left;
+    text-align: center;
+    font-size: 16px;
+    color: white;
+    position:relative;
+    left:-20px;
+    background: repeating-linear-gradient( 45deg, black, #606dbc 10px, #465298 10px, #465298 20px );
+    background-color:black;
+}
+
+
+.DropZone2 {
+  margin-top: -100px;
+  margin-left: -250px;
+  width: 500px;
+  height: 200px;
+  border: 4px dashed #fff;
+}
+</style>
+
+    <small>
+    <asp:Label ID="lblHideArea" runat="server" Text="">
+    <asp:Label runat="server" ID="lblSubject">Title:</asp:Label>
+       <br />
+    <asp:TextBox ID="txtSubject" width="200px" runat="server"></asp:TextBox>
+       <br /> 
+    <asp:Label runat="server" ID="lblBody">Body:</asp:Label>
+       <br />
+    <asp:TextBox ID="txtBody" runat="server" TextMode="MultiLine"  Rows="2" style="width: 200px">        </asp:TextBox>
+       <br />
+    <asp:Label runat="server" ID="Label1">Category:</asp:Label>
+
         <br />
+    </asp:Label>
+    <%=GetVideoCategories()%>
+    &nbsp;&nbsp;<asp:Button ID="btnUnchainedSave" runat="server" OnClick="btnUnchainedSave_Click" OnClientClick="return validateForm();"                      Text="Save your File" />
+
+    <br />
+    </small>
     
-
-         <!-- <asp:FileUpload ID="FileUpload1" onchange="UploadFile(this);" runat="server"  MultipleFileSelection="Automatic" for multiple files /> -->
-        <table width="90%">
-
-            <tr><td width="90%">
-             <div class="attachment-container">
-                <h4>Select the file(s) you want to upload here</h4>
-         
-                <span class="allowed-attachments">
-                    <span class="allowed-attachments-list">(<%= String.Join( ",", AsyncUpload1.AllowedFileExtensions ) %>)</span>
-                </span>
-                <telerik:RadAsyncUpload RenderMode="Lightweight" runat="server" CssClass="async-attachment" 
-                    ID="AsyncUpload1" HideFileInput="true" MultipleFileSelection="Automatic" DropZones=".DropZone1" 
-                    AllowedFileExtensions=".jpeg,.jpg,.bmp,.svg,.png,.pdf,.gif,.docx,.xlsx,.mp3,.webm,.mp4" />
-             </div>
-       </td></tr>
-
-            <tr><td>
+    <div class="attachment-container" style="xfont-size:10px;">
+       <div class="DropZone1">
+       <telerik:RadAsyncUpload RenderMode="Lightweight" runat="server" CssClass="async-attachment largeBrowseButton" width="250px" Height="190px"
+                style="left:-5px;color:gold;"    ID="AsyncUpload1" HideFileInput="true" MultipleFileSelection="Automatic" DropZones=".DropZone1" 
+                    AllowedFileExtensions=".jpeg,.jpg,.bmp,.svg,.png,.pdf,.gif,.xlsx,.mp3,.webm,.mp4,.mov" />
         
-                <div class="DropZone1">
-                 <h3>Or, Drop Files Here</h3>
-                 <p><i class="fa fa-camera"></i></p>
+            <div style="position:relative;top:-60px;">
+            Drop files or click here
                 </div>
-         </td></tr>
-            
+            <br />
 
-            <tr><td>
-                
-                <h4>Then, Save your File:</h4>
-        
-                       <asp:Button ID="btnUnchainedSave" runat="server" OnClick="btnUnchainedSave_Click" 
-                                OnClientClick="var oSubject=document.getElementById('MainContent_txtSubject'); var oBody=document.getElementById('MainContent_txtBody'); if (oSubject.value.length < 3 || oBody.value.length < 3) {alert('Sorry, the Subject or Body must be greater than 3 characters.'); return false;}  if (getCount()==0) { alert('Please choose at least one file before saving the record. If you have already chosen files, please wait until they have uploaded (the dot will become green when they are finished).');return false;} showSpinner();" Text="Save Record" />
-                       <br /><br />
-                       <asp:Label ID="lblmessage" runat="server" />
-                                </td></tr>
-
-           </table>
-
-                   
-</fieldset>
-
+        </div>
+    </div>
+    
      
-</asp:Content>
+</form>

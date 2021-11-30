@@ -17,8 +17,10 @@ namespace Unchained
     {
         protected new void Page_Load(object sender, EventArgs e)
         {
-
-         
+            if (gUser(this).Administrator!=1)
+            {
+                UICommon.MsgBox("Error", "You are not authorized", this);
+            }
         }
 
         private static int ctr = 0;
@@ -27,9 +29,7 @@ namespace Unchained
             if (e.EventName == "PerfCounter_Click")
             {
                 ctr++;
-
             }
-
         }
 
 
@@ -71,9 +71,6 @@ namespace Unchained
                     select new
                          { UserName1 = u.FirstName, UserID = u.id, VideoURL = v.URL, VideoTitle = v.Title };
 
-                //var list = new List<object?>();
-                //IEnumerable<MyObject> notNull = list.NotNull();
-                //var l = query1.Where(x => x != null).ToList();
                 var l = query1.Where(x => x != null).ToList();
                 foreach (var v in query1)
                 {
@@ -97,13 +94,10 @@ namespace Unchained
                         string s1044 = "";
                     }
                 }
-                string sFin = "";
-
             }
             catch(Exception ex)
             {
                 string s1099 = "";
-
             }
 
         }
@@ -115,7 +109,6 @@ namespace Unchained
             string sBt = UICommon.GetStandardButton("1",
                     "<i class='fa fa-file'></i>", "PerfCounter", "Perf Counter");
 
-
             string sAnchor = "<a id='2' onclick=\"var e={};e.Event='PerfCounter_Click';e.Value='2';e.Table='"
                 + "3';BBPPostBack2(null, e);BBPPostBack2(null, e);BBPPostBack2(null, e);BBPPostBack2(null, e);" + "\" title='myclick1'>myclick1</a>";
 
@@ -124,27 +117,49 @@ namespace Unchained
 
         }
 
+        protected async void testai()
+        {
+            string sData = "";
+            sData = System.IO.File.ReadAllText("c:\\cnn.txt");
+            sData = BiblePayCommon.Encryption.PunctuateTranscript(sData);
+            string sSummary = await BiblePayDLL.Sidechain.AISummary(sData,6);
+            List<string> lTopics = await BiblePayDLL.Sidechain.AILanguageTopics(sData, 7);
+            string sData1 = "";
+            for (int i = 0; i < lTopics.Count; i++)
+            {
+                sData1 += lTopics[i] + ",";
+            }
+            string sOut = sSummary + "\r\n\r\n" + sData1;
+            string sTime = "";
+        }
+
         protected void btnSave_Click(object sender, EventArgs e)
         {
 
-            List<dynamic> lv = new List<dynamic>();
-            for (int i = 1000; i < 1256; i++)
+            return;
+            System.Threading.Thread t1 = new System.Threading.Thread(testai);
+            t1.Start();
+            if (false)
             {
-                BiblePayCommon.Entity.NewsFeedItem v = new BiblePayCommon.Entity.NewsFeedItem();
-                v.URL = "https://" + i.ToString() + ".com";
-                v.NewsFeedSourceID = "CNN";
-                v.Title = v.URL;
-                string sKey = BiblePayCommon.Encryption.GetSha256HashI(v.NewsFeedSourceID + v.URL);
-                v.id = sKey;
-                v.time = i;
-                v.Expiration = (int)(UnixTimestampUTC() + (60 * 60 * 24 * 30));
-                lv.Add(v);
+                List<dynamic> lv = new List<dynamic>();
+                for (int i = 1000; i < 1256; i++)
+                {
+                    BiblePayCommon.Entity.NewsFeedItem v = new BiblePayCommon.Entity.NewsFeedItem();
+                    v.URL = "https://" + i.ToString() + ".com";
+                    v.NewsFeedSourceID = "CNN";
+                    v.Title = v.URL;
+                    string sKey = BiblePayCommon.Encryption.GetSha256HashI(v.NewsFeedSourceID + v.URL);
+                    v.id = sKey;
+                    v.time = i;
+                    v.Expiration = (int)(UnixTimestampUTC() + (60 * 60 * 24 * 30));
+                    lv.Add(v);
+                }
+                // Insert the list
+                var t = BiblePayDLL.Sidechain.SpeedyInsertMany(false, "newsfeeditems", lv, SERVICE_TYPE.PRIVATE_CACHE, gUser(this));
+                // Retrieve the list
+                IList<BiblePayCommon.Entity.NewsFeedItem> l2 = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.NewsFeedItem>(false,
+                    "newsfeeditems", null, SERVICE_TYPE.PRIVATE_CACHE);
             }
-            // Insert the list
-            var t = BiblePayDLL.Sidechain.SpeedyInsertMany(false, "newsfeeditems", lv, SERVICE_TYPE.PRIVATE_CACHE, gUser(this));
-            // Retrieve the list
-            IList<BiblePayCommon.Entity.NewsFeedItem> l1 = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.NewsFeedItem>(false, 
-                "newsfeeditems", null, SERVICE_TYPE.PRIVATE_CACHE);
             return;
         }
     }

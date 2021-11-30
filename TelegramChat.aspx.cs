@@ -96,6 +96,22 @@ namespace Unchained
             return ltm2;
         }
 
+        public static int ChooseSmallestLength(List<string> s)
+        {
+            int nPointer = -1;
+            int nSmallest = 99999;
+            for (int i = 0; i < s.Count; i++)
+            {
+                int nLen = s[i].Length;
+                if (nLen > 0 && nLen < nSmallest)
+                {
+                    nPointer = i;
+                }
+
+            }
+            return nPointer;
+        }
+
         public static TelegramMessage GetTelegramMessageById(long nMsgID)
         {
             List<BiblePayCommon.Common.TelegramMessage> lT = GetArchivedTelegramMessages(lANRSocialChatID);
@@ -114,7 +130,55 @@ namespace Unchained
             string sOut = RenderTelegramMessage(t);
             return sOut;
         }
+        public static string ReplaceTelegramLinks(string s)
+        {
+            // Replace any non https t.me with t.me
+            s = s.Replace(" t.me", " https://t.me");
+            string sOut = "";
+            for (int i = 0; i < s.Length; i++)
+            {
+                string sSearchPhrase = "https://t.me";
+                string sMid = Mid(s, i, sSearchPhrase.Length);
+                string sOld = Mid(s, i - 1, 1);
+                string sLeftOver = Mid(s, i,  256);
 
+                if (sMid==sSearchPhrase  && sOld != "'" && sOld != "\"")
+                {
+                    // this needs replaced
+                    string sExtract = "";
+                    List<string> s1 = new List<string>();
+                    s1.Add(ExtractXML(sLeftOver, sSearchPhrase, "&nbsp;"));
+                    s1.Add(ExtractXML(sLeftOver, sSearchPhrase, " "));
+                    s1.Add(ExtractXML(sLeftOver, sSearchPhrase, "\n"));
+                    int nPos = ChooseSmallestLength(s1);
+                    if (nPos > -1)
+                    {
+                        sExtract = s1[nPos];
+                    }
+
+                    if (sExtract =="")
+                    {
+                        sExtract = ExtractXML(sLeftOver, sSearchPhrase, "<");
+                    }
+                    if (sExtract != "")
+                    {
+                        string sOrigLink = sSearchPhrase + sExtract;
+                        string sLink = "<a href='" + sOrigLink + "'>" + sOrigLink + "</a>";
+                        i = i + sExtract.Length + sSearchPhrase.Length - 1;
+                        sOut += sLink;
+                    }
+                    else
+                    {
+                        sOut += Mid(s, i, 1);
+                    }
+                }
+                else
+                {
+                    sOut += Mid(s, i, 1);
+                }
+            }
+            return sOut;
+        }
         public static string RenderTelegramMessage(TelegramMessage t)
         {
             string sValueControl = t.Text + "";
@@ -149,6 +213,9 @@ namespace Unchained
                     sWebPage += "</div>";
                     sValueControl += sWebPage;
                 }
+
+                // Reserved to replace telegram links here...
+
             }
             else if (t.ContentType == "messageVideo")
             {
@@ -165,6 +232,7 @@ namespace Unchained
                 sValueControl = "<a href='" + MakeTelegramURL(t.Path) + "' target=_blank><img src='" + MakeTelegramURL(t.Path) + "' style='width:100%;'/></a>";
                 sValueControl += "<span>" + sIntro + t.Text + "</span>";
 
+                sValueControl = ReplaceTelegramLinks(sValueControl);
             }
             else if (t.ContentType == "messageSticker")
             {
@@ -175,11 +243,14 @@ namespace Unchained
             {
                 // Reserved for Telegram unsupported messages
             }
-
+            if (sValueControl.Contains("https://t.me"))
+            {
+                string s9099 = "";
+            }
+            // Replace any t.me links:
+            sValueControl = ReplaceTelegramLinks(sValueControl);
             return sValueControl;
-
         }
-
 
         public static string MakeTelegramURL(string sPath)
         {

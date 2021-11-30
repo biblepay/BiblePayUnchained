@@ -30,7 +30,6 @@ namespace Unchained
             _action = Request.QueryString["action"] ?? "";
             if (_action == "setavatar")
             {
-                lblPageHeading.Text = "Upload your avatar picture here:";
                 lblBody.Text = "(Optional) Avatar Text:";
                 lblSubject.Text = "(Optional) Avatar Subject:";
                 string[] vExt = ".jpeg,.gif,.jpg,.bmp,.png".Split(",");
@@ -39,7 +38,6 @@ namespace Unchained
             }
             else if (_action == "setattachment" || _action == "setticketattachment")
             {
-                lblPageHeading.Text = "Upload your timeline attachment here:";
                 lblBody.Text = "(Optional) Write something about your timeline post:";
                 lblSubject.Text = "(Optional) Write a subject about your attachment:";
                 if (!IsPostBack)
@@ -49,18 +47,11 @@ namespace Unchained
                     txtSubject.Text = sType + " Attachment";
                 }
             }
-            else
-            {
-                lblPageHeading.Text = "Upload your contribution here:";
-                lblBody.Text = "Body:";
-                lblSubject.Text = "Subject:";
-            }
             if (!IsPostBack)
             {
                
             }
         }
-
         protected string OffchainUpload(BiblePayCommon.Entity.object1 o1, int iFileNo)
         {
             string sCat = Request.Form["ddCategory"].ToNonNullString();
@@ -74,6 +65,8 @@ namespace Unchained
 
         protected void btnUnchainedSave_Click(object sender, EventArgs e)
         {
+            string JSClose = "<script>function removeAllChildNodes(parent) {  while (parent.lastElementChild) {    parent.removeChild(parent.lastElementChild);    }   }";
+            JSClose += "var oParent=parent.document.getElementById('divupload');parent.closeIFrame();</script>";
 
             if (!gUser(this).LoggedIn)
             {
@@ -125,7 +118,6 @@ namespace Unchained
                     o.Title = txtSubject.Text;
                     o.Subject = txtSubject.Text;
                     o.Body = txtBody.Text;
-
                     o.Attachment = 0;
 
                     if (_action == "setavatar" || _action == "setattachment" || _action == "setticketattachment")
@@ -150,35 +142,35 @@ namespace Unchained
                         {
                             Session["stack"] = UICommon.Toast("Not Updated", "Your avatar failed.");
                         }
-                        Response.Redirect("RegisterMe.aspx");
+
+                        Response.Write(JSClose);
+                        return;
+                        //UICommon.MsgBox("Success", "Your profile picture has been updated!", this);
                     }
                     // End of Avatar
-
-
-
                 }
             }
-
-
             // Redirects 
 
-            if (_action == "setattachment")
+            if (_action == "setticketattachment")
             {
-                Response.Redirect("Person.aspx");
+                
+                Response.Write(JSClose);
+                return;
             }
-            else if (_action == "setticketattachment")
+            else if (_action == "setattachment")
             {
-                Response.Redirect("TicketList.aspx");
+                UICommon.MsgBox("Success", "Social Media Timeline Attachment Uploaded", this);
             }
-
 
             // End of Redirects
 
-
             if (fSuccess)
             {
-                string narr = "Thank you for using our Decentralized Social Media System.  <br><br>Your video will be available as soon as it is transcoded (Usually within 20 minutes). ";
-                UICommon.MsgBox("Social Media Video Uploaded", narr, this);
+                Response.Write(JSClose);
+                return;
+                // string narr = "Thank you for using our Decentralized Social Media System.  <br><br>Your video will be available as soon as it is transcoded (Usually within 20 minutes). ";
+                // UICommon.MsgBox("Social Media Video Uploaded", narr, this);
             }
             else
             {

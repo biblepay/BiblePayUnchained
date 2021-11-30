@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BiblePayCommon;
+using System;
 using System.Data;
 using System.Web.UI;
 using static BiblePayCommon.Common;
@@ -10,79 +11,42 @@ namespace Unchained
 {
     public partial class Admin : Page
     {
+
         protected void Page_Load(object sender, EventArgs e)
         {
-
-         
-        }
-        
-
-
-
-        protected void btnSaveOrganization_Click(object sender, EventArgs e)
-        {
-
             if (gUser(this).Administrator != 1)
             {
-                UICommon.MsgBox("ERROR", "Sorry, you must be an administrator.", this);
+                UICommon.MsgBox("Error", "You are not authorized", this);
             }
 
-            if (txtOrganizationName.Text == "" || txtDomainName.Text == "")
+            string sID = Request.QueryString["Organization"] ?? "";
+            dynamic o = GetObjectWithFilter(IsTestNet(this), "Organization", "id='" + sID + "'");
+            if (o != null)
             {
-                UICommon.MsgBox("ERROR", "Org and Domain must be populated.", this);
+                lblOrganizationName.Text = o.Name;
             }
-            BiblePayCommon.Entity.Organization O = new BiblePayCommon.Entity.Organization();
-            O.Domain = txtDomainName.Text;
-            O.Name = txtOrganizationName.Text;
-            BiblePayCommon.IBBPObject oOld = GetObjectWithFilter(IsTestNet(this), "Organization", "Name='" + O.Name + "'");
-            if (oOld.id != null)
-            {
-                UICommon.MsgBox("Error", "This Organization already exists.", this);
-            }
-
-
-            O.id = Guid.NewGuid().ToString();
-            BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), O, gUser(this));
-            if (r.fError())
-            {
-                UICommon.MsgBox("Error while inserting object", "Sorry, the object was not saved: " + r.Error, this);
-            }
-            BiblePayCommonNET.UICommonNET.ToastLater(this, "Sucess", "Successfully added.");
+            // Does the current user play the role by name, and, is the Server authorized to Execute this role?
+            // Add configuration keys too (Key for d660,feature path, value)
+            bool fPlays = BiblePayDLL.Sidechain.UserPlaysRole(IsTestNet(this), "LocalhostOrg2Admin", gUser(this).id);
         }
 
-        protected void btnSaveRole_Click(object sender, EventArgs e)
+
+        protected void btnListUserRoles_Click(object sender, EventArgs e)
         {
-            if (gUser(this).Administrator != 1)
+            string sUser = Request.Form["ddusers_list"].ToNonNullString();
+            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), "UserRole");
+            dt = dt.FilterBBPDataTable("UserID='" + sUser + "'");
+            string html = "<table><tr><th>Role Name</th></tr>";
+            for (int i = 0; i < dt.Rows.Count; i++)
             {
-                UICommon.MsgBox("ERROR", "Sorry, you must be an administrator.", this);
+                //string sRoleID = dt.GetColValue(i, "RoleID");
+                dynamic oRole = GetObjectWithFilter(IsTestNet(this), "Role", "ID='" + dt.GetColValue(i,"RoleID") + "'");
+                string sRow = "<tr><td>" + oRole.Name + "</td></tr>";
+                html += sRow;
             }
-
-            BiblePayCommon.Entity.Role R = new BiblePayCommon.Entity.Role();
-            string sOrg = Request.Form["ddorganization"].ToNonNullString();
-            if (sOrg == "")
-            {
-                UICommon.MsgBox("ERROR", "Org must be chosen", this);
-            }
-            if (txtRoleName.Text == "")
-            {
-                UICommon.MsgBox("ERROR", "Role Name must be chosen", this);
-            }
-            R.OrganizationID = Request.Form["ddorganization"];
-            R.Name = txtRoleName.Text;
-
-            BiblePayCommon.IBBPObject o = GetObjectWithFilter(IsTestNet(this), "Role", "OrganizationID='" + R.OrganizationID + "' and Name='" + R.Name + "'");
-            if (o.id != null)
-            {
-                UICommon.MsgBox("Error", "This role already exists.", this);
-            }
-
-            R.id = Guid.NewGuid().ToString();
-            BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), R, gUser(this));
-            if (r.fError())
-            {
-                UICommon.MsgBox("Error while inserting object", "Sorry, the object was not saved: " + r.Error, this);
-            }
-            BiblePayCommonNET.UICommonNET.ToastLater(this, "Sucess", "Successfully added.");
+            html += "</table>";
+            lblRoles.Text = html;
+           
         }
 
         protected void btnSaveUserRole_Click(object sender, EventArgs e)
@@ -117,7 +81,8 @@ namespace Unchained
             {
                 UICommon.MsgBox("Error while inserting object", "Sorry, the object was not saved: " + r.Error, this);
             }
-            BiblePayCommonNET.UICommonNET.ToastLater(this, "Sucess", "Successfully added.");
+            BiblePayCommonNET.UICommonNET.ToastNow(this, "Sucess", "Successfully added.");
+
         }
 
         protected void btnSavePermission_Click(object sender, EventArgs e)
@@ -164,7 +129,7 @@ namespace Unchained
             {
                 UICommon.MsgBox("Error while inserting object", "Sorry, the object was not saved: " + r.Error, this);
             }
-            BiblePayCommonNET.UICommonNET.ToastLater(this, "Sucess", "Successfully added.");
+            BiblePayCommonNET.UICommonNET.ToastNow(this, "Sucess", "Successfully added.");
         }
 
     }

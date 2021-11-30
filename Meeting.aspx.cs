@@ -25,7 +25,7 @@ namespace Unchained
             {
                 UICommon.MsgBox("Unauthorized", "Sorry, you must be logged in to use this feature.", this);
             }
-            bool fGot = UICommon.dictChats.TryGetValue(gUser(this).id, out myChat);
+            bool fGot = UICommon.GetChatStruct(gUser(this).id, out myChat);
 
             string sNarrative = "";
             string sMeetingName = "";
@@ -58,7 +58,7 @@ namespace Unchained
                 {
                     myChat.NotifiedOfEntry = true;
                     BiblePayCommonNET.UICommonNET.MsgModal(this, "Paged", "We have paged your friend.  You may move this tab to the side and continue working, and if your friend accepts the chat, they will enter the room. ", 400, 300, true);
-                    UICommon.dictChats[gUser(this).id] = myChat;
+                    UICommon.dictChats2[myChat.chatGuid] = myChat;
                 }
             }
             

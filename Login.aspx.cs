@@ -57,7 +57,7 @@ namespace Unchained
 
         protected void btnRegister_Click(object sender, EventArgs e)
         {
-            Response.Redirect("RegisterMe.aspx");
+            Response.Redirect("RegisterNewUser.aspx");
         }
 
 
@@ -88,17 +88,18 @@ namespace Unchained
             }
             BiblePayCommon.HalfordDatabase.SetKVDWX("LockedOut" + g.id, 1, 60 * 30);
 
-            MailMessage m = new MailMessage();
+            BiblePayCommon.Common.BiblePayMailMessage m = new BiblePayMailMessage();
             string sDomainName = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
-            string sURL = sDomainName + "/RegisterMe?action=resetpassword&id=" + g.id.ToString() + "&RSAKey=" + g.RSAKey.ToString();
+            string sURL = sDomainName + "/AccountEdit?action=resetpassword&id=" + g.id.ToString() + "&RSAKey=" + g.RSAKey.ToString();
             string sNarr = "Dear " + g.FirstName + ", <br>To reset your password, please click <a href='" + sURL + "'>here.<br><br>Thank you.<br>";
-            m.Subject = "Reset Password Request";
-            m.Body = sNarr;
-            m.IsBodyHtml = true;
-            m.To.Add(new MailAddress(g.EmailAddress, g.FirstName));
+
+            m.PrimaryMailMessage.Subject = "Reset Password Request";
+            m.PrimaryMailMessage.Body = sNarr;
+            m.PrimaryMailMessage.IsBodyHtml = true;
+            m.UserToAddress.Add(g);
             EmailNarr e1 = GetEmailFooter(this);
 
-            DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(this), m, e1.DomainName);
+            DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(this), m, e1.DomainName, true);
             MsgModal(this, r.OverallResult ? "Sent" : "Not Sent", 
                 r.OverallResult ? "Your password reset request has been e-mailed to you!" : "Your notification failed.", 400, 200, true);
         }
@@ -153,7 +154,17 @@ namespace Unchained
             this.Page.Session["stack"] = UICommon.Toast("Logging Off", "You are now logged off.");
             // Cookie
             BMS.StoreCookie("pwhash", "");
-            Response.Redirect("Login");
+
+            string sDefDoc = Config("defaultdocumentlogoff");
+            if (sDefDoc == "")
+            {
+                Response.Redirect("Login");
+            }
+            else
+            {
+                Log("Redirecting to " + sDefDoc);
+                Response.Redirect(sDefDoc);
+            }
         }
     }
 }

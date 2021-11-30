@@ -38,6 +38,13 @@ namespace Unchained
         {
             string sSource = Request.QueryString["type"].ToNonNullString();
             string sPath = Server.MapPath("JesusChrist/" + sSource + ".htm");
+            if (sSource.ToLower().Contains("anr"))
+            {
+                sPath = Server.MapPath("Images/" + sSource + ".htm");
+                string sURL = "Images/" + sSource + ".htm";
+                string sHTML = "<iframe src='" + sURL + "' style='height:1000px;width:100%;overflow:hidden;border:0;'/>";
+                return sHTML;
+            }
             if (!System.IO.File.Exists(sPath))
             {
                 UICommon.MsgBox("Error", "Sorry, this content does not exist.", this);

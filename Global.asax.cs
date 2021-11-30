@@ -24,6 +24,8 @@ namespace Unchained
 
             Session.Timeout = 86400;
         }
+        private static int nVersion = 1002;
+
 
         void Application_Error(object sender, EventArgs e)
         {
@@ -76,16 +78,15 @@ namespace Unchained
             if (!fHandled)
             {
                 MailAddress mTo = new MailAddress("rob@biblepay.org", "Rob Andrews");
-                MailMessage m = new MailMessage(mTo, mTo);
-
+                BiblePayCommon.Common.BiblePayMailMessage m = new BiblePayCommon.Common.BiblePayMailMessage();
+                m.PrimaryMailMessage.To.Add(mTo);
                 string sSubject = "SERVER ERROR " + Request.Url.ToString() + " " + BiblePayCommon.Common.Mid(sNarr, 0, 200);
                 sSubject = sSubject.Replace('\r', ' ').Replace('\n', ' ');
-                m.Subject = sSubject;
-                m.Body = sNarr;
-                m.IsBodyHtml = false;
-                BiblePayDLL.Sidechain.SendMail(false, m, "");
+                m.PrimaryMailMessage.Subject = sSubject;
+                m.PrimaryMailMessage.Body = sNarr;
+                m.PrimaryMailMessage.IsBodyHtml = false;
+                BiblePayDLL.Sidechain.SendMail(false, m, "", true);
             }
-
             BiblePayCommon.Common.Log2(Request.Url.ToString() + "\r\n" + sNarr);
             if (fSessionExists)
             {
@@ -105,8 +106,10 @@ namespace Unchained
         void Application_Start(object sender, EventArgs e)
         {
 
+            
+
             BiblePayCommon.Common.DOMAIN_NAME = System.Web.Hosting.HostingEnvironment.SiteName;
-            BiblePayCommon.Common.Log2("BiblePay Unchained v1.3 - Starting Up - Site Name: " + BiblePayCommon.Common.DOMAIN_NAME);
+            BiblePayCommon.Common.Log2("BiblePay Unchained v1.6 - Starting Up - Site Name: " + BiblePayCommon.Common.DOMAIN_NAME);
 
             bool fOK = BiblePayDLL.Sidechain.CheckForUpgrade();
             if (!fOK)
