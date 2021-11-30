@@ -1,7 +1,9 @@
 ﻿<%@ Page Title="Greeing Cards" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" EnableEventValidation="false" CodeBehind="GreetingCard.aspx.cs" Inherits="Unchained.GreetingCard" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-
+    
+  <asp:UpdatePanel runat="server" ID="UpdatePanel2">
+     <ContentTemplate>
     <h3>BiblePay Greeting Card and Virtual Gift Card Home Delivery - v1.4</h3>
 
     <br />
@@ -63,5 +65,6 @@
      <asp:Label ID="lblInfo" runat="server" style="color:red;" Text=""></asp:Label></td>
 
   <br />
-   
+   </ContentTemplate></asp:UpdatePanel>
+
 </asp:Content>

@@ -60,15 +60,17 @@ namespace Unchained
         {
             // Assigned to Me
 
+            if (gUser(this).LoggedIn == false)
+                Response.Redirect("VideoList");
 
             string sTicketHistoryIDs = GetTicketIdsFromHistory(IsTestNet(this), gUser(this).id);
 
             string s1 = GetTicketListBase("isnull(disposition,'') <> 'Closed' and (AssignedTo='" 
-                + gUser(this).id + "' or UserID='" + gUser(this).id + "')",
+                + gUser(this).id + "')",
                 "Assigned To Me or Added by Me");
 
-            string s2 = GetTicketListBase("isnull(disposition,'') <> 'Closed' and (" + sTicketHistoryIDs + ")",
-                "Assigned By Me or Worked by Me");
+            string s2 = GetTicketListBase("isnull(disposition,'') <> 'Closed' and (" + sTicketHistoryIDs + ") or  (disposition <> 'Closed' and UserID='" + gUser(this).id + "')",
+                "Assigned By Me or Worked by Me or Added by Me");
 
 
             // string s2 = GetTicketListBase("UserID='" + gUser(this).id + "' and isnull(disposition,'') <> 'Closed'", "Added by Me");

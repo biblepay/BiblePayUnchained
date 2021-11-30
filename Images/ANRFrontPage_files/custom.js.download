@@ -1,0 +1,18 @@
+jQuery(document).ready(function(){
+	jQuery(".hamburger").on("click", function() {
+		console.log('click open 4');
+		jQuery(this).parent(".hamburger-wrapper").toggleClass("hamburger-active");
+		jQuery(this).parent(".hamburger-wrapper").parent().toggleClass("hamburger-active-parent");
+		jQuery(this).parent(".hamburger-wrapper").parent().parent().parent().parent().toggleClass("hamburger-active-parent-blobal");
+	});
+
+	jQuery(window).scroll(function(){
+	  console.log('DONE scrroll');
+	    console.log(jQuery(window).scrollTop());
+	    if(jQuery(this).scrollTop() > 8){	     
+	        jQuery('.container.container-hamburger').addClass('sticky')
+	    } else{
+	        jQuery('.container.container-hamburger').removeClass('sticky')
+	    }
+	});
+})

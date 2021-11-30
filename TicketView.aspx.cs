@@ -74,7 +74,7 @@ namespace Unchained
                 // Notify the assignee
                 if (uAssignee.FirstName.ToNonNullString2() != "")
                 {
-                    MailMessage m = new MailMessage();
+                    BiblePayMailMessage m = new BiblePayMailMessage();
                     string sLastNarr = gUser(this).FirstName + " said:<br>" + th.Body + "<br><br>";
                     if (th.Hours > 0)
                     {
@@ -88,7 +88,7 @@ namespace Unchained
                         + " has been assigned to you for " + T.Disposition + ".  "
                         + "<br><br>To view the ticket, click <a href='" + sURL + "'>here. </a><br><br>" + sLastNarr 
                         +" Thank you.<br>The " + e1.DomainName + " Team<br>";
-                    m.Subject = "[Transactional Message] Ticket #" + T.TicketNumber + " - " + T.Title + " has been assigned to you for " + T.Disposition;
+                    m.PrimaryMailMessage.Subject = "[Transactional Message] Ticket #" + T.TicketNumber + " - " + T.Title + " has been assigned to you for " + T.Disposition;
                     // CC everyone who touched this ticket also
                     BiblePayCommon.BBPDataTable th1 = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), "TicketHistory");
                     th1 = th1.FilterBBPDataTable("parentid='" + id + "'");
@@ -99,22 +99,38 @@ namespace Unchained
                         User u1 = gUserById(this, sAssignedTo);
                         if (u1.EmailAddress.ToNonNullString2() != "")
                         {
-                            MailAddress mad = new MailAddress(u1.EmailAddress, u1.FullUserName());
-                            if (!m.CC.Contains(mad) && !m.To.Contains(mad) && !m.Bcc.Contains(mad))
-                                 m.CC.Add(mad);
+                            if (!m.UserCC.Contains(u1) && !m.UserToAddress.Contains(u1) && !m.UserBCC.Contains(u1))
+                                m.UserCC.Add(u1);
                         }
                     }
-                    m.Body = sNarr;
-                    m.IsBodyHtml = true;
-                    m.To.Add(new MailAddress(uAssignee.EmailAddress, uAssignee.FullUserName()));
-                    DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(this), m, e1.DomainName);
+                    // Add the entered by person too
+                    User uAddedBy = gUserById(this, T.UserID);
+                    if (uAddedBy.id != "" && uAddedBy.EmailAddress.ToNonNullString2() != "")
+                    {
+                        if (!m.UserCC.Contains(uAddedBy) && !m.UserToAddress.Contains(uAddedBy) && !m.UserBCC.Contains(uAddedBy))
+                            m.UserCC.Add(uAddedBy);
+                    }
+
+                    m.PrimaryMailMessage.Body = sNarr;
+                    m.PrimaryMailMessage.IsBodyHtml = true;
+                    m.UserToAddress.Add(uAssignee);
+                    
+                    DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(this), m, e1.DomainName, true);
                 }
                 Response.Redirect("TicketList");
             }
             else if (e.EventName == "AddAttachment_Click")
             {
-                string sURL = "UnchainedUpload?action=setticketattachment&parentid=" + e.EventValue;
-                Response.Redirect(sURL);
+                MsgInputUnchainedUpload(this, "AddedAttachment", "Add Ticket Attachment", "action=setticketattachment&parentid=" + e.EventValue, 750);
+            }
+            else if (e.EventName == "UploadFile_Click")
+            {
+
+            }
+            else if (e.EventName == "AddedAttachment")
+            {
+                string sNarr = "If you uploaded a video, please wait (approx. 20 mins) for it to be transcoded.  If you uploaded an image or an attachment, it will be available by the next block. [My Uploads are coming soon. ]";
+                BiblePayCommonNET.UICommonNET.MsgModal(this, "Success", "Your file has been uploaded.  <br><br>" + sNarr, 400, 200, true);
             }
         }
 
@@ -151,10 +167,16 @@ namespace Unchained
                 sLastInteraction = dt.Rows[0]["Body"].ToString();
             }
 
+            string sAddOPAttachmentButton = "";
+            if (gUser(this).Administrator == 1 || gUser(this).id == dt.Rows[0]["UserID"].ToString())
+            {   
+                sAddOPAttachmentButton = UICommon.GetStandardButton(id,
+                  "<i class='fa fa-file'></i>", "AddAttachment", "Add media to this ticket, such as a URL, a video, an mp3, a pdf, an image...etc");
+            }
             string div = "<table class='comments'>"
-                + "<tr><th class='objheader' colspan=3><h3>" + _ObjectName + " #" + dt.GetColValue(0,"TicketNumber") 
+                + "<tr><th class='objheader' colspan=3><h3>" + _ObjectName + " #" + dt.GetColValue(0, "TicketNumber")
                 + " - View</h3><th class='objheader' colspan=3><div class='prayer'>"
-                + UICommon.GetStandardAnchor(id, "DeleteObject", id, "<i class='fa fa-trash'></i>","Delete this " + _EntityName, _EntityName ) 
+                + UICommon.GetStandardAnchor(id, "DeleteObject", id, "<i class='fa fa-trash'></i>", "Delete this " + _EntityName, _EntityName)
                 + "</div></th></tr>"
                 + "<tr><td width=10%>Added By:<td>" + UICommon.GetUserAvatarAndName(this, dt.GetColValue("UserID"))
                 + "<tr><td>Added:<td>" + dt.GetColDateTime(0, "time").ToString() + "</td></tr>"
@@ -162,7 +184,17 @@ namespace Unchained
                 + "<tr><td>Disposition:<td>" + sDisposition + "</td></tr>"
                 + "<tr><td>Assigned To:<td>" + UICommon.GetUserAvatarAndName(this, sAssignedTo) + "</td></tr>"
                 + "<tr><td>Last Interaction:<td colspan=6><textarea class='pc90 comments' rows=10 columns=10 readonly=true>" + sLastInteraction + "</textarea></td></tr>"
-                + "</table>";
+                + "<tr><td>" + sAddOPAttachmentButton + "</td></tr>";
+            //string sOPAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetLightboxGallery(this,              id, "", "Ticket Attachments", "") + "</td></tr></table></td></tr>";
+            string sOPAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetAttachments(this,
+                 id, "", "Ticket Attachments", "") + "</td></tr></table></td></tr>";
+
+            // Any Ticket OP attachments?
+            div += sOPAttachments;
+
+            div += "</table>";
+
+            // End of OP Post
 
             // Ticket History
             string sHistory = "<hr><table class='comments'>";
@@ -202,10 +234,10 @@ namespace Unchained
                 string sRow = "<tr><td colspan=10><hr></tr><tr>" + sAssignedFromControl;
                 string sBody = th.Rows[i]["Body"].ToString();
                 // Add Attachment button
-                string sAddTimelineAttachmentButton = "";
+                string sAddHistoryAttachmentButton = "";
                 if (th.GetColValue(i, "UserID") == gUser(this).id)
                 {
-                    sAddTimelineAttachmentButton = UICommon.GetStandardButton(th.Rows[i]["id"].ToString(),
+                    sAddHistoryAttachmentButton = UICommon.GetStandardButton(th.Rows[i]["id"].ToString(),
                         "<i class='fa fa-file'></i>", "AddAttachment", "Add media to this post, such as a URL, a video, an mp3, a pdf, an image...etc");
                 }
 
@@ -215,15 +247,15 @@ namespace Unchained
                     sRow += "<td>" + th.GetColDateTime(i, "time").ToString()
                         + "<td>Hours: " + th.GetColDouble(i,"Hours").ToString() + "</td></tr>"
                         + "<tr><td colspan=6><textarea class='pc90 comments' rows=10 columns=10 readonly=true>" + sBody + "</textarea>"
-                        + sAddTimelineAttachmentButton + "</td></tr>";
+                        + sAddHistoryAttachmentButton + "</td></tr>";
                 }
 
                 sHistory += sRow;
 
                 // Display the attachments
-                //string sAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetAttachments(this, th.Rows[i]["id"].ToString(), "", "Ticket Attachments", "") + "</td></tr></table></td></tr>";
-                string sAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetLightboxGallery(this,
-                    th.Rows[i]["id"].ToString(), "", "Ticket Attachments", "") + "</td></tr></table></td></tr>";
+                string sAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetAttachments(this, th.Rows[i]["id"].ToString(), "", "Ticket Attachments", "") + "</td></tr></table></td></tr>";
+                //string sAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetLightboxGallery(this,  th.Rows[i]["id"].ToString(), "", "Ticket Attachments", "") + "</td></tr></table></td></tr>";
+
 
                 sHistory += sAttachments;
             }

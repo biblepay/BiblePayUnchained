@@ -9,6 +9,7 @@ using static BiblePayCommon.Common;
 using static BiblePayCommonNET.DataTableExtensions;
 using static BiblePayCommon.DataTableExtensions;
 using OpenHtmlToPdf;
+using System.Web.UI;
 
 namespace Unchained
 {
@@ -17,8 +18,8 @@ namespace Unchained
 
         protected new void Page_Load(object sender, EventArgs e)
         {
-
-        }
+            ScriptManager.GetCurrent(this).RegisterPostBackControl(btnRun);
+    }
 
         int DatePickerToUnixTimestamp(string sDatePickerValue)
         {
@@ -64,7 +65,5 @@ namespace Unchained
             Response.Flush();
             Response.End();
         }
-
-
     }
 }

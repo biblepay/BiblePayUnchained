@@ -2,6 +2,9 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
   
+     <asp:UpdatePanel runat="server" ID="UpdatePanel1">
+     <ContentTemplate>
+
 
     <h3>BiblePay - Non Fungible Tokens</h3>&nbsp;&nbsp;  <font color="red"> <asp:Label ID="lblAction" runat="server" Text=""></asp:Label></font>
 
@@ -56,5 +59,8 @@
 
    <asp:Label ID="lblInfo" runat="server" Text="Note:  It costs 100 BBP to create or edit an NFT."></asp:Label>
 
+   </ContentTemplate>
+</asp:UpdatePanel>
+         
 
 </asp:Content>

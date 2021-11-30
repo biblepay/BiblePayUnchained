@@ -3,6 +3,9 @@
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
   
 
+     <asp:UpdatePanel runat="server" ID="UpdatePanel1">
+     <ContentTemplate>
+
     <script>
         function pb() {
             var e = {}; e.Event = 'event_pin';BBPPostBack2(this, e);
@@ -41,6 +44,9 @@
     
          <asp:Label ID="lblInfo" runat="server"  Text="Welcome to the Portfolio Builder!"></asp:Label>
 
+         </ContentTemplate>
 
+</asp:UpdatePanel>
+         
 
 </asp:Content>

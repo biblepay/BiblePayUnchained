@@ -1,0 +1,102 @@
+.vjs-wpstream .vjs-control-bar {
+    background-color: hsl(0 0% 100% / 0);
+    padding: 0px 12px;
+    height: auto;
+    height: 4em;
+}
+
+.vjs-wpstream .vjs-control{
+    height: 44px;
+    width: 34px;
+    opacity: 0.87;
+    transition: 0.3s ease-out;
+    padding: 0px;
+    height: 3em;
+    width: 3em;
+}
+
+.video-js .vjs-progress-control{
+    width: 4em;
+    min-width: 4em;
+}
+
+
+.vjs-wpstream .vjs-button>.vjs-icon-placeholder:before {
+    font-size: 2.1em;
+    line-height: 44px;
+    line-height: 1.6;
+
+}
+
+.vjs-wpstream .button:hover,
+.vjs-wpstream button:hover,
+.vjs-wpstream input[type="button"]:hover,
+.vjs-wpstream input[type="reset"]:hover,
+.vjs-wpstream input[type="submit"]:hover {
+    background: transparent;
+    opacity: 1;
+}
+
+.vjs-wpstream  .vjs-live-control {
+    font-size: 1.1em;
+    line-height: 3em;
+}
+
+
+.vjs-wpstream .vjs-volume-panel .vjs-volume-control {
+    margin: 0px 0px 0px 0px;
+}
+
+.vjs-wpstream .vjs-button{
+    background-color: transparent!important;
+}
+    
+.vjs-wpstream  .vjs-fullscreen-control{
+    background-image: url(images/fullscreen_simple.svg)!important;
+    background-position: 50%!important;
+    background-repeat: no-repeat!important;
+    background-size: 47%!important;
+}
+
+
+.vjs-wpstream.vjs-fullscreen   .vjs-fullscreen-control{
+    background-image: url(images/fullscreen_full.svg)!important;
+    background-position: 50%!important;
+    background-repeat: no-repeat!important;
+    background-size: 47%!important;
+}
+
+.vjs-wpstream  .vjs-picture-in-picture-control{
+    background-image: url(images/pip_player.svg)!important;
+    background-position: 67% 54%!important;
+    background-repeat: no-repeat!important;
+    background-size: 60%!important;
+}
+
+
+
+.vjs-wpstream  .vjs-fullscreen-control:hover{
+    background-size: 47%!important; 
+}
+
+.vjs-wpstream .vjs-fullscreen-control .vjs-icon-placeholder:before,
+.vjs-wpstream .vjs-icon-fullscreen-enter:before {
+    content: "";
+    display: none;
+}
+
+.vjs-wpstream.vjs-fullscreen .vjs-fullscreen-control .vjs-icon-placeholder:before, 
+.vjs-wpstream .vjs-icon-fullscreen-exit:before{
+    
+}
+
+
+.vjs-wpstream .vjs-time-control{
+    line-height: 44px;
+    line-height: 3em;
+}
+
+
+.vjs-wpstream .vjs-big-play-button{
+    border: .06666em solid #595656;
+}

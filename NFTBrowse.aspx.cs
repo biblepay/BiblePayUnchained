@@ -77,7 +77,7 @@ namespace Unchained
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 BiblePayCommon.Entity.NFT n = (BiblePayCommon.Entity.NFT)BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, "NFT", i);
-                if (sTypes.Contains(n.Type) && !n.fDeleted)
+                if (sTypes.Contains(n.Type) && !n.fDeleted && n.Marketable)
                 {
                     nList.Add(n);
                 }
@@ -136,17 +136,15 @@ namespace Unchained
                 if (n[i].Marketable)
                 {
                     string sButtonCaption = fOrphansOnly ? "Sponsor Now" : "Buy it Now";
-                    string sSubCaption = fOrphansOnly ? "Sponsor this Orphan now" : "Purchase this NFT now";
+                    string sSubCaption = fOrphansOnly ? "Sponsor Now" : "Buy Now";
                     string sBuyItNowPrice = n[i].BuyItNowAmount.ToString() + " BBP";
                     string sPurchaseCaption = "Are you sure you want to " + sSubCaption + " for " + sBuyItNowPrice + "?";
-                    string sButton = UICommon.GetStandardButtonWithConfirm(sID, sButtonCaption, "btnBuyNFT", sPurchaseCaption, sPurchaseCaption);
                     string sPreviewURL = sURLLow + "?id=" + sID;
                     string sPreviewButton = "<input type='reset' onclick=\"window.open('" + sPreviewURL + "');\" value='Preview' />";
-
-                    string sBidButton = "<button onclick=\"var amt=prompt('Please enter the bid "
-                        + "amount you are offering', '0'); var Extra = {}; Extra.Amount = amt; Extra.Event='btnBidNFT_Click'; Extra.Value='" 
-                        + sID + "';BBPPostBack2(null, Extra); return true;"
-                        + "\" value='Make Offer'>Make Offer</button>";
+                    string sBidButton = UICommon.GetStandardButton(n[i].GetHash(), "Make Offer", "BidNFTStep1", 
+                        "Make Offer on this NFT", "");
+                    string sBuyItNowButton = UICommon.GetStandardButton(n[i].GetHash(), sSubCaption, "BuyNFTStep1", 
+                        sPurchaseCaption, "e.Amount=" + n[i].BuyItNowAmount.ToString() + ";");
 
                     string sAsset = "<iframe style='height: 200px;width:300px;' src='" + sURLLow + "'></iframe>";
                     if (sURLLow.Contains(".gif") || sURLLow.Contains(".jpg") || sURLLow.Contains(".jpeg") || sURLLow.Contains(".png"))
@@ -177,7 +175,7 @@ namespace Unchained
 
                     }
 
-                    s1 += "<br>" + sButton;
+                    s1 += "<br>" + sBuyItNowButton;
                     if (!fOrphansOnly)
                     {
                         s1 += sBidButton;
@@ -226,7 +224,7 @@ namespace Unchained
         protected override void Event(BBPEvent e)
         {
 
-            if (e.EventAction == "btnBuyNFT_Click" && e.EventValue.Length > 10)
+            if (e.EventAction == "btnBuyNFT_Click")
             {
 
 
@@ -235,19 +233,28 @@ namespace Unchained
                     MsgModal(this, "NFT Buy Error", "Sorry, you must log in first to buy an NFT.", 450, 200);
                     return;
                 }
-                BiblePayCommon.Entity.NFT myNFT = BiblePayUtilities.GetSpecificNFT(IsTestNet(this), e.EventValue);
+                BiblePayCommon.Entity.NFT myNFT = BiblePayUtilities.GetSpecificNFT(IsTestNet(this), e.Extra.Address.ToString());
                 if (myNFT == null)
                 {
                     UICommon.MsgBox("Error", "Sorry, this NFT cannot be found!", this);
                     return;
                 }
-                DACResult d = BiblePayUtilities.BuyNFT1(this, gUser(this).id, e.EventValue, myNFT.BuyItNowAmount, false, IsTestNet(this));
+                DACResult d = BiblePayUtilities.BuyNFT1(this, gUser(this).id, e.Extra.Address.ToString(), myNFT.BuyItNowAmount, false, IsTestNet(this));
+                if (d.fError())
+                {
+                    MsgModal(this, "Error", d.Error, 450, 200);
+
+                }
+                else
+                {
+                    //MsgModal(this, "Success", "Success", 450, 400);
+                }
 
             }
-             else if (e.EventAction == "BoughtNFT")
+            else if (e.EventAction == "BoughtNFT")
             {
                 string sPin = BiblePayCommon.Encryption.Base64DecodeWithFilter((e.Extra.Output ?? "").ToString());
-		DACResult r30 = UICommon.BuySomething2(this, sPin);
+                DACResult r30 = UICommon.BuySomething2(this, sPin);
                 if (!r30.fError())
                 {
                     BiblePayCommon.Entity.NFT n = (BiblePayCommon.Entity.NFT)Session["pendingpurchasenft"];
@@ -263,7 +270,25 @@ namespace Unchained
                     UICommon.MsgBox("Purchase Failed", "Error", this);
                 }
             }
-            else if (e.EventAction == "btnBidNFT_Click" && e.EventValue.Length > 10)
+            else if (e.EventAction == "BuyNFTStep1_Click")
+            {
+                UICommon.MsgInput(this, "btnBuyNFT_Click", "Confirm?", "Are you sure you would like to buy this NFT for " +e.Extra.Amount.ToString() + "?",
+                    500, e.EventValue, "", UICommon.InputType.text, true);
+
+            }
+            else if (e.EventAction == "BidNFTStep1_Click")
+            {
+                // Ask the user how much
+                // 11-18-2021
+                string js = "e.EventValue='" + e.EventValue + "';";
+
+                UICommon.MsgInput(this, "btnBidNFT_Click", "Enter Bid Amount", "Enter the amount you would like to bid on the item >",
+                    500, e.EventValue, "", UICommon.InputType.number, false);
+
+
+
+            }
+            else if (e.EventAction == "btnBidNFT_Click")
             {
                 if (!gUser(this).LoggedIn)
                 {
@@ -271,11 +296,14 @@ namespace Unchained
                     return;
                 }
 
+                double nAmount = GetDouble(BiblePayCommon.Encryption.Base64DecodeWithFilter((e.Extra.Output ?? "").ToString()));
 
-                DACResult d = BiblePayUtilities.BuyNFT1(this, gUser(this).id, e.EventValue, GetDouble(e.Extra.Amount), true, IsTestNet(this));
+
+
+                DACResult d = BiblePayUtilities.BuyNFT1(this, gUser(this).id, e.Extra.Address.ToString(), nAmount, true, IsTestNet(this));
                 if (d.fError())
                 {
-                    MsgModal(this, "NFT Bid Error", d.Error, 450, 200, true);
+                    MsgModal(this, "NFT Bid Error", d.Error, 450, 200,true,true);
                     return;
                 }
                 else

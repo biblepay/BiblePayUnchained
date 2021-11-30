@@ -2,6 +2,9 @@
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
+    
+    <ContentTemplate>
+
     <h3>Hours by Developer:</h3>
     <br />
 
@@ -20,5 +23,8 @@
     <br />
 
     <asp:Button ID="btnRun" runat="server" Text="Run Report" OnClick="Run_Click" />
-   
+<Triggers>          
+      <asp:PostBackTriggerControlID=”btnRun”/>      
+</Triggers>
+
  </asp:Content>

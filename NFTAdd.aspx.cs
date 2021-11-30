@@ -88,6 +88,15 @@ namespace Unchained
 		protected void btnSubmit_Click(object sender, EventArgs e)
 		{
 			BiblePayCommon.Entity.NFT n = new BiblePayCommon.Entity.NFT();
+			n.LowQualityURL = txtLowQualityURL.Text;
+			n.HighQualityURL = txtHighQualityURL.Text;
+
+			n = BiblePayUtilities.GetSpecificNFT(IsTestNet(this), n.GetHash());
+
+			if (n == null)
+			{
+				n = new BiblePayCommon.Entity.NFT();
+			}
 
 			n.Name = txtName.Text;
 			n.UserID = txtOwnerAddress.Text;
@@ -102,6 +111,9 @@ namespace Unchained
 			n.Marketable = ckMarketable.Checked;
 			n.fDeleted = ckDeleted.Checked;
 			n.OwnerUserID = gUser(this).id;
+
+			n.id = n.GetHash();
+
 
 			string sError = "";
 			if (n.Name.Length < 3)
