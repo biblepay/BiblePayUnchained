@@ -2,19 +2,24 @@ body {
     background-color: #f9fafb;
     margin-top: 20px;
 }
-.profile-page{
-    margin-top:70px;
+
+.profile-page {
+    margin-top: 70px;
 }
-    .post-container a{
-        color:#000;
-    }
+
+.post-container a {
+    color: #000;
+}
+
 #friends-container .fa-heart-broken {
     font-size: 22px;
 }
+
 .profile-page .btn-edit-profile,
 .profile-page .btn-edit-profile a:link, .profile-page .btn-edit-profile a:visited {
     color: #fff;
 }
+
 .profile-page .profile-header {
     box-shadow: 0 0 10px 0 rgba(183, 192, 206, 0.2);
     border: 1px solid #f2f4f9;
@@ -98,14 +103,14 @@ body {
 .profile-page .profile-header .cover .cover-body .profile-name {
     font-size: 20px;
     font-weight: 600;
-    margin:0;
+    margin: 0;
     margin-left: 10px;
     font-size: 20px;
     font-weight: 600;
     margin-left: 2px;
     padding: 10px;
     background-color: transparent;
-    margin-top:20px;
+    margin-top: 20px;
 }
 
 .profile-page .profile-header .header-links {
@@ -122,32 +127,34 @@ body {
         list-style-type: none;
         margin: 0;
         padding: 0;
-        border:none;
+        border: none;
     }
-        .profile-page .profile-header .header-links ul li{
-            border:none;
-        }
-        .profile-page .profile-header .header-links ul li a {
-            color: #000;
-            -webkit-transition: all .2s ease;
-            transition: all .2s ease;
+
+        .profile-page .profile-header .header-links ul li {
+            border: none;
         }
 
-            .profile-page .profile-header .header-links ul li a.active + svg + span,
-            .profile-page .profile-header .header-links ul li a.active + svg {
-                color: #727cf5;
-                fill: #727cf5;
+            .profile-page .profile-header .header-links ul li a {
+                color: #000;
+                -webkit-transition: all .2s ease;
+                transition: all .2s ease;
             }
-            
+
+                .profile-page .profile-header .header-links ul li a.active + svg + span,
+                .profile-page .profile-header .header-links ul li a.active + svg {
+                    color: #727cf5;
+                    fill: #727cf5;
+                }
+
             .profile-page .profile-header .header-links ul li:hover,
             .profile-page .profile-header .header-links ul li.active {
                 color: #727cf5;
             }
 
-            .profile-page .profile-header .header-links ul li:hover a,
-            .profile-page .profile-header .header-links ul li.active a {
-                color: #727cf5;
-            }
+                .profile-page .profile-header .header-links ul li:hover a,
+                .profile-page .profile-header .header-links ul li.active a {
+                    color: #727cf5;
+                }
 
 .profile-page .profile-body .left-wrapper .social-links a {
     width: 30px;
@@ -255,6 +262,7 @@ img {
     border: none;
     cursor: pointer;
 }
+
 select.postprivacy {
     line-height: .8;
     width: 100px;
@@ -265,6 +273,7 @@ select.postprivacy {
     line-height: 9px;
     display: inline-block;
 }
+
 textarea.newpost {
     border: none;
     width: 100%;
@@ -279,36 +288,42 @@ textarea.newpost {
     box-shadow: none;
     resize: none;
 }
+
     textarea.newpost#sharenewpost {
         height: 50px;
     }
 
-    textarea .newpost:focus{
-    outline:none !important;
-}
+    textarea .newpost:focus {
+        outline: none !important;
+    }
+
 .posturl-content {
     /*max-height: 100px;*/
 }
-    .posturl-content img{
+
+    .posturl-content img {
         /*max-height:100px;*/
     }
+
     .posturl-content h3 {
         font-size: 18px;
         max-height: 22px;
         overflow: clip;
     }
-.posturl-content p {
-    font-size: 12px;
-    line-height: 14px;
-    max-height: 85px;
-    overflow: clip;
-}
+
+    .posturl-content p {
+        font-size: 12px;
+        line-height: 14px;
+        max-height: 85px;
+        overflow: clip;
+    }
 
 .commentview {
     background-color: #D3D3D3;
     padding: 5px;
     border-radius: 10px;
 }
+
     .commentview .emojionearea.commentbody.emojionearea-disable {
         background-color: #D3D3D3 !important;
         border-color: transparent !important;
@@ -316,11 +331,13 @@ textarea.newpost {
         position: initial !important;
         box-shadow: none;
     }
+
         .commentview .emojionearea.commentbody.emojionearea-disable
         .emojionearea-editor {
             color: initial !important;
             min-height: 1em;
         }
+
 .emojionearea.writecomment .emojionearea-editor {
     min-height: 1em;
     max-height: none;
@@ -328,16 +345,19 @@ textarea.newpost {
 
 #post-container .emojionearea .emojionearea-picker.emojionearea-picker-position-bottom {
 }
+
 .saving .saving-comment {
-display:initial;
+    display: initial;
 }
+
 .saving-comment {
     position: absolute;
     right: 13px;
     top: 10px;
     font-size: 21px;
-    display:none;
+    display: none;
 }
+
 .likebox {
     position: absolute;
     right: 10px;
@@ -351,40 +371,48 @@ display:initial;
     font-weight: bold;
     padding-right: 5px;
 }
+
     .likebox.likecount {
         right: 60px;
     }
+
         .likebox.likecount.no-dislike {
             right: 10px !important;
         }
-        .likebox .fa {
-            background-color: blue;
-            border-radius: 100%;
-            padding: 2px;
-            padding-top: 2px;
-            width: 17px;
-            height: 17px;
-            padding-top: 4px;
-            text-align: center;
-            color: #fff;
-            font-size: 10px;
-        }
-.comment-actions .fa{
-    font-size:12px !important;
-    margin-right:4px;
+
+    .likebox .fa {
+        background-color: blue;
+        border-radius: 100%;
+        padding: 2px;
+        padding-top: 2px;
+        width: 17px;
+        height: 17px;
+        padding-top: 4px;
+        text-align: center;
+        color: #fff;
+        font-size: 10px;
+    }
+
+.comment-actions .fa {
+    font-size: 12px !important;
+    margin-right: 4px;
 }
+
 #contentpopup img.tosee {
     max-height: 100vh;
     display: block;
     margin: auto;
 }
+
 #contentpopup .btn-close {
     top: 15px;
     right: 15px;
 }
-.loading .loader1{
-    display:flex
+
+.loading .loader1 {
+    display: flex
 }
+
 .loader1 {
     position: absolute;
     left: 0;
@@ -400,6 +428,7 @@ display:initial;
     text-align: center;
     align-items: center;
 }
+
     .loader1 .fa-spin {
         align-self: center;
         float: none;
@@ -408,19 +437,20 @@ display:initial;
         margin: auto;
     }
 
-.ruButton.ruBrowse{
+.ruButton.ruBrowse {
+}
 
+.cate-type {
+    font-size: 12px;
 }
-.cate-type{
-    font-size:12px;
-}
+
 .icon-post {
     max-width: 30px;
 }
 
-.RadAsyncUpload{
-    margin-top:5px;
-    width:100%;
+.RadAsyncUpload {
+    margin-top: 5px;
+    width: 100%;
 }
 
     .RadAsyncUpload ul li:last-child {
@@ -428,6 +458,6 @@ display:initial;
         width: 100%;
     }
 
-    .RadAsyncUpload ul li:last-child span {
-    width:84px;
-    }
+        .RadAsyncUpload ul li:last-child span {
+            width: 84px;
+        }

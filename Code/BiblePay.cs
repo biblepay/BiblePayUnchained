@@ -362,7 +362,7 @@ namespace Unchained
         public static BiblePayCommon.Entity.NFT GetSpecificNFT(bool fTestNet, string id)
         {
             BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "NFT");
-            dt = dt.FilterBBPDataTable("id='" + id + "'");
+            dt = dt.FilterBBPDataTable("id='" + id + "' or hash='" + id + "'");
             if (dt.Rows.Count < 1)
                 return null;
             BiblePayCommon.Entity.NFT n = (BiblePayCommon.Entity.NFT)BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, "NFT", 0);
@@ -373,9 +373,12 @@ namespace Unchained
         {
             double nSend = 100;
             string sToAddress = "";
-            BiblePayCommon.Entity.NFT nOldNFT = GetSpecificNFT(IsTestNet(p), n.GetHash());
+            n.hash = n.GetHash();
+
+            BiblePayCommon.Entity.NFT nOldNFT = GetSpecificNFT(IsTestNet(p), n.id);
             string sSellerCPK = "";
             n.Action = Action;
+            
             if (Action == "EDIT")
             {
                 if (nOldNFT == null)
@@ -466,6 +469,8 @@ namespace Unchained
 
             if (Action == "EDIT" || Action == "CREATE")
             {
+                n.hash = n.GetHash();
+
                 BiblePayCommon.Common.DACResult r1 = DataOps.InsertIntoTable(p, IsTestNet(p), n, gUser(p));
 
                 if (!r1.fError())
@@ -584,7 +589,7 @@ namespace Unchained
                 return d;
             }
             // BUY
-            if (gUser(p).EmailAddress == "")
+            if (gUser(p).EmailAddress.ToNonNullString() == "")
             {
                 d.Error = "Sorry, the bid failed.  You must have an e-mail address populated first in your user record so we can send you the NFT information.  ";
                 return d;

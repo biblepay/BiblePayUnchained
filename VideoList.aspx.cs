@@ -175,12 +175,20 @@ namespace Unchained
                 }
                 sType = "video";
             }
-            else if (sAction == "popular" || sAction == "")
+            else if (sAction == "popular")
             {
                 if (sType == "video")
                 {
-                    // highest Watched
+                    // Highest Watch Count
                     sSortBy = "WatchSum";
+                    fAsc = false;
+                }
+            }
+            else if (sAction == "")
+            {
+                if (sType == "video")
+                {
+                    sSortBy = "time";
                     fAsc = false;
                     sType = "video";
                 }
@@ -230,7 +238,8 @@ namespace Unchained
                 filter &= builder.Ne("Attachment", 1);
                 filter &= builder.Exists("SVID", true);
                 filter &= builder.Regex("URL", new BsonRegularExpression(".*mp4.*", "i"))
-                    | builder.Regex("URL", new BsonRegularExpression(".*webm.*", "i"));
+                    | builder.Regex("URL", new BsonRegularExpression(".*webm.*", "i"))
+                    | builder.Regex("URL", new BsonRegularExpression(".*mov.*", "i"));
 
             }
             else if (sType == "pdf")

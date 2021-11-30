@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
 
     <!-- contains the sidebar menu color (l154): -->
-    <!--   	<link rel="stylesheet" type="text/css" href='<%=Unchained.UICommon.GetCurrentThemeName(this.Page)%>' />-->
+    <!-- <link rel="stylesheet" type="text/css" href='<%=Unchained.UICommon.GetCurrentThemeName(this.Page)%>' />-->
 
     <asp:Literal ID="sitecss" runat="Server" />
 
@@ -25,9 +25,7 @@
     <link href='~/Content/themes/base/jquery-ui.css' rel="stylesheet" type="text/css" />
    	<link rel="stylesheet" type="text/css" href="~/Content/jquery.toast.css" />
 
-
     <link rel="stylesheet" href="/richtexteditor/rte_theme_default.css" />
-
 
     <title><%: Page.Title %> - <%=Unchained.Common.GetSiteTitle(this.Page)%></title>
 
@@ -36,7 +34,16 @@
     </asp:PlaceHolder>
 
     <webopt:bundlereference runat="server" path="~/Content/css" />
-    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+  
+
+
+    <!-- The global favicon for our site, and the apple-touch icon for MAC and iPhone shortcuts -->
+    <link href="dummy" rel="shortcut icon" type="image/x-icon" id="FavIcon" runat="server"/>
+
+    <link rel="apple-touch-icon" href="dummy" id="AppleTouchIcon" runat="server"/>
+            
+
+    
     <!--     <script type='text/javascript' src='https://www.google.com/jsapi'></script> -->
     <!--    <script src="https://muse.ai/static/js/embed-player.min.js"></script>-->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
@@ -79,9 +86,9 @@
                 <asp:ScriptReference Name="jquery-ui" />
                 <asp:ScriptReference Name="jquery-context-menu" />
                 <asp:ScriptReference Name="jquery-toast" />
-                <asp:ScriptReference Name ="core" />
+                <asp:ScriptReference Name="core" />
                 <asp:ScriptReference Name="muse" />
-                <asp:ScriptReference Name ="rte" />
+                <asp:ScriptReference Name="rte" />
                 <asp:ScriptReference Name="rte2" />
                 <asp:ScriptReference Name="lightbox" />
             </Scripts>
@@ -96,6 +103,8 @@
  
 
     
+                <asp:UpdatePanel runat="server" ID="UpdatePanel9" UpdateMode="Conditional" ChildrenAsTriggers="false">
+                 <ContentTemplate>
 
         <!--Above div height is used to calculate the whole page size (so the footer knows the page height)-->
         <div class="xnavbar navbar-inverse navbar-fixed-top" style="z-index:256;height:64px;max-height:64px;">
@@ -108,8 +117,8 @@
 
                 <td style="padding:0px;white-space:nowrap;max-height:84px;padding-right:15px;" width="20%">
                            
-                         <div style="overflow:hidden;max-height:90px;"><%=Unchained.UICommon.GetBannerControls(this.Page) %>&nbsp;</div>
-                         <span style="font-family:candara;color:antiquewhite;font-size:22px;"><%=Unchained.Common.Config("SiteName") %></span>
+                         <div style="overflow:hidden;position:relative;top:-8px;max-height:90px;"><%=Unchained.UICommon.GetBannerControls(this.Page) %>&nbsp;</div>
+                         <span style="position:relative;top:-11px;font-family:candara;color:antiquewhite;font-size:18px;"><%=Unchained.Common.Config("SiteName") %></span>
                          <div id='rightmenubutton' style='float:right;' class="close-sidebar hidden-lg hidden-sm"></div>
                 </td>
                 <td width="6%">
@@ -118,7 +127,6 @@
                     </a>
                 </td>
                 <td width="5%"><div id="gNotificationConsole">
- 
                         <%=Unchained.UICommon.GetNotificationConsole(this.Page) %>
 
                     </div>
@@ -136,25 +144,23 @@
     
                 </td>
                 </tr>
-
-           </table>       
-            </div>
+        
+           </table>  
+            
             <%=Unchained.Common.GetGlobalAlert(this.Page) %>
-          </div>
-
-
-
-
-
-
-                 
-            <%=Unchained.UICommon.GetSideBar(this.Page) %>
                 
-            <div class="body-content">
-                 <div id="divdialog" title="" class='spandialog'><span id="spanVersion1"></span><span id="spandialog"></span></div>
+        </div>
 
-                <asp:UpdatePanel runat="server" ID="UpdatePanel9" UpdateMode="Conditional" ChildrenAsTriggers="false">
-                 <ContentTemplate>
+                     
+            <%=Unchained.UICommon.GetSideBar(this.Page) %>
+
+            <div class="body-content">
+    
+                <div id="divdialog" title="" class='spandialog'><span id="spanVersion1"></span><span id="spandialog"></span></div>
+
+
+
+
                  <asp:HiddenField ID="hidSourceID" runat="server" />
                  <button id="hfNewButton1" style="visibility:hidden"></button>
                 <input id="hfPostback" style="visibility:hidden" />
@@ -170,17 +176,16 @@
  
  
                 <asp:ContentPlaceHolder ID="MainContent" runat="server">
-
                 </asp:ContentPlaceHolder>
 
-              </ContentTemplate>
-              </asp:UpdatePanel>
 
             </div>
 
 
          <p></p><p></p>
-    
+                      </ContentTemplate>
+                 </asp:UpdatePanel>
+
     
     </div>        
 

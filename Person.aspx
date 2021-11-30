@@ -359,7 +359,7 @@
                                         <telerik:RadAsyncUpload  runat="server"  RenderMode="Classic" HideFileInput="true"
                      ID="AsyncUpload1" MultipleFileSelection="Automatic" 
                     AllowedFileExtensions=".jpeg,.jpg,.bmp,.svg,.png,.pdf,.gif,.mp3,.webm,.mp4" >
-                                            <Localization Select="Add Media" />
+                                           <Localization Select="+ Pic/Video &nbsp;" />
                                         </telerik:RadAsyncUpload>
                                     </div>
                                 </div>
@@ -756,14 +756,14 @@
             //    alert(event.target);
 
             //})
-            let loadingvid = false, vidfinished = false, vidpno=0;
+            let loadingvid = false, vidfinished = false, vidpno = 0;
             function LoadVideos() {
                 if (loadingvid || vidfinished)
                     return false;
 
                 vidpost = true;
                 let posturl = `api/media?type=videos&count=9&sID=${userId}&isTestNet=${isTestNet}&pno=${phpno}`;
-                 $.get(posturl, function (response) {
+                $.get(posturl, function (response) {
                     if (response.length == 0) {
                         $('#no-vid').show();
                         postfinished = true;
@@ -789,7 +789,7 @@
 
                 phpost = true;
                 let posturl = `api/media?type=images&count=9&sID=${userId}&isTestNet=${isTestNet}&pno=${phpno}&count=12`;
-                
+
                 $.get(posturl, function (response) {
                     if (response.length == 0) {
                         $('#no-ph').show();
@@ -812,7 +812,7 @@
             function LoadAbout() {
 
             }
-            
+
 
             $(function () {
                 $('.stretched-link.nav-link.tab-link').each(function () {
@@ -834,7 +834,7 @@
 
                     });
                 })
-                
+
                 let visi = localStorage.getItem("post_visitbility");
                 if (visi & visi != '')
                     $('#visibility').val(visi);
@@ -924,7 +924,7 @@
             });
             function savepost() {
                 let body = $('#newpost').emojioneArea()[0].emojioneArea.getText();
-                if (body == '' & getAttachmentCount()==0) {
+                if (body == '' & getAttachmentCount() == 0) {
                     return false;
                 } else {
                     body = XSS(escape(body));
@@ -946,8 +946,8 @@
 
                 }
             }
-           
-           
+
+
             <%}%>
             function getAttachmentCount() {
                 var upload = $find("<%=AsyncUpload1.ClientID%>");
@@ -1013,7 +1013,7 @@
             function getpost() {
                 if (loadingpost || postfinished)
                     return false;
-               let category = $('input[name="rdopostcategory"]:checked').val();
+                let category = $('input[name="rdopostcategory"]:checked').val();
                 loadingpost = true;
                 let posturl = `api/post/posts?category=${category}&sID=${userId}&fHomogenized=${homogenized}&me=${me}&IsTestNet=${isTestNet}&pno=${pno}`;
 <%if (SinglePost)
@@ -1139,7 +1139,7 @@
                             //console.log($(emojin[0].getBoundingClientRect().top).offset().top);
                             emojin.data("emojioneArea").setFocus();
                         });
-                        
+
                         html.find('.singlecomment').attr('id', commentid);
                         let emojin = html.find('.writecomment').emojioneArea({
                             autoHideFilters: true,
@@ -1159,175 +1159,175 @@
 
                                                 chtml.find('.commenterpic').attr('src', pic);
                                                 chtml.find('.commentername').html('<%= MySelf.FullUserName()  %>');
-                                              chtml.find('.commenttime').html(PrepareTime(new Date()));
-                                              chtml.find('.commentbody').html(body?.replaceAll('\n', '<br\>'));
-                                              html.find('.postcommentscontainer').append(chtml);
-                                              chtml.addClass('saving');
-                                              console.log(body);
-                                              let data1 = JSON.stringify({ Body: XSS(escape(body)), ParentID: v.id });
-                                              $.ajax({
-                                                  type: "POST",
-                                                  url: "Person.aspx/comment",
-                                                  data: { data: data1 },
-                                                  headers: { headeraction: data1 },
-                                                  success: function (response) {
-                                                      var result = JSON.parse(response);
-                                                      if (result.status) {
-                                                          updateNotificationCount();
-                                                          let ncid = result.data;
-                                                          $(chtml[0]).attr('id', 'comment' + ncid);
-                                                          chtml.removeClass('saving');
+                                                chtml.find('.commenttime').html(PrepareTime(new Date()));
+                                                chtml.find('.commentbody').html(body?.replaceAll('\n', '<br\>'));
+                                                html.find('.postcommentscontainer').append(chtml);
+                                                chtml.addClass('saving');
+                                                console.log(body);
+                                                let data1 = JSON.stringify({ Body: XSS(escape(body)), ParentID: v.id });
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: "Person.aspx/comment",
+                                                    data: { data: data1 },
+                                                    headers: { headeraction: data1 },
+                                                    success: function (response) {
+                                                        var result = JSON.parse(response);
+                                                        if (result.status) {
+                                                            updateNotificationCount();
+                                                            let ncid = result.data;
+                                                            $(chtml[0]).attr('id', 'comment' + ncid);
+                                                            chtml.removeClass('saving');
 
-                                                          //$(chtml[0]).attr('id', 'comment' + id);
-                                                          chtml.find('.commentlike').on('click', function () {
-                                                              let param = 'upvote|' + ncid + "|comment1";
-                                                              chtml.addClass('saving')
-                                                              $.ajax({
-                                                                  type: "POST",
-                                                                  url: "Person.aspx/voting",
-                                                                  data: { data: param },
-                                                                  headers: { headeraction: param },
-                                                                  success: function (response) {
-                                                                      var result = JSON.parse(response);
-                                                                      if (result.status.status) {
-                                                                          chtml.find('.commentview .likecount .count').html(result.nUpvotes);
-                                                                          if (result.nUpvotes > 0) {
-                                                                              chtml.find('.commentview .likecount').show()
-                                                                          }
-                                                                          else {
-                                                                              chtml.find('.commentview .likecount').hide()
-                                                                          }
-                                                                          chtml.find('.commentview .dislikecount .count').html(result.nDownvotes);
-                                                                          if (result.nDownvotes > 0) {
-                                                                              chtml.find('.commentview .dislikecount').show()
-                                                                          }
-                                                                          else {
-                                                                              chtml.find('.commentview .dislikecount').hide()
-                                                                              chtml.find('.commentview .likecount').addClass('no-dislike')//'right', '10px !important');
-                                                                          }
-                                                                          chtml.removeClass('saving')
-                                                                      }
-                                                                  }
-                                                              });
+                                                            //$(chtml[0]).attr('id', 'comment' + id);
+                                                            chtml.find('.commentlike').on('click', function () {
+                                                                let param = 'upvote|' + ncid + "|comment1";
+                                                                chtml.addClass('saving')
+                                                                $.ajax({
+                                                                    type: "POST",
+                                                                    url: "Person.aspx/voting",
+                                                                    data: { data: param },
+                                                                    headers: { headeraction: param },
+                                                                    success: function (response) {
+                                                                        var result = JSON.parse(response);
+                                                                        if (result.status.status) {
+                                                                            chtml.find('.commentview .likecount .count').html(result.nUpvotes);
+                                                                            if (result.nUpvotes > 0) {
+                                                                                chtml.find('.commentview .likecount').show()
+                                                                            }
+                                                                            else {
+                                                                                chtml.find('.commentview .likecount').hide()
+                                                                            }
+                                                                            chtml.find('.commentview .dislikecount .count').html(result.nDownvotes);
+                                                                            if (result.nDownvotes > 0) {
+                                                                                chtml.find('.commentview .dislikecount').show()
+                                                                            }
+                                                                            else {
+                                                                                chtml.find('.commentview .dislikecount').hide()
+                                                                                chtml.find('.commentview .likecount').addClass('no-dislike')//'right', '10px !important');
+                                                                            }
+                                                                            chtml.removeClass('saving')
+                                                                        }
+                                                                    }
+                                                                });
 
-                                                          })
-                                                          chtml.find('.commentdis').on('click', function () {
-                                                              let param = 'downvote|' + ncid + "|comment1";
-                                                              chtml.addClass('saving')
-                                                              $.ajax({
-                                                                  type: "POST",
-                                                                  url: "Person.aspx/voting",
-                                                                  data: { data: param },
-                                                                  headers: { headeraction: param },
-                                                                  success: function (response) {
-                                                                      var result = JSON.parse(response);
-                                                                      if (result.status) {
-                                                                          chtml.find('.commentview .likecount .count').html(result.nUpvotes);
-                                                                          if (result.nUpvotes > 0) {
-                                                                              chtml.find('.commentview .likecount').show()
-                                                                          }
-                                                                          else {
-                                                                              chtml.find('.commentview .likecount').hide()
-                                                                          }
-                                                                          chtml.find('.commentview .dislikecount .count').html(result.nDownvotes);
-                                                                          if (result.nDownvotes > 0) {
-                                                                              chtml.find('.commentview .dislikecount').show()
-                                                                          }
-                                                                          else {
-                                                                              chtml.find('.commentview .dislikecount').hide()
-                                                                              chtml.find('.commentview .likecount').addClass('no-dislike')//'right', '10px !important');
-                                                                          }
-                                                                          chtml.removeClass('saving')
-                                                                      }
-                                                                  }
-                                                              });
+                                                            })
+                                                            chtml.find('.commentdis').on('click', function () {
+                                                                let param = 'downvote|' + ncid + "|comment1";
+                                                                chtml.addClass('saving')
+                                                                $.ajax({
+                                                                    type: "POST",
+                                                                    url: "Person.aspx/voting",
+                                                                    data: { data: param },
+                                                                    headers: { headeraction: param },
+                                                                    success: function (response) {
+                                                                        var result = JSON.parse(response);
+                                                                        if (result.status) {
+                                                                            chtml.find('.commentview .likecount .count').html(result.nUpvotes);
+                                                                            if (result.nUpvotes > 0) {
+                                                                                chtml.find('.commentview .likecount').show()
+                                                                            }
+                                                                            else {
+                                                                                chtml.find('.commentview .likecount').hide()
+                                                                            }
+                                                                            chtml.find('.commentview .dislikecount .count').html(result.nDownvotes);
+                                                                            if (result.nDownvotes > 0) {
+                                                                                chtml.find('.commentview .dislikecount').show()
+                                                                            }
+                                                                            else {
+                                                                                chtml.find('.commentview .dislikecount').hide()
+                                                                                chtml.find('.commentview .likecount').addClass('no-dislike')//'right', '10px !important');
+                                                                            }
+                                                                            chtml.removeClass('saving')
+                                                                        }
+                                                                    }
+                                                                });
 
-                                                          })
-                                                           
-                                                              chtml.find('.commentdel').on('click', function () {
-                                                                  chtml.addClass('saving')
-                                                                  $.ajax({
-                                                                      type: "POST",
-                                                                      url: "Person.aspx/deletecomentbyid",
-                                                                      data: { data: ncid },
-                                                                      headers: { headeraction: ncid },
-                                                                      success: function (response) {
-                                                                          var result = JSON.parse(response);
-                                                                          if (result.status) {
-                                                                              chtml.remove();
-                                                                          }
-                                                                      }
-                                                                  });
-                                                              })
-                                                              chtml.find('.commentedit').on('click', function () {
-                                                                  if ($(this).hasClass('cancel')) {
-                                                                      chtml.find('.commentbody').data('emojioneArea').disable();
-                                                                      $(this).removeClass('cancel')
-                                                                  }
-                                                                  else {
-                                                                      chtml.find('.commentbody').data('emojioneArea').enable();
-                                                                      $(this).addClass('cancel')
-                                                                  }
-                                                              })
-                                                              chtml.find('.commentbody').emojioneArea(
-                                                                  {
-                                                                      autoHideFilters: true,
-                                                                      useSprite: true,
-                                                                      pickerPosition: "bottom",
-                                                                      events: {
-                                                                          keypress: function (e, o) {
-                                                                              if (o.originalEvent.charCode == 13) {
-                                                                                  if (!o.originalEvent.shiftKey) {
-                                                                                      o.originalEvent.returnValue = false;
-                                                                                      let body = chtml.find('.commentbody').data("emojioneArea").getText();
-                                                                                      if (body != null & body != 'undefined' & body != '') {
-                                                                                          chtml.addClass('saving');
-                                                                                          let data1 = JSON.stringify({ Body: XSS(escape(body)), Id: ncid });
-                                                                                          $.ajax({
-                                                                                              type: "POST",
-                                                                                              url: "Person.aspx/editcomentbyid",
-                                                                                              data: { data: data1 },
-                                                                                              headers: { headeraction: data1 },
-                                                                                              success: function (response) {
-                                                                                                  var result = JSON.parse(response);
-                                                                                                  if (result.status) {
-                                                                                                      chtml.find('.commentbody').data("emojioneArea").disable();
-                                                                                                      //$(chtml[0]).attr('id', 'comment' + result.data);
-                                                                                                      chtml.removeClass('saving')
-                                                                                                  }
-                                                                                              }
-                                                                                          });
-                                                                                      }
-                                                                                      return false;
+                                                            })
 
-                                                                                  }
-                                                                                  else {
+                                                            chtml.find('.commentdel').on('click', function () {
+                                                                chtml.addClass('saving')
+                                                                $.ajax({
+                                                                    type: "POST",
+                                                                    url: "Person.aspx/deletecomentbyid",
+                                                                    data: { data: ncid },
+                                                                    headers: { headeraction: ncid },
+                                                                    success: function (response) {
+                                                                        var result = JSON.parse(response);
+                                                                        if (result.status) {
+                                                                            chtml.remove();
+                                                                        }
+                                                                    }
+                                                                });
+                                                            })
+                                                            chtml.find('.commentedit').on('click', function () {
+                                                                if ($(this).hasClass('cancel')) {
+                                                                    chtml.find('.commentbody').data('emojioneArea').disable();
+                                                                    $(this).removeClass('cancel')
+                                                                }
+                                                                else {
+                                                                    chtml.find('.commentbody').data('emojioneArea').enable();
+                                                                    $(this).addClass('cancel')
+                                                                }
+                                                            })
+                                                            chtml.find('.commentbody').emojioneArea(
+                                                                {
+                                                                    autoHideFilters: true,
+                                                                    useSprite: true,
+                                                                    pickerPosition: "bottom",
+                                                                    events: {
+                                                                        keypress: function (e, o) {
+                                                                            if (o.originalEvent.charCode == 13) {
+                                                                                if (!o.originalEvent.shiftKey) {
+                                                                                    o.originalEvent.returnValue = false;
+                                                                                    let body = chtml.find('.commentbody').data("emojioneArea").getText();
+                                                                                    if (body != null & body != 'undefined' & body != '') {
+                                                                                        chtml.addClass('saving');
+                                                                                        let data1 = JSON.stringify({ Body: XSS(escape(body)), Id: ncid });
+                                                                                        $.ajax({
+                                                                                            type: "POST",
+                                                                                            url: "Person.aspx/editcomentbyid",
+                                                                                            data: { data: data1 },
+                                                                                            headers: { headeraction: data1 },
+                                                                                            success: function (response) {
+                                                                                                var result = JSON.parse(response);
+                                                                                                if (result.status) {
+                                                                                                    chtml.find('.commentbody').data("emojioneArea").disable();
+                                                                                                    //$(chtml[0]).attr('id', 'comment' + result.data);
+                                                                                                    chtml.removeClass('saving')
+                                                                                                }
+                                                                                            }
+                                                                                        });
+                                                                                    }
+                                                                                    return false;
 
-                                                                                  }
-                                                                              }
+                                                                                }
+                                                                                else {
 
-                                                                          }
-                                                                      }
-                                                                  }
-                                                              );
-                                                              chtml.find('.commentbody').data('emojioneArea').disable();
-                                                          
-                                                          ///end of comment buttons copied
-                                                      }
-                                                  }
-                                              });
-                                          }
-                                          return false;
+                                                                                }
+                                                                            }
 
-                                      }
-                                      else {
+                                                                        }
+                                                                    }
+                                                                }
+                                                            );
+                                                            chtml.find('.commentbody').data('emojioneArea').disable();
 
-                                      }
-                                  }
+                                                            ///end of comment buttons copied
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                            return false;
 
-                              }
-                          }
-                      });
+                                        }
+                                        else {
+
+                                        }
+                                    }
+
+                                }
+                            }
+                        });
 
 
                         //writecomment
@@ -1546,7 +1546,7 @@
                             let cssClass = 'col-12';
                             if (attcount > 1)
                                 cssClass = 'col-6';
-                            $.each(v.Attachments, function (ii,vv) {
+                            $.each(v.Attachments, function (ii, vv) {
                                 let atthtml = '<div class="' + cssClass + '"><img src="' + vv.URL + '" data-id="' + vv.id + '" data-parentid="' + vv.ParentID + '" class="img-fluid preview"></div>';
                                 html.find('.attachment-container').append(atthtml);
                             });
@@ -1578,7 +1578,7 @@
             {%>
                 $.get(`api/media?type=images&count=9&sID=${userId}&isTestNet=${isTestNet}`, function (response) {
                     $.each(response, function (i, v) {
-                        let temp = '<div class="col-md-4" ><figure><img data-id="' + v.id + '" data-parentid="' + v.ParentId +'" class="img-fluid preview" src="' + v.URL + '" alt="' + v.Title + '"></figure></div>'
+                        let temp = '<div class="col-md-4" ><figure><img data-id="' + v.id + '" data-parentid="' + v.ParentId + '" class="img-fluid preview" src="' + v.URL + '" alt="' + v.Title + '"></figure></div>'
                         $('#latest-images').append(temp);
                     })
                 })
@@ -1601,7 +1601,7 @@
          <%}%>   })
 
             $('body').on('click', 'img.preview', function () {
-               let id = $(this).attr('data-id');
+                let id = $(this).attr('data-id');
                 let parentid = $(this).attr('data-parentid');
                 //getMediaById()
                 $('#contentpopup').modal('show');
@@ -1615,13 +1615,13 @@
 
                 $('#contentpopup #comment-container').html('');
 
-                
+
                 $.get(`api/media/get-by-id?parentid=${parentid}&isTestNet=${isTestNet}`, function (response) {
 
                     let v = response.find(function (t) { return t.id == id; });
 
                     //if (!v)
-                      //  v = response[0];
+                    //  v = response[0];
                     $('#contentpopup img.tosee').attr('src', response[0].URL);
                     $('#contentpopup img.userimage').attr('src', response[0].ProfilePicture);
                     $('#contentpopup .username').html(response[0].FullName);
@@ -1629,7 +1629,7 @@
                     $('#contentpopup .likecount .count').html(response[0].Likes);
                     $('#contentpopup .viewcount .count').html(response[0].Views);
 
-                    let emojin =  $('#contentpopup .writecomment').emojioneArea({
+                    let emojin = $('#contentpopup .writecomment').emojioneArea({
                         autoHideFilters: true,
                         useSprite: true,
                         pickerPosition: "bottom",

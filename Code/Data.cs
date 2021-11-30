@@ -38,16 +38,20 @@ namespace Unchained
             return r;
         }
 
+        /*
         public static DACResult InsertIntoTable(bool fTestNet, BiblePayCommon.IBBPObject o, User u = new User())
         {
             // string sEntityName = BiblePayCommon.EntityCommon.GetEntityName(fTestNet, o);
             DACResult r = BiblePayDLL.Sidechain.InsertIntoDSQL(fTestNet, o, u);
             return r;
         }
+        */
+
 
         public static void InsertIntoTable_Background(bool fTestNet, BiblePayCommon.IBBPObject o, User u)
         {
             BiblePayDLL.Sidechain.InsertIntoDSQL_Background(fTestNet, o, u);
+            
         }
 
         public static double GetTotalFrom(string userid, string table)

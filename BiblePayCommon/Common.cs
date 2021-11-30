@@ -58,6 +58,15 @@ namespace BiblePayCommon
             return o.ToString();
         }
 
+        public static string CreateVideoEmbedCode(string sID, string sDomainName)
+        {
+            string sFullDomain = sDomainName == "" ? "" : "https://" + sDomainName + "/";
+            string sShareLink = "<iframe width=\"500\" height=\"300\" src=\"" + sFullDomain + "Media?embedid="
+            + sID + "&width=480&height=280\" style=\"border:0px;\" allowfullscreen></iframe>";
+            return sShareLink;
+        }
+
+
         public static bool IsEmailValid(string emailaddress)
         {
             try
@@ -75,6 +84,11 @@ namespace BiblePayCommon
         {
             // Ported from VB6, except this version is 0 based (NOT 1 BASED)
             if (nStart > data.Length)
+            {
+                return "";
+            }
+
+            if (nStart < 0)
             {
                 return "";
             }
@@ -165,6 +179,7 @@ namespace BiblePayCommon
             
         }
 
+
         public struct User
         {
             // User Record Specific
@@ -194,6 +209,9 @@ namespace BiblePayCommon
             public int FA2Verified { get; set; }
 
             public int EmailVerified { get; set; }
+            public int GDPRVerified { get; set; }
+            public int EmailDoNotAdvertise { get; set; }
+
             public string id { get; set; }
             public string PublicText { get; set; }
             public string ProfessionalText { get; set; }
@@ -221,6 +239,7 @@ namespace BiblePayCommon
                 {
                     sFullName = "N/A";
                 }
+                sFullName = sFullName.Trim();
                 return sFullName;
             }
 
@@ -252,7 +271,6 @@ namespace BiblePayCommon
                     return "<img src='" + AvatarURL + "' class='" + sClass + "'>";
                 }
             }
-
             public string GetAvatarUrl()
             {
                 //images/emptyavatar.png
@@ -341,18 +359,49 @@ namespace BiblePayCommon
 
         public static void CleanDirectoryOfOldFiles(string sPattern)
         {
-            string[] f = System.IO.Directory.GetFiles(Path.GetTempPath(), sPattern);
-            for (int i = 0; i < f.Length; i++)
+            try
             {
-                string filename = f[i];
-                FileInfo fi = new FileInfo(filename);
-                double nElapsed = DateTime.Now.Subtract(fi.LastWriteTime).TotalSeconds;
-                if (nElapsed > (60 * 60 * 24))
+                string[] f = System.IO.Directory.GetFiles(Path.GetTempPath(), sPattern);
+                for (int i = 0; i < f.Length; i++)
                 {
-                    EraseTempData(filename);
+                    string filename = f[i];
+                    FileInfo fi = new FileInfo(filename);
+                    double nElapsed = DateTime.Now.Subtract(fi.LastWriteTime).TotalSeconds;
+                    if (nElapsed > (60 * 60 * 24))
+                    {
+                        EraseTempData(filename);
+                    }
                 }
             }
+            catch(Exception ex)
+            {
+                Log2(ex.Message);
+            }
         }
+
+        public static void CleanDirectoryOfOldFiles(string sPath, string sPattern, long nSecondsOld)
+        {
+            try
+            {
+                string[] f = System.IO.Directory.GetFiles(sPath, sPattern);
+                for (int i = 0; i < f.Length; i++)
+                {
+                    string filename = f[i];
+                    FileInfo fi = new FileInfo(filename);
+                    double nElapsed = DateTime.Now.Subtract(fi.LastWriteTime).TotalSeconds;
+                    if (nElapsed > nSecondsOld)
+                    {
+                        EraseTempData(filename);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log2(ex.Message);
+            }
+
+        }
+
 
         public static int UnixTimestamp(DateTime dt)
         {
@@ -437,7 +486,7 @@ namespace BiblePayCommon
             try
             {
                 string sPath = GetFolderUnchained("unchained.log");
-                System.IO.StreamWriter sw = new System.IO.StreamWriter(sPath, true);
+                   System.IO.StreamWriter sw = new System.IO.StreamWriter(sPath, true);
                 string Timestamp = DateTime.Now.ToString();
                 if (fQuiet && sLastLog == sData)
                     return;
@@ -632,9 +681,9 @@ namespace BiblePayCommon
 
             // 4.
             // Don't allow out of range values.
-            if (dayDiff < 0 || dayDiff >= 31)
+            if (dayDiff < 0 || dayDiff >= 65535)
             {
-                return null;
+                return "N/A";
             }
 
             // 5.
@@ -701,6 +750,21 @@ namespace BiblePayCommon
             VIDEO,
             DSQL
         };
+
+        public class BiblePayMailMessage
+        {
+            public MailMessage PrimaryMailMessage;
+            public List<User> UserToAddress;
+            public List<User> UserCC;
+            public List<User> UserBCC;
+            public BiblePayMailMessage()
+            {
+                PrimaryMailMessage = new MailMessage();
+                UserToAddress = new List<User>();
+                UserCC = new List<User>();
+                UserBCC = new List<User>();
+            }
+        }
         public class DACResult
         {
             public string Result;
@@ -723,6 +787,8 @@ namespace BiblePayCommon
             public double Amount;
             public double UTXOBalance;
             public double AccountingBalance;
+            public bool fIsNew;
+
             public DACResult()
             {
                 Error = "";
@@ -1009,6 +1075,31 @@ namespace BiblePayCommon
             d = d.Replace(">", "[greaterthan]");
             return d;
         }
+
+
+        public static string PunctuateTranscript(string sData)
+        {
+            try
+            {
+                sData = sData.Replace("<br>", "\r\n");
+
+                string[] v = sData.Split(new string[] { "\r\n" }, StringSplitOptions.None);
+                string sFullData = "";
+                for (int i = 0; i < v.Length; i++)
+                {
+                    string vRow = v[i];
+                    int nInd = vRow.IndexOf(" ");
+                    string s1 = Common.Mid(vRow, nInd + 1, 1000);
+                    sFullData += s1 + ". \r\n";
+                }
+                return sFullData;
+            }catch(Exception ex)
+            {
+                return "An Error Occurred during punctuation.";
+            }
+
+        }
+
         public static string Base64Decode0(string base64EncodedData, bool fApplyFilter = false)
         {
             try

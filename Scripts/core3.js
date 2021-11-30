@@ -147,9 +147,8 @@ $(document).ready(function () {
    
 
 // Continue with core JS functionality here:
-
-        function showModalDialog(title, body, width, height, fReload)
-        {
+function showModalDialog(title, body, width, height, fReload)
+{
             $("#divdialog").dialog({
                 "body": body,
                 "title": title,
@@ -171,6 +170,26 @@ $(document).ready(function () {
             e.innerHTML = body;
 }
 
+function showModalDialogWithRedirect(title, body, width, height, sRedirect)
+{
+    $("#divdialog").dialog({
+        "body": body,
+        "title": title,
+        "show": true,
+        "width": width,
+        "height": height,
+        buttons: {
+            OK: function ()
+            {
+               window.location.href = sRedirect;
+               $(this).dialog("close");
+            
+            }
+        },
+    });
+    var e = document.getElementById("spandialog");
+    e.innerHTML = body;
+}
 
 function showModalDialogWithCancel(title, body, width, height) {
     $("#divdialog").dialog({
@@ -279,6 +298,11 @@ function updateNotificationCount() {
             updateNotificationCount();
         }
 
+function transmitRead(id) {
+    setRemoteValue('read_notification', id + "|read_notification|Notification|", "","");
+    updateNotificationCount();
+}
+
         function transmitfollow(id, action, affectedID, affectedID2) {
             // Change class in affectedID2
             var curaction = $("#follow1" + id).html();
@@ -340,13 +364,39 @@ function UpdateChatWindow() {
     var ts = Date.now();
     var elapsed = ts - lastupdate;
     if (elapsed > 1500) {
-        //alert(elapsed);
         setRemoteValue('voting', 'chat|', 'chatinner', '');
         lastupdate = ts;
         setTimeout("UpdateChatWindow()", 3000);
     }
 }
 
+var lastupdatepollchat = 0;
+
+function PollChat() {
+    var ts = Date.now();
+    var elapsed = ts - lastupdatepollchat;
+    if (elapsed > 1500) {
+        var oComment = document.getElementById("txtComment");
+        if (oComment.value.length === 0) {
+
+            setRemoteValue('voting', 'pollchat|', '', '');
+            setTimeout("PollChat()", 3000);
+        }
+    }
+}
+
+function PollChatComplete(returnValue) {
+
+    if (returnValue === "1") {
+        var e = {};
+        e.EventName = "PollChatComplete";
+        BBPPostBack3(null, e);
+    }
+    else {
+        //setTimeout("PollChat()", 12000);
+    }
+
+}
 
 var lastvalue1 = "";
 var notified = false;
@@ -358,13 +408,28 @@ var notified = false;
                 headers: { headeraction: data1 },
                 success: function (response) {
 
-                    var oResponse = JSON.parse(response);
+                    var oResponse;
 
-                    if (oResponse.Error !== null) {
-                            alert(oResponse.Error);
-                            return false;
+                    try
+                    {
+                        oResponse = JSON.parse(response);
+                    }
+                    catch (e)
+                    {
+                        console.log(actionname);
+                        console.log(data1);
+                        console.log(response);
                     }
 
+                    if (oResponse.Error !== null) {
+                        alert(oResponse.Error);
+                        return false;
+                    }
+
+                    if (oResponse.CustomResponse === "ChatResponse") {
+                        PollChatComplete(oResponse.CustomResponseValue);
+                        return true;
+                    }
                     var e1 = document.getElementById(elementToUpdate);
                     var e2 = document.getElementById(elementToUpdate2);
 

@@ -15,15 +15,6 @@ namespace Unchained
     {
 
         /// <summary>
-        /// lblPageHeading control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblPageHeading;
-
-        /// <summary>
         /// lblHideArea control.
         /// </summary>
         /// <remarks>
@@ -78,24 +69,6 @@ namespace Unchained
         protected global::System.Web.UI.WebControls.Label Label1;
 
         /// <summary>
-        /// FileUpload1 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.FileUpload FileUpload1;
-
-        /// <summary>
-        /// AsyncUpload1 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::Telerik.Web.UI.RadAsyncUpload AsyncUpload1;
-
-        /// <summary>
         /// btnUnchainedSave control.
         /// </summary>
         /// <remarks>
@@ -105,12 +78,12 @@ namespace Unchained
         protected global::System.Web.UI.WebControls.Button btnUnchainedSave;
 
         /// <summary>
-        /// lblmessage control.
+        /// AsyncUpload1 control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblmessage;
+        protected global::Telerik.Web.UI.RadAsyncUpload AsyncUpload1;
     }
 }

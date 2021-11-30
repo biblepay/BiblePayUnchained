@@ -71,7 +71,7 @@ namespace Unchained
                 {
                     v = v.Replace("<br>", "");
 
-                    v = "<a target='_blank' href='" + v + "'><b>Link</b></a>";
+                    v = "<a target='_blank' href='" + v + "'><b>" + v + "</b></a>";
                 }
                 sOut += v + " ";
             }
@@ -79,7 +79,51 @@ namespace Unchained
         }
         public static string GetGlobalAlert(Page p)
         {
-            return "";
+            string sAlert = String.Empty;
+            // Verify they are cookie compliant first
+            double nCookieConsent = GetDouble(BMS.GetCookie("cookieconsent"));
+            string sPrivacyPolicy = Config("PrivacyPolicyURL", "Content/PrivacyPolicy.htm");
+
+            if (nCookieConsent == 0)
+            {
+                string sNarr = "This web site uses cookies to store your session information and user preferences.  Click <a target='_blank' href='" + sPrivacyPolicy + "'>here to read our privacy policy</a>.   ";
+                string sAccept = GetStandardButton("confirmCookies", "Allow Cookies", "ConfirmCookies", "Allow Cookies on this site");
+                string sDeny = GetStandardButton("denyCookies", "Disable Cookies and Limit Site Functionality", "DenyCookies", "Disable Cookies and Limit Site Functionality");
+                sNarr += "&nbsp;&nbsp;&nbsp;" + sAccept + "&nbsp;" + sDeny;
+                sAlert = "<div class='globalalert'>" + sNarr + "</div>";
+                return sAlert;
+            }
+            else if (nCookieConsent == 9)
+            {
+                // We do this in case they change their mind (because here, they cannot log in as they wont get a session).
+                string sNarr = "Cookies are disabled on your browser (we we cannot create a session).  Click <a target='_blank'  href='" + sPrivacyPolicy + "'>here to read our privacy policy</a>.    ";
+                string sAccept = GetStandardButton("confirmCookies", "Allow Cookies", "ConfirmCookies", "Allow Cookies on this site");
+                string sDontRemindMe = GetStandardButton("confirmCookies", "Dont Remind me Again", "ConfirmCookiesDontRemindMe", "Disable cookies and dont remind me again.");
+
+                sNarr += "&nbsp;&nbsp;&nbsp;" + sAccept + "&nbsp;" + sDontRemindMe;
+                sAlert = "<div class='globalalert'>" + sNarr + "</div>";
+                return sAlert;
+            }
+            else if (nCookieConsent == 68)
+            {
+                // User has disabled cookies and does not want to be reminded.
+
+            }
+            else if (nCookieConsent == 1)
+            {
+                // normal flow
+            }
+            // If they havent verified their email address
+            if (gUser(p).EmailVerified == 0 && gUser(p).LoggedIn)
+            {
+                string btnSendEmailVerificationRequest = GetStandardButton("sendEmailVerification", "Send E-Mail Verification Request",
+                    "SendEmailVerificationRequest", "Send me an e-mail to allow me to verify my e-mail address Now");
+
+                sAlert += "<div class='globalalert'>Your E-mail address has not been verified.  In this state you cannot unlock your account if you forget your password.  "
+                    + btnSendEmailVerificationRequest + "</div>";
+            }
+
+            return sAlert;
         }
 
         public static string GetBaseHomeFolder()
@@ -191,6 +235,13 @@ namespace Unchained
             return Config(sKey);
         }
 
+        public static string Config(string _Key, string sDefaultValue)
+        {
+            string s1 = Config(_Key);
+            if (s1 == "" || s1 == null)
+                return sDefaultValue;
+            return s1;
+        }
         public static string Config(string _Key)
         {
             string sDOMAIN_NAME = DOMAIN_NAME;
@@ -240,7 +291,9 @@ namespace Unchained
             if (dt.Count < 1)
                 return (User)o;
             BiblePayCommon.EntityCommon.CastExpandoToBiblePayObject(dt[0], ref o);
-            return (User)o;
+            User u1 = (User)o;
+            BiblePayDLL.Sidechain.EnsureAccessRights(ref u1);
+            return u1;
         }
 
         public static User gUserSession(System.Web.SessionState.HttpSessionState s)
@@ -346,18 +399,18 @@ namespace Unchained
             // Voting buttons
             sHTML = "";
             sHTML += "<a onclick='transmitVote(\"" + sID + "\", \"upvote\", \"" + sTable + "\", \"" + sParentType + "\",\"upvote1" + sID + "\", \"downvote1" + sID + "\");'>"
-                + "<span class='fa fa-thumbs-up'></span></a>"
+                + "<span title='Like this' class='fa fa-thumbs-up largeIcon'></span></a>"
                 + "&nbsp;"
                 + "<span id='upvote1" + sID + "'>" + GetVoteCount(fTestNet, sID, 0).ToString() + "</span>"
                 + " &nbsp; "
                 + "<a onclick='transmitVote(\"" + sID + "\", \"downvote\", \"" + sTable + "\",\"" + sParentType + "\",\"upvote1" + sID + "\", \"downvote1" + sID + "\");'>"
-                + "<span class='fa fa-thumbs-down'></span></a>&nbsp;"
+                + "<span title='Dislike this' class='largeIcon fa fa-thumbs-down'></span></a>&nbsp;"
                 + "<span id='downvote1" + sID + "'>"
                 + GetVoteCount(fTestNet, sID, 1).ToString() + "</span>";
             // Add on the delete button
             bool fOwns = HasOwnership(fTestNet, sID, sTable, u.id);
             string sDeleteAnchor = UICommon.GetStandardAnchor(u.id, "DeleteObject", sID, "<i class='fa fa-trash'></i>", "Delete this object", sTable);
-            if (fOwns)
+            if (fOwns && false)
                       sHTML += "&nbsp;" + sDeleteAnchor;
             return sHTML;
         }
@@ -386,8 +439,59 @@ namespace Unchained
             public double nDownvotes;
             public double nAvg;
         };
+        public static Dictionary<string, VoteSums> dictVoteSums = new Dictionary<string, VoteSums>();
+
+        public static void AdjustVote(string sParentID, double nAmount)
+        {
+            VoteSums v = new VoteSums();
+            bool fGot = dictVoteSums.TryGetValue(sParentID, out v);
+            if (nAmount == 1)
+            {
+                v.nUpvotes++;
+            }
+            else if (nAmount == -1)
+            {
+                v.nDownvotes++;
+            }
+            dictVoteSums[sParentID] = v;
+        }
+        public static void CalcVoteSums(bool fTestNet)
+        {
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "vote1");
+            if (dictVoteSums.Keys.Count > 0)          
+                return;
+
+
+            if (dt.Rows.Count == 0)
+                return;
+            dictVoteSums.Clear();
+
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                VoteSums v = new VoteSums();
+                string sParentID = dt.Rows[i]["parentID"].ToNonNullString();
+                if (sParentID != "")
+                {
+                    bool f = dictVoteSums.TryGetValue(sParentID, out v);
+
+                    double nVoteValue = GetDouble(dt.Rows[i]["VoteValue"]);
+                    if (nVoteValue == 1)
+                        v.nUpvotes++;
+                    if (nVoteValue == -1)
+                        v.nDownvotes++;
+                    dictVoteSums[sParentID] = v;
+                }
+            }
+            return;
+        }
+
+
         public static VoteSums GetVoteSum(bool fTestNet, string sParentID)
         {
+            //CalcVoteSums(fTestNet);
+            //            VoteSums v = new VoteSums();
+            //            bool fGot = dictVoteSums.TryGetValue(sParentID, out v);
+            //            return v;
             VoteSums v = new VoteSums();
 
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "vote1");
@@ -403,8 +507,22 @@ namespace Unchained
                     v.nDownvotes++;
             }
             return v;
+           
+
         }
-       
+
+        public static bool UserExists(Page p, string sEmailAddress)
+        {
+            if (sEmailAddress == null || sEmailAddress=="")
+            {
+                throw new Exception("Invalid address");
+            }
+            User uEmail = gUser(p, sEmailAddress);
+            if (uEmail.EmailAddress == null)
+                return false;
+            return true;
+        }
+
         public static BiblePayCommon.Entity.user1 ConvertUserToUserEntity(User u)
         {
             ExpandoObject oExpando = BiblePayCommon.EntityCommon.CastObjectToExpando(u);
@@ -412,11 +530,12 @@ namespace Unchained
             return u10;
         }
 
-        public static void NotifyOfNewUser(User u, Page p)
+        
+
+    public static void NotifyOfNewUser(User u, Page p)
         {
             try
             {
-
                 double nReplay = BiblePayCommon.Common.GetDouble(BiblePayCommon.HalfordDatabase.GetKVDWX("NotifyOfNewUser" + u.EmailAddress));
                 if (nReplay == 1)
                 {
@@ -431,29 +550,29 @@ namespace Unchained
                     string sPath = "c:\\inetpub\\wwwroot\\Templates\\" + sTemplate;
                     string sData = System.IO.File.ReadAllText(sPath);
 
-                    MailMessage m = new MailMessage();
+                    BiblePayCommon.Common.BiblePayMailMessage m = new BiblePayMailMessage();
+
                     EmailNarr e = GetEmailFooter(p);
-                    m.IsBodyHtml = true;
+                    m.PrimaryMailMessage.IsBodyHtml = true;
                     sData = sData.Replace("[FullUserName]", u.FullUserName());
                     string sDomainReported = e.DomainName;
                     if (e.DomainName.Contains("anrsocial.com"))
                     {
                         sDomainReported = "Truthbook.social";
                     }
-                    m.Subject = "Welcome to " + sDomainReported + "!           [Transactional Message]";
-
-                    m.Body = sData;
-                    m.IsBodyHtml = true;
-                    m.To.Add(new MailAddress(u.EmailAddress, u.FullUserName()));
+                    m.PrimaryMailMessage.Subject = "Welcome to " + sDomainReported + "!           [Transactional Message]";
+                    m.PrimaryMailMessage.Body = sData;
+                    m.PrimaryMailMessage.IsBodyHtml = true;
+                    m.UserToAddress.Add(u);
 
                     string sNotifyExtra = Config("NotifyUser");
                     if (sNotifyExtra != "")
                     {
-                        m.Bcc.Add(new MailAddress(sNotifyExtra));
+                        m.PrimaryMailMessage.Bcc.Add(new MailAddress(sNotifyExtra));
                     }
-                    m.Bcc.Add(new MailAddress("rob@biblepay.org"));
-                   
-                    DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(p), m, e.DomainName);
+                    m.PrimaryMailMessage.Bcc.Add(new MailAddress("rob@biblepay.org"));
+
+                    DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(p), m, e.DomainName, true);
                 }
             }
             catch(Exception ex)
@@ -466,11 +585,8 @@ namespace Unchained
         public static DACResult SaveUserRecord(bool fTestNet, User u, Page p)
         {
             DACResult r = new DACResult();
-
             bool fIsNew = false;
-
             BiblePayCommon.Entity.user1 o = ConvertUserToUserEntity(u);
-            
             if (!IsEmailValid(o.EmailAddress))
             {
                 r.Error = "Sorry, the E-mail address is invalid.";
@@ -494,11 +610,9 @@ namespace Unchained
                 // This allows cross-site spending with trust.
                 u.RSAKey = o.RSAKey;
                 u.UserGuid = o.UserGuid;
-
                 // Email must not exist:
-                User uEmail = gUser(p, o.EmailAddress);
-                if (uEmail.EmailAddress != null)
-                {
+                if (UserExists(p, o.EmailAddress))
+                { 
                     r.Error = "Sorry, this user already exists.";
                     MsgModal(p, "Error",  r.Error, 400, 200, true);
                     return r;
@@ -556,6 +670,8 @@ namespace Unchained
                 // This is where we save the users session
                 BiblePayDLL.Sidechain.SetBiblePayAddressAndSignature(IsTestNet(p), sDomainName, ref u);
                 p.Session[GetChain0(fTestNet) + "user"] = u;
+                r.fIsNew = fIsNew;
+
             }
             return r;
         }

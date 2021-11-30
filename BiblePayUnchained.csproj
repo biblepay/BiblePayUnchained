@@ -34,7 +34,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -51,6 +51,21 @@
     </Reference>
     <Reference Include="HtmlAgilityPack, Version=1.7.4.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>packages\HtmlAgilityPack.1.7.4\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.4.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.SignalR.Core.2.4.2\lib\net45\Microsoft.AspNet.SignalR.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.SystemWeb, Version=2.4.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.SignalR.SystemWeb.2.4.2\lib\net45\Microsoft.AspNet.SignalR.SystemWeb.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Owin.2.1.0\lib\net45\Microsoft.Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Owin.Host.SystemWeb.2.1.0\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Owin.Security.2.1.0\lib\net45\Microsoft.Owin.Security.dll</HintPath>
     </Reference>
     <Reference Include="MongoDB.Bson, Version=2.13.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -73,6 +88,9 @@
     </Reference>
     <Reference Include="OpenHtmlToPdf, Version=1.12.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\OpenHtmlToPdf.1.12.0.0\lib\net45\OpenHtmlToPdf.dll</HintPath>
+    </Reference>
+    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
+      <HintPath>packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -194,6 +212,87 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="BanManagement.aspx" />
+    <Content Include="Images\ANRFrontPage.htm" />
+    <Content Include="Images\ANRFrontPage_files\4359-300x174.jpg" />
+    <Content Include="Images\ANRFrontPage_files\4826451.jpg" />
+    <Content Include="Images\ANRFrontPage_files\animations.min.css" />
+    <Content Include="Images\ANRFrontPage_files\australian-national-review-logo-black-450x47-1.png" />
+    <Content Include="Images\ANRFrontPage_files\australian-national-review-logo-black1-1-2.png" />
+    <Content Include="Images\ANRFrontPage_files\brands.min.css" />
+    <Content Include="Images\ANRFrontPage_files\CANADIAN-TIMES-LOGO-2-1.png" />
+    <Content Include="Images\ANRFrontPage_files\CBFI-LOGO-2048x381-3.png" />
+    <Content Include="Images\ANRFrontPage_files\CGN-LOGO-1-1-1.png" />
+    <Content Include="Images\ANRFrontPage_files\cgn-logo-11-1-1.png" />
+    <Content Include="Images\ANRFrontPage_files\custom.css" />
+    <Content Include="Images\ANRFrontPage_files\Eagle-Ace-11-1-2.png" />
+    <Content Include="Images\ANRFrontPage_files\Eagle-Ace-250-1-1.png" />
+    <Content Include="Images\ANRFrontPage_files\elementor-icons.min.css" />
+    <Content Include="Images\ANRFrontPage_files\erwerq-300x175.jpg" />
+    <Content Include="Images\ANRFrontPage_files\europian_times_1-1-2.png" />
+    <Content Include="Images\ANRFrontPage_files\fontawesome.min.css" />
+    <Content Include="Images\ANRFrontPage_files\frontend-forms.css" />
+    <Content Include="Images\ANRFrontPage_files\frontend.min%281%29.css" />
+    <Content Include="Images\ANRFrontPage_files\frontend.min.css" />
+    <Content Include="Images\ANRFrontPage_files\GCR-logo-1-1-1.png" />
+    <Content Include="Images\ANRFrontPage_files\GIMO-1-1-1.png" />
+    <Content Include="Images\ANRFrontPage_files\GLOBAL-ENTERTAINMENT-INITIATIVE-1-2048x1073-1-1-1-1.png" />
+    <Content Include="Images\ANRFrontPage_files\global.css" />
+    <Content Include="Images\ANRFrontPage_files\GLOBAL_ECONOMIC_FORUM-1-1-1.png" />
+    <Content Include="Images\ANRFrontPage_files\h90nveymaytblh5fldz8-100x100-1.png" />
+    <Content Include="Images\ANRFrontPage_files\jquery-ui-1.9.1.custom.css" />
+    <Content Include="Images\ANRFrontPage_files\logo-trump-news11-1-1-1.png" />
+    <Content Include="Images\ANRFrontPage_files\logo1-1.png" />
+    <Content Include="Images\ANRFrontPage_files\london-times-logo-f-22.png" />
+    <Content Include="Images\ANRFrontPage_files\OneSignalSDKStyles.css" />
+    <Content Include="Images\ANRFrontPage_files\post-15292.css" />
+    <Content Include="Images\ANRFrontPage_files\post-15302.css" />
+    <Content Include="Images\ANRFrontPage_files\post-15306.css" />
+    <Content Include="Images\ANRFrontPage_files\post-15327.css" />
+    <Content Include="Images\ANRFrontPage_files\post-207.css" />
+    <Content Include="Images\ANRFrontPage_files\post-51602.css" />
+    <Content Include="Images\ANRFrontPage_files\post-57203.css" />
+    <Content Include="Images\ANRFrontPage_files\post-782.css" />
+    <Content Include="Images\ANRFrontPage_files\post-872.css" />
+    <Content Include="Images\ANRFrontPage_files\public.css" />
+    <Content Include="Images\ANRFrontPage_files\pvc.min.css" />
+    <Content Include="Images\ANRFrontPage_files\rumble155.png" />
+    <Content Include="Images\ANRFrontPage_files\snbs-logo-FINAL-1-1-1-1.png" />
+    <Content Include="Images\ANRFrontPage_files\solid.min.css" />
+    <Content Include="Images\ANRFrontPage_files\style.css" />
+    <Content Include="Images\ANRFrontPage_files\style.min%281%29.css" />
+    <Content Include="Images\ANRFrontPage_files\style.min%282%29.css" />
+    <Content Include="Images\ANRFrontPage_files\style.min.css" />
+    <Content Include="Images\ANRFrontPage_files\sweetalert2.css" />
+    <Content Include="Images\ANRFrontPage_files\TB-04-1024x420.png" />
+    <Content Include="Images\ANRFrontPage_files\TBA-1.png" />
+    <Content Include="Images\ANRFrontPage_files\TBOW.png" />
+    <Content Include="Images\ANRFrontPage_files\theme.min.css" />
+    <Content Include="Images\ANRFrontPage_files\video-js.min.css" />
+    <Content Include="Images\ANRFrontPage_files\videojs-wpstream.css" />
+    <Content Include="Images\ANRFrontPage_files\wpstream-admin.css" />
+    <Content Include="Images\ANRFrontPage_files\wpstream_style.css" />
+    <Content Include="Images\maintenance.png" />
+    <Content Include="Images\Truth-book.social.mp4" />
+    <Content Include="Images\truthbook-icon.png" />
+    <Content Include="Images\truthbook_apple_touch.png" />
+    <Content Include="Images\truthbook_favicon.ico" />
+    <Content Include="Images\unchained_apple_touch.png" />
+    <Content Include="Images\unchained_favicon.ico" />
+    <Content Include="ChatViaDatabase.aspx" />
+    <Content Include="EliteMeeting.aspx" />
+    <Content Include="webhook.aspx" />
+    <Content Include="RegisterNewUser.aspx" />
+    <Content Include="AddNewsFeedItem.aspx" />
+    <Content Include="Content\PrivacyPolicy.htm" />
+    <Content Include="Content\TermsOfService.htm" />
+    <Content Include="Content\TruthbookPrivacyPolicy.htm" />
+    <Content Include="Content\TruthbookPrivacyPolicy_files\colorschememapping.xml" />
+    <Content Include="Content\TruthbookPrivacyPolicy_files\filelist.xml" />
+    <Content Include="MyUploads.aspx" />
+    <Content Include="RoleAdd.aspx" />
+    <Content Include="OrganizationAdd.aspx" />
+    <Content Include="AdminPages.aspx" />
     <Content Include="Admin.aspx" />
     <Content Include="Admin1.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
@@ -214,6 +313,7 @@
     <Content Include="Content\embed-player3.min.js" />
     <Content Include="Content\pages\bz.png" />
     <Content Include="Content\pages\cv.png" />
+    <Content Include="Content\pages\peopledirectory.css" />
     <Content Include="Content\pages\rq.png" />
     <Content Include="Content\pages\sc.png" />
     <Content Include="Content\pages\sp.png" />
@@ -476,6 +576,9 @@
     <Content Include="Content\sidenav_grey.css" />
     <Content Include="Content\sidenav_maroon.css" />
     <Content Include="Content\sidenav_whiteblue.css" />
+    <Content Include="Content\TOS.htm" />
+    <Content Include="Content\TOS_files\colorschememapping.xml" />
+    <Content Include="Content\TOS_files\filelist.xml" />
     <Content Include="Friends.aspx" />
     <Content Include="GreetingCard.aspx" />
     <Content Include="Images\404.jpg" />
@@ -486,6 +589,7 @@
     <Content Include="Images\VideoRecordIcon.png" />
     <Content Include="LiveRecord.aspx" />
     <Content Include="Meeting.aspx" />
+    <Content Include="NewsFeedItemList.aspx" />
     <Content Include="ReportGeneric.aspx" />
     <Content Include="ReportHoursByDeveloper.aspx" />
     <Content Include="Reports.aspx" />
@@ -503,6 +607,8 @@
     <Content Include="Scripts\emoji\emojionearea.js" />
     <Content Include="Scripts\emoji\emojionearea.min.css" />
     <Content Include="Scripts\emoji\emojionearea.min.js" />
+    <Content Include="Scripts\jquery.signalR-2.4.2.js" />
+    <Content Include="Scripts\jquery.signalR-2.4.2.min.js" />
     <Content Include="Scripts\VideoRecord7.js" />
     <Content Include="Scripts\waypoint\jquery.waypoints.js" />
     <Content Include="Scripts\waypoint\jquery.waypoints.min.js" />
@@ -517,6 +623,8 @@
     <Content Include="Scripts\waypoint\waypoints.debug.js" />
     <Content Include="Scripts\waypoint\zepto.waypoints.js" />
     <Content Include="Scripts\waypoint\zepto.waypoints.min.js" />
+    <Content Include="SignalAdmin.aspx" />
+    <Content Include="SignalClient.aspx" />
     <Content Include="TelegramChat.aspx" />
     <Content Include="TicketAdd.aspx" />
     <Content Include="TicketList.aspx" />
@@ -597,7 +705,6 @@
     <Content Include="Images\DetailedEvents7YrTribulation.gif" />
     <Content Include="Images\emptyavatar.png" />
     <Content Include="Images\EventsInMiddleTribulation3.gif" />
-    <Content Include="Images\favicon.ico" />
     <Content Include="Images\FirstHalfGreatTribulation2.gif" />
     <Content Include="Images\firsthalftrib_seals1-7.jpg" />
     <Content Include="Images\GloriousLion.jpg" />
@@ -625,7 +732,7 @@
     <Content Include="Images\TheChurchAge1.gif" />
     <Content Include="Images\TheMessianicKingdomEternalOrder8.gif" />
     <Content Include="Images\workers.png" />
-    <Content Include="CreateNewDocument.aspx" />
+    <Content Include="CreateNewDocumentRetired.aspx" />
     <Content Include="DownloadFile.aspx" />
     <Content Include="FormView.aspx" />
     <Content Include="BBPUniversity.aspx" />
@@ -772,13 +879,13 @@
     <Content Include="Scripts\jquery-ui-111.js" />
     <Content Include="Scripts\jquery-ui-112.js" />
     <Content Include="VideoList.aspx" />
-    <Content Include="RegisterMe.aspx" />
+    <Content Include="AccountEdit.aspx" />
     <Content Include="MessagePage.aspx" />
     <Content Include="PrayerView.aspx" />
     <Content Include="PrayerAdd.aspx" />
     <Content Include="PrayerBlog.aspx" />
     <Content Include="Content\bootstrap.css" />
-    <Content Include="Content\Site.css" />
+    <Content Include="Content\Site1.css" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="LICENSE" />
@@ -804,6 +911,66 @@
     <Content Include="Content\html5gallery\icons\font\mhfontello.ttf" />
     <Content Include="Content\html5gallery\icons\font\mhfontello.woff" />
     <Content Include="Content\html5gallery\icons\font\mhfontello.woff2" />
+    <Content Include="Content\TOS_files\themedata.thmx" />
+    <Content Include="Content\TruthbookPrivacyPolicy_files\themedata.thmx" />
+    <Content Include="Images\ANRFrontPage_files\a11y.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\autocomplete.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\billing-address.js.download" />
+    <Content Include="Images\ANRFrontPage_files\clipboard.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\core.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\css" />
+    <Content Include="Images\ANRFrontPage_files\custom.js.download" />
+    <Content Include="Images\ANRFrontPage_files\datepicker.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\dialog.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\dom-ready.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\effect.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\frontend-form.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\frontend-modules.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\frontend.min.js%281%29.download" />
+    <Content Include="Images\ANRFrontPage_files\frontend.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\handlers.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\hooks.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\i18n.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\iframe_api" />
+    <Content Include="Images\ANRFrontPage_files\imagesloaded.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\jquery-migrate.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\jquery.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\jquery.smartmenus.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\jquery.sticky.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\js" />
+    <Content Include="Images\ANRFrontPage_files\menu.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\mouse.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\moxie.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\OneSignalPageSDKES6.js.download" />
+    <Content Include="Images\ANRFrontPage_files\OneSignalSDK.js.download" />
+    <Content Include="Images\ANRFrontPage_files\page-scroll-to-id.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\plupload.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\preloaded-elements-handlers.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\preloaded-modules.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\regenerator-runtime.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\share-link.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\sldp-v2.12.1.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\slider.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\sortable.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\start_streaming.js.download" />
+    <Content Include="Images\ANRFrontPage_files\stripe-handler-ng.js.download" />
+    <Content Include="Images\ANRFrontPage_files\subscriptions.js.download" />
+    <Content Include="Images\ANRFrontPage_files\suggest.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\sweetalert2.js.download" />
+    <Content Include="Images\ANRFrontPage_files\swiper.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\underscore.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\upload.js.download" />
+    <Content Include="Images\ANRFrontPage_files\video.js.download" />
+    <Content Include="Images\ANRFrontPage_files\videojs-vimeo.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\waypoints.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\webpack-pro.runtime.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\webpack.runtime.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\wp-embed.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\wp-emoji-release.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\wp-polyfill.min.js.download" />
+    <Content Include="Images\ANRFrontPage_files\wpstream-player.js.download" />
+    <Content Include="Images\ANRFrontPage_files\www-widgetapi.js.download" />
+    <Content Include="Images\ANRFrontPage_files\youtube.min.js.download" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <Content Include="README.md" />
     <Content Include="Scripts\bootstrap.min.js.map" />
@@ -845,6 +1012,76 @@
     <Content Include="Bundle.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BanManagement.aspx.cs">
+      <DependentUpon>BanManagement.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="BanManagement.aspx.designer.cs">
+      <DependentUpon>BanManagement.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ChatViaDatabase.aspx.cs">
+      <DependentUpon>ChatViaDatabase.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ChatViaDatabase.aspx.designer.cs">
+      <DependentUpon>ChatViaDatabase.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="EliteMeeting.aspx.cs">
+      <DependentUpon>EliteMeeting.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="EliteMeeting.aspx.designer.cs">
+      <DependentUpon>EliteMeeting.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="webhook.aspx.cs">
+      <DependentUpon>webhook.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="webhook.aspx.designer.cs">
+      <DependentUpon>webhook.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="RegisterNewUser.aspx.cs">
+      <DependentUpon>RegisterNewUser.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="RegisterNewUser.aspx.designer.cs">
+      <DependentUpon>RegisterNewUser.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="AddNewsFeedItem.aspx.cs">
+      <DependentUpon>AddNewsFeedItem.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AddNewsFeedItem.aspx.designer.cs">
+      <DependentUpon>AddNewsFeedItem.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="MyUploads.aspx.cs">
+      <DependentUpon>MyUploads.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="MyUploads.aspx.designer.cs">
+      <DependentUpon>MyUploads.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="RoleAdd.aspx.cs">
+      <DependentUpon>RoleAdd.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="RoleAdd.aspx.designer.cs">
+      <DependentUpon>RoleAdd.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="OrganizationAdd.aspx.cs">
+      <DependentUpon>OrganizationAdd.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="OrganizationAdd.aspx.designer.cs">
+      <DependentUpon>OrganizationAdd.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="AdminPages.aspx.cs">
+      <DependentUpon>AdminPages.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AdminPages.aspx.designer.cs">
+      <DependentUpon>AdminPages.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Admin.aspx.cs">
       <DependentUpon>Admin.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -890,6 +1127,13 @@
     <Compile Include="Meeting.aspx.designer.cs">
       <DependentUpon>Meeting.aspx</DependentUpon>
     </Compile>
+    <Compile Include="NewsFeedItemList.aspx.cs">
+      <DependentUpon>NewsFeedItemList.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="NewsFeedItemList.aspx.designer.cs">
+      <DependentUpon>NewsFeedItemList.aspx</DependentUpon>
+    </Compile>
     <Compile Include="ReportGeneric.aspx.cs">
       <DependentUpon>ReportGeneric.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -911,6 +1155,21 @@
     <Compile Include="Reports.aspx.designer.cs">
       <DependentUpon>Reports.aspx</DependentUpon>
     </Compile>
+    <Compile Include="SignalAdmin.aspx.cs">
+      <DependentUpon>SignalAdmin.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="SignalAdmin.aspx.designer.cs">
+      <DependentUpon>SignalAdmin.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="SignalClient.aspx.cs">
+      <DependentUpon>SignalClient.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="SignalClient.aspx.designer.cs">
+      <DependentUpon>SignalClient.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Startup1.cs" />
     <Compile Include="TelegramChat.aspx.cs">
       <DependentUpon>TelegramChat.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -1079,12 +1338,12 @@
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
-    <Compile Include="CreateNewDocument.aspx.cs">
-      <DependentUpon>CreateNewDocument.aspx</DependentUpon>
+    <Compile Include="CreateNewDocumentRetired.aspx.cs">
+      <DependentUpon>CreateNewDocumentRetired.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="CreateNewDocument.aspx.designer.cs">
-      <DependentUpon>CreateNewDocument.aspx</DependentUpon>
+    <Compile Include="CreateNewDocumentRetired.aspx.designer.cs">
+      <DependentUpon>CreateNewDocumentRetired.aspx</DependentUpon>
     </Compile>
     <Compile Include="DownloadFile.aspx.cs">
       <DependentUpon>DownloadFile.aspx</DependentUpon>
@@ -1191,12 +1450,12 @@
     <Compile Include="VideoList.aspx.designer.cs">
       <DependentUpon>VideoList.aspx</DependentUpon>
     </Compile>
-    <Compile Include="RegisterMe.aspx.cs">
-      <DependentUpon>RegisterMe.aspx</DependentUpon>
+    <Compile Include="AccountEdit.aspx.cs">
+      <DependentUpon>AccountEdit.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="RegisterMe.aspx.designer.cs">
-      <DependentUpon>RegisterMe.aspx</DependentUpon>
+    <Compile Include="AccountEdit.aspx.designer.cs">
+      <DependentUpon>AccountEdit.aspx</DependentUpon>
     </Compile>
     <Compile Include="MessagePage.aspx.cs">
       <DependentUpon>MessagePage.aspx</DependentUpon>

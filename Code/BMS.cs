@@ -39,6 +39,15 @@ namespace Unchained
         {
             try
             {
+                // if its the cookie consent cookie its ok to store it because that is changing the actual preference.
+                // cookieconsent=9 when they blocked cookies, 1 when they allow cookies, 0 when they never decided yet
+                double nCookieConsent = BiblePayCommon.Common.GetDouble(BMS.GetCookie("cookieconsent"));
+                if (nCookieConsent == 9 && sKey != "cookieconsent")
+                {
+                    // Blocked
+                    return;
+                }
+
                 string sEnc = BiblePayCommon.Encryption.Base65Encode(sValue);
                 HttpCookie _pool = new HttpCookie("c_" + sKey);
                 _pool[sKey] = sEnc;

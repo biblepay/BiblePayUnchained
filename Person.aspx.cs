@@ -26,8 +26,11 @@ namespace Unchained
         protected bool fHomogenized;
         protected string FriendButton;
         protected User MySelf;
+
         protected bool SinglePost = false;
         protected string postId = "";
+
+
         protected new void Page_Load(object sender, EventArgs e)
         {
             
@@ -109,8 +112,9 @@ namespace Unchained
                     comment2.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(comment.Body));
                     //comment.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(_bbpevent.Extra.Output.ToString()));
 
-                    DACResult result2 = DataOps.InsertIntoTable(this, Common.IsTestNet(this), 
+                    DACResult result2 = DataOps.InsertIntoTable(this, Common.IsTestNet(this),
                         comment2, Common.gUser(this));
+
                     if (!result2.fError())
                     {
                         result = new { status = true, data = comment2.id };
@@ -130,11 +134,12 @@ namespace Unchained
             string sUserID = Request.QueryString["id"].ToNonNullString();
 
             string post = Request.QueryString["post"].ToNonNullString();
-            if(!string.IsNullOrEmpty(post))
+            if (!string.IsNullOrEmpty(post))
             {
                 SinglePost = true;
                 postId = post;
             }
+
             MySelf = gUser(this);
             if (sUserID == "")
             {
@@ -144,7 +149,6 @@ namespace Unchained
 
             IsMe = (this.user.id == gUser(this).id);
             IsTestNet = IsTestNet(this);
-
             var r = AmIFriend(this, user.id, gUser(this).id);
             if (r.Result == "Me")
             {
@@ -159,15 +163,15 @@ namespace Unchained
                 }
                 else if (r.TXID == "WAITING_FOR_MY_ACCEPTANCE")
                 {
-                    FriendButton  = GetStandardButton(user.id, "<i class='fa fa-check'></i> Accept Request", r.Event, r.Alt, "", "btnaccptfreindreq btn btn-info text-light mb-4");
+                    FriendButton = GetStandardButton(user.id, "<i class='fa fa-check'></i> Accept Request", r.Event, r.Alt, "", "btnaccptfreindreq btn btn-info text-light mb-4");
                 }
                 else if (r.TXID == "FRIENDS")
                 {
-                    FriendButton  = GetStandardButton(user.id, "<i class='fa fa-user-minus'></i> Unfriend", r.Event, r.Alt, "", "btnfreindreq btn btn-info text-light mb-4");
+                    FriendButton = GetStandardButton(user.id, "<i class='fa fa-user-minus'></i> Unfriend", r.Event, r.Alt, "", "btnfreindreq btn btn-info text-light mb-4");
                 }
                 else if (r.Event == "AddFriendRequest")
                 {
-                    FriendButton  = GetStandardButton(user.id, "<i class='fa fa-user-plus'></i> Make Friend", r.Event, r.Alt, "", "btnfreindreq btn btn-info text-light mb-4");
+                    FriendButton = GetStandardButton(user.id, "<i class='fa fa-user-plus'></i> Make Friend", r.Event, r.Alt, "", "btnfreindreq btn btn-info text-light mb-4");
                 }
             }
         }
@@ -286,6 +290,22 @@ namespace Unchained
             return result;
         }
 
+        public static string ExtractBody(Timeline tParent)
+        {
+            string sBlurb = Mid(tParent.Body, 0, 65);
+            sBlurb = ExtractXML(sBlurb, "", "\n");
+            if (sBlurb.Contains("<") || sBlurb == "")
+            {
+                sBlurb = "on " + UnixTimeStampToDisplayAge(tParent.time);
+            }
+            if (tParent.Body.Contains("Telegram Chat"))
+            {
+                sBlurb = "Telegram Chat";
+            }
+            return sBlurb;
+            
+        }
+
         public object Voting(string parentID, string sVoteType, string sParentType)
         {
             var user = gUser(this);
@@ -305,14 +325,34 @@ namespace Unchained
                 if (sVoteType == "upvote")
                 {
                     o.VoteValue = 1;
-		         
+                    string sSmallAction = "liked";
                     dynamic tParent = Common.GetObject(Common.IsTestNet(this), sParentType, o.ParentID);
-		            string sHRObject = " your " + sParentType;
-                    string sBlurb = "your " + sParentType;
-		            if (sBlurb == "")
-		               sBlurb = "N/A";
-		            string sAnchor = "Person?homogenized=1";
-                    SendNotification("Timeline", sBlurb, this, "liked", sAnchor, tParent.UserID);
+                    if (sParentType == "comment1")
+                    {
+                         tParent = Common.GetObject(Common.IsTestNet(this), "Timeline", tParent.ParentID);
+                        sParentType = "Timeline";
+                        sSmallAction = "liked your comment on";
+                    }
+                    string sBlurb = String.Empty;
+                   
+                    string sAnchor = "Person?post=" + tParent.id.ToString();
+                    string sURLTitle = BiblePayCommon.EntityCommon.GetEntityString(tParent, "URLTitle");
+
+                    if (sParentType == "Timeline")
+                    {
+
+                        if (sURLTitle.Length > 1)
+                        {
+                            sBlurb = tParent.URLTitle;
+                        }
+                        else
+                        {
+                            sBlurb = ExtractBody((Timeline)tParent);
+
+                        }
+                    }
+
+                    SendNotification("Timeline", sBlurb, this, sSmallAction, sAnchor, tParent.UserID);
                 }
                 else if (sVoteType == "downvote")
                 {
@@ -413,8 +453,7 @@ namespace Unchained
                 }
 
                 Timeline t = new Timeline();
-
-
+                
                 try
                 {
                     t.Privacy = e.Extra.Privacy.ToString();
@@ -460,7 +499,7 @@ namespace Unchained
                 else
                 {
                     string url = Request.Url.AbsoluteUri;
-                   var upload =  UploadAttachment(t.id, "", t.Body);
+                    var upload =  UploadAttachment(t.id, "", t.Body);
                     if (!(bool)upload.GetType().GetProperty("status").GetValue(upload))
                     {
                         UICommon.MsgBox("Error", upload.GetType().GetProperty("error").GetValue(upload).ToString(), this);
@@ -469,6 +508,7 @@ namespace Unchained
                     //UICommon.MsgBox("Error", "You Must be logged in first.", this);
                     //SendBlastOutForTimeline(this, t);
                     ToastLater(this, "Success", "Your timeline entry has been saved!");
+
                     Response.Redirect(url);
                 }
 
@@ -519,9 +559,7 @@ namespace Unchained
                     ToastLater(this, "Success", "Your timeline entry has been saved!");
                     Response.Redirect(url);
                 }
-
             }
-
             else if (e.EventName == "AddTimelineURL_Click")
             {
                 if (!Common.gUser(this).LoggedIn)
@@ -598,9 +636,8 @@ namespace Unchained
                 }
                 else
                 {
-                    ToastLater(this, "Success", "You are now friends!"); 
+                    ToastLater(this, "Success", "You are now friends!");
                     Response.Redirect(Request.Url.AbsoluteUri);
-
                 }
 
             }
@@ -628,9 +665,8 @@ namespace Unchained
                 }
                 else
                 {
-                    ToastLater(this, "Success", "Your Friends Request has been sent!"); 
+                    ToastLater(this, "Success", "Your Friends Request has been sent!");
                     Response.Redirect(Request.Url.AbsoluteUri);
-
                 }
 
             }
@@ -775,26 +811,25 @@ namespace Unchained
                 for (int i = 0; i < dt.Rows.Count; i++)
                 {
                     User u = gUserById(p, dt.Rows[i]["id"].ToString());
-                    if (u.EmailAddress != null && u.EmailAddress != "" && u.EmailAddress.Length > 3)
+                    if (u.EmailAddress.ToNonNullString().Length > 3)
                     {
                         EmailNarr e = GetEmailFooter(p);
 
-                        MailMessage m = new MailMessage();
+                        BiblePayMailMessage m = new BiblePayMailMessage();
                         string sDomainName = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
                         string sURL = sDomainName + "/Person?homogenized=1";
                         string sURLA = "<a href='" + sURL + "'>here</a>";
                         string sNarr = "Dear " + u.FirstName + ",<br><br>One of your friends has posted this on their timeline:"
                             + ".<br><br>" + t.Body + "<br><br>To view the post, click " + sURLA + ".<br><br>Thank you.<br>The " + e.DomainName + " Team<br>";
-                        m.Subject = "[Timeline Notification] A new post from " + gUser(p).FirstName;
-                        m.Body = sNarr;
-                        m.IsBodyHtml = true;
-                        m.To.Add(new MailAddress(u.EmailAddress, u.FirstName));
-                        // m.Bcc.Add(new MailAddress(gUser(p).EmailAddress, gUser(p).FirstName));
-
-                        DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(p), m, e.DomainName);
+                        m.PrimaryMailMessage.Subject = "[Timeline Notification] A new post from " + gUser(p).FirstName;
+                        m.PrimaryMailMessage.Body = sNarr;
+                        m.PrimaryMailMessage.IsBodyHtml = true;
+                        m.UserToAddress.Add(u);
+                        DACResult r = BiblePayDLL.Sidechain.SendMail(IsTestNet(p), m, e.DomainName, true);
                     }
                 }
-            }catch(Exception ex)
+            }
+            catch(Exception ex)
             {
                 Log("SendBlastOutForTimeline Issue:: " + ex.Message);
             }
@@ -815,7 +850,6 @@ namespace Unchained
             }
             else
             {
-                
                 sAddFriendButton = UICommon.GetStandardButton(u.id, r.Result, r.Event, r.Alt);
             }
 

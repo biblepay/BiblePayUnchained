@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Web;
+using static BiblePayCommon.Common;
+using static BiblePayCommon.DataTableExtensions;
+using static BiblePayCommonNET.CommonNET;
 using System.Data;
 using System.Web;
 using System.Web.UI;
 using static BiblePayCommon.Common;
 using static BiblePayCommon.DataTableExtensions;
 using static BiblePayCommon.Entity;
-using static BiblePayCommonNET.CommonNET;
 using static BiblePayCommonNET.UICommonNET;
 using static Unchained.Common;
 
@@ -45,10 +48,37 @@ namespace Unchained
                         + sChannelName + ":", 700,
                         "", "", UICommon.InputType.number, false, "","");
             }
+            else if (e.EventName == "AddFriendRequest_Click")
+            {
+                BiblePayCommon.Entity.FriendRequest f = new FriendRequest();
+                f.RequesterID = gUser(this).id;
+                f.UserID = e.EventValue;
+                if (e.EventValue == "" || f.UserID == f.RequesterID)
+                {
+                    UICommon.MsgBox("Error", "Sorry, you cannot be friends with yourself. ", this);
+                    return;
+                }
+                DACResult r = AmIFriend(this.Page, f.UserID, f.RequesterID);
+                if (r.fError())
+                {
+                    UICommon.MsgBox("Error", r.Error, this);
+                    return;
+                }
+                DACResult r1 = DataOps.InsertIntoTable(this, IsTestNet(this), f, gUser(this));
+                if (r1.fError())
+                {
+                    BiblePayCommonNET.UICommonNET.MsgModal(this, "Error", "Sorry, the friend request was not saved.", 500, 200, true);
+                    return;
+                }
+                else
+                {
+                    ToastLater(this, "Success", "Your Friends Request has been sent!");
+                }
+            }
             else if (e.EventName == "Tipping_Click")
             {
                 string sPub = gUser(this).BiblePayAddress;
-		double nAmt = BiblePayCommon.Common.GetDouble(BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Output.ToString()));
+		        double nAmt = BiblePayCommon.Common.GetDouble(BiblePayCommon.Encryption.Base64DecodeWithFilter(e.Extra.Output.ToString()));
 
                 string sTipTo = (Session["tipto"] ?? "").ToString();
                 User uTip = UICommon.GetUserRecord(IsTestNet(this), sTipTo);
@@ -91,34 +121,6 @@ namespace Unchained
                     this.Page.Session["stack"] = Toast("Tipped", "You have tipped this channel on TXID " + r30.Result);
                 }
             }
-            else if (e.EventName == "AddFriendRequest_Click")
-            {
-                BiblePayCommon.Entity.FriendRequest f = new FriendRequest();
-                f.RequesterID = gUser(this).id;
-                f.UserID = e.EventValue;
-                if (e.EventValue == "" || f.UserID == f.RequesterID)
-                {
-                    UICommon.MsgBox("Error", "Sorry, you cannot be friends with yourself. ", this);
-                    return;
-                }
-                DACResult r = AmIFriend(this.Page, f.UserID, f.RequesterID);
-                if (r.fError())
-                {
-                    UICommon.MsgBox("Error", r.Error, this);
-                    return;
-                }
-                DACResult r1 = DataOps.InsertIntoTable(this, IsTestNet(this), f, gUser(this));
-                if (r1.fError())
-                {
-                    BiblePayCommonNET.UICommonNET.MsgModal(this, "Error", "Sorry, the friend request was not saved.", 500, 200, true);
-                    return;
-                }
-                else
-                {
-                    ToastLater(this, "Success", "Your Friends Request has been sent!");
-                }
-
-            }
             else if (e.EventName == "ApproveFriendRequest_Click")
             {
                 BiblePayCommon.Entity.FriendRequest f = new FriendRequest();
@@ -149,13 +151,13 @@ namespace Unchained
                 }
                 else
                 {
-                    ToastLater(this, "Success", "You are now friends!"); 
+                    ToastLater(this, "Success", "You are now friends!");
                     Response.Redirect(Request.Url.AbsoluteUri);
 
                 }
 
             }
-           else if (e.EventName == "Unfriend_Click")
+            else if (e.EventName == "Unfriend_Click")
             {
                 BiblePayCommon.Entity.Friend f = (Friend)GetObject(IsTestNet(this), "Friend", e.EventValue);
                 if (e.EventValue == "" || f == null)
@@ -179,39 +181,8 @@ namespace Unchained
                     Response.Redirect(Request.Url.AbsoluteUri);
                 }
             }
-
         }
 
-        protected string GetPeople()
-        {
-            BiblePayCommon.BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), "user1");
-            string sFilter = Config("hideusersdomain");
-            if (sFilter != "")
-            {
-                dt = dt.FilterBBPDataTable(sFilter);
-            }
-
-            // Reserved:Filter by Domain:
-            if (txtSearch.Text != "")
-            {
-                dt = dt.FilterBBPDataTable("FirstName like '%" + txtSearch.Text
-                    + "%' or LastName like '%" + txtSearch.Text + "%' or TelegramLinkName like '%"
-                    + txtSearch.Text + "' or TelegramLinkURL like '%" + txtSearch.Text + "%' or TelegramLinkDescription like '%" + txtSearch.Text + "%'");
-            }
-            List<BiblePayCommon.Entity.user1> l = new List<BiblePayCommon.Entity.user1>();
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                BiblePayCommon.Entity.user1 o = (BiblePayCommon.Entity.user1)BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, "user1", i);
-                l.Add(o);
-            }
-            string html = UICommon.GetUserGallery(this, l, paginator1, 3);
-            return html;
-        }
-
-        protected void btnSearch_Click(object sender, EventArgs e)
-        {
-            // Refine the query
-        }
 
         public static DACResult AmIFriend(Page p, string sFriendUserGuid, string sMyUserGuid)
         {
@@ -281,6 +252,38 @@ namespace Unchained
             r.Event = "AddFriendRequest";
             r.Result = "Friend Request";
             return r;
+        }
+
+
+        protected string GetPeople()
+        {
+            BiblePayCommon.BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), "user1");
+            string sFilter = Config("hideusersdomain");
+            if (sFilter != "")
+            {
+                dt = dt.FilterBBPDataTable(sFilter);
+            }
+
+            // Reserved:Filter by Domain:
+            if (txtSearch.Text != "")
+            {
+                dt = dt.FilterBBPDataTable("FirstName + ' ' + LastName like '%" + txtSearch.Text + "%' or FirstName like '%" + txtSearch.Text
+                    + "%' or LastName like '%" + txtSearch.Text + "%' or TelegramLinkName like '%"
+                    + txtSearch.Text + "' or TelegramLinkURL like '%" + txtSearch.Text + "%' or TelegramLinkDescription like '%" + txtSearch.Text + "%'");
+            }
+            List<BiblePayCommon.Entity.user1> l = new List<BiblePayCommon.Entity.user1>();
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                BiblePayCommon.Entity.user1 o = (BiblePayCommon.Entity.user1)BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, "user1", i);
+                l.Add(o);
+            }
+            string html = UICommon.GetUserGallery(this, l, paginator1, 3);
+            return html;
+        }
+
+        protected void btnSearch_Click(object sender, EventArgs e)
+        {
+            // Refine the query
         }
 
     }

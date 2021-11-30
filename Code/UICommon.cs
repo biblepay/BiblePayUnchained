@@ -162,6 +162,8 @@ namespace Unchained
             string sGrabber = "";
             sInitialTextValue = sInitialTextValue.Replace("\n", "\\n");
             sInitialTextValue = sInitialTextValue.Replace("'", "\\'");
+            sNarrative = sNarrative.Replace("\n", "\\n");
+            sNarrative = sNarrative.Replace("\r", "\\r");
             if (eInputType == InputType.multiline)
             {
                 sInputControl = "<textarea autocomplete=\"nope\" id=\"q1\" class=\"comments\" name=\"q1\" rows=\"6\" cols=\"10\">" + sInitialTextValue + "</textarea>";
@@ -174,15 +176,17 @@ namespace Unchained
             }
             string sClear = "var o = document.getElementById('q1'); o.value='';";
             //this used to say b t o a(escape(v)); test this 
-            string sJavascript = "$('<form id=\"wform1\" method=\"POST\">" + sNarrative
-                + "<br>" + sInputControl + "<br></form>').dialog({"
+            string sFormData = "<div id=\"inpDialog1\"><form id=\"wform1\" method=\"POST\">" + sNarrative + "<br>" + sInputControl + "<br></form></div>";
+
+            string sJavascript = "$('" + sFormData + "').dialog({"
                 + "  modal: true, width: " + nWidth.ToString() + ", title: '" + sTitle + "', buttons: {    'OK': function() {"
                 + "  " + sGrabber
                 + "  var Extra={};Extra.Value='" + sEventValue + "';Extra.Address='" + sAddress + "';Extra.Amount='" + sAmt + "';"
                 + "Extra.Output=XSS(v);Extra.Event='" + sCallBackEvent + "';" + sClear + "BBPPostBack2(this, Extra);"
-                + "$(this).dialog('close');"
-                + " },     'Cancel': function() {       $(this).dialog('close');                 }            }        });";
-            ScriptManager.RegisterStartupScript(p,p.GetType(), "msginput1", sJavascript, true);
+                + "$(this).html('');$(this).dialog('close');"
+                + " },     'Cancel': function() {       $(this).html('');$(this).dialog('close');                 }            }        });";
+            
+            ScriptManager.RegisterStartupScript(p,p.GetType(), "msginput2"+Guid.NewGuid().ToString(), sJavascript, true);
         }
 
 
@@ -199,7 +203,12 @@ namespace Unchained
             sInitialTextValue = sInitialTextValue.Replace("\r", "\\r");
             sInitialTextValue = sInitialTextValue.Replace("'", "\\'");
             sInitialTextValue = sInitialTextValue.Replace("\"", "\\\"");
-
+            bool fMobile = BiblePayCommonNET.UICommonNET.fBrowserIsMobile(p);
+            if (fMobile && nWidth > 375)
+            {
+                nWidth = 375;
+               
+            }
             if (eInputType == InputType.multiline)
             {
                 sInputControl = "<textarea id=\"q1\" class=\"comments\" name=\"q1\" rows=\"6\" cols=\"10\">" + sInitialTextValue + "</textarea>";
@@ -207,7 +216,7 @@ namespace Unchained
             }
             string sClear = "var o = document.getElementById('q1'); o.value='';";
             iteration++;
-            string sRegJS = "var editor" + iteration.ToString() + " = new RichTextEditor('#q1',{maxHTMLLength:65535});";
+            string sRegJS = "var editor" + iteration.ToString() + " = new RichTextEditor('#q1',{skin:'rounded-corner',toolbar:'basic',maxHTMLLength:65535});";
 
             string sJavascript = "$('<form id=\"wform" + Guid.NewGuid().ToString() + "\" method=\"POST\">" + sNarrative
                 + "<br>" + sInputControl + "<br></form>').dialog({"
@@ -219,6 +228,32 @@ namespace Unchained
                 + " },     'Cancel': function() {       $(this).dialog('close');    $(this).dialog('destroy');             }            }        });"
                 +" $(\".ui-dialog-titlebar-close\").hide(); " + sRegJS;
             ScriptManager.RegisterStartupScript(p, p.GetType(), "msginput1", sJavascript, true);
+        }
+
+
+        public static void MsgInputUnchainedUpload(Page p, string sCallBackEvent, string sTitle, string sAction,
+             int nWidth)
+        {
+
+            string sExtraBody = "";
+            bool fMobile = BiblePayCommonNET.UICommonNET.fBrowserIsMobile(p);
+            string sRegJS = "";
+            nWidth = 400;
+            int nHeight = 500;
+            string sOK = "var Extra ={ }; Extra.Value = \"" + sCallBackEvent + "\"; "
+                      + "Extra.Event=\"" + sCallBackEvent + "\";BBPPostBack3(this, Extra);";
+            string sPos = "$( '#divupload' ).dialog('widget').position({  my: 'left top',  at: 'left+0 top',  of: '#divupload'});";
+            sPos = "";
+
+            string sUploadControl = "<iframe id=\"iframe1\" style=\"overflow:hidden;\" width=\"" + nWidth.ToString() + "px\" height=\"" + nHeight.ToString() + "px\" src=\"UnchainedUpload?" 
+                + sAction + "\"></iframe>";
+            sUploadControl += "<script>function closeIFrame(){  " + sOK + " $(\"#divupload\").dialog(\"destroy\");   }</script>";
+            string sJavascript = "$('<div id=\"divupload\" style=\"xoverflow-y:scroll;overflow-x:hidden;\"><form id=\"wform0\" method=\"POST\">" + sExtraBody
+                + "<br>" + sUploadControl + "<br></form></div>').dialog({"
+                + "  modal: true, height:" + (nHeight-1).ToString() + ", width: " + (nWidth-1).ToString() + ", closeOnEscape: true, title: '" + sTitle + "', buttons: {    "
+                + "  'Close': function() {       $(this).dialog('close');    $(this).dialog('destroy');             }            }        });"
+                + "  " + sPos + sRegJS;
+            ScriptManager.RegisterStartupScript(p, p.GetType(), "msgupload1", sJavascript, true);
         }
 
         public static void GenerateJsTag(Page page, string jsCode)
@@ -379,7 +414,7 @@ namespace Unchained
             if (nVal == null)
             {
                 string sPub = gUser(p).BiblePayAddress;
-                if (sPub == "")
+                if (sPub == "" ||sPub == null)
                     return "0.00";
 
                 nVal = BiblePayDLL.Sidechain.QueryAddressBalance(IsTestNet(p), sPub);
@@ -391,6 +426,12 @@ namespace Unchained
             return FormatUSD((double)nVal) + " BBP";
         }
 
+        public enum ChatType
+        {
+            ConferenceCall,
+            ChatRoom
+        };
+
         public struct ChatStructure
         {
             public string startedByUser;
@@ -398,10 +439,16 @@ namespace Unchained
             public string chatGuid;
             public bool NotifiedOfChatRequest;
             public bool NotifiedOfEntry;
+            public ChatType chatType;
+            public string URL;
+            public long LastActivity;
+            public bool NeedsRefreshed;
+            public string LastTyper;
+            public List<string> participants;
         }
 
         public static Dictionary<string, List<string>> dictChatHistory = new Dictionary<string, List<string>>();
-        public static Dictionary<string, ChatStructure> dictChats = new Dictionary<string, ChatStructure>();
+        public static Dictionary<string, ChatStructure> dictChats2 = new Dictionary<string, ChatStructure>();
         public static string GetChatInner(Page p)
         {
             if (gUser(p).LoggedIn == false)
@@ -410,7 +457,7 @@ namespace Unchained
             }
 
             UICommon.ChatStructure myChat;
-            bool fGot = UICommon.dictChats.TryGetValue(gUser(p).id, out myChat);
+            bool fGot = UICommon.GetChatStruct(gUser(p).id, out myChat);
             if (!fGot)
             {
                 return "<div id='chatinner'>...</div>";
@@ -436,25 +483,35 @@ namespace Unchained
         {
             // Show the Notifications console.
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(Common.IsTestNet(p), "Notification");
-            dt = dt.FilterDataTable("userid='" + Common.gUser(p).id + "'");
+            double nTimeCutoff = UnixTimestampUTC() - (60 * 60 * 24 * 30);
+
+            dt = dt.FilterDataTable("userid='" + Common.gUser(p).id + "' and time > " + nTimeCutoff.ToString());
+            dt = dt.OrderBy("time desc");
+
             string html = "<table width=100% style='table-layout:fixed'>";
+            
 
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 string sID = dt.Rows[i]["id"].ToString();
+                double nRead = dt.GetColDouble(i, "Read");
+
                 string sTrashAnchor = UICommon.GetStandardAnchor("ancDelete1", "DeleteNotification", sID, "&nbsp;&nbsp;<i class='fa fa-trash'></i>",
                     "Delete Notification", "Notification", "", "");
-                //11-8-2021
-                string sArea = dt.Rows[i]["Body"].ToString() 
-                    + "<br><font color=blue>" + GetPrettyDate(dt.GetColDouble(i, "time"));
+                
+                string sMouseOver = nRead == 0 ? "onmouseover=\"transmitRead('" + sID + "');\"" : "";
+
+                string sArea = "<span "+ sMouseOver + ">" +  dt.Rows[i]["Body"].ToString()
+                    + "<br><font color=blue>" + GetPrettyDate(dt.GetColDouble(i, "time")) + "</span>";
                 string sDiv = "<tr class='notification'><td width=5%>" + UICommon.GetUserAvatarAndName(p, dt.Rows[i]["UserID"].ToString())
                 + "</td><td width='90%' style='width:255px;overflow-x:hidden;'><small>" + sArea 
-                + "</small></td><td width=6% style='padding:2em;margin:-2em;font-size:150%;'><b>" + sTrashAnchor + "</b></tr>";
+                + "</small></td><td width=6% xstyle='padding:2em;margin:-2em;font-size:150%;' class='largeIcon'>" + sTrashAnchor + "</tr>";
                 string sRow = "<tr>" + sDiv + "</tr>";
                 html += sRow;
             }
             if (nUnread > 0)
             {
+                dt = dt.FilterDataTable("read <> 1");
                 nUnread = dt.Rows.Count;
                 return;
             }
@@ -500,6 +557,25 @@ namespace Unchained
             return sHTML;
         }
 
+        public static bool GetChatStruct(string sUserID, out UICommon.ChatStructure myChat)
+        {
+            myChat = new UICommon.ChatStructure();
+            foreach (KeyValuePair<string, UICommon.ChatStructure> entry in UICommon.dictChats2)
+            {
+                if (entry.Value.startedByUser == sUserID)
+                {
+                    myChat = entry.Value;
+                    return true;
+                }
+                else if (entry.Value.chattingWithUser == sUserID)
+                {
+                    myChat = entry.Value;
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public static string GetChatBox2(Page p)
         {
             // Check for Paging
@@ -509,7 +585,8 @@ namespace Unchained
 
             UICommon.ChatStructure myChat;
 
-            bool fGot = dictChats.TryGetValue(gUser(p).id, out myChat);
+            bool fGot = GetChatStruct(gUser(p).id, out myChat);
+
 
             if (!fGot)
                 return "";
@@ -522,16 +599,16 @@ namespace Unchained
             if (myChat.NotifiedOfChatRequest == true)
                 return "";
 
-            string sURL = "Meeting?type=private&chat=" + myChat.chatGuid;
             string sTheOtherUser = myChat.chattingWithUser == gUser(p).id ? myChat.startedByUser : myChat.chattingWithUser;
             User u = gUserById(p, sTheOtherUser);
             string sClose = "onclick='closeDialog();'";
+            string sRoomType = myChat.chatType == ChatType.ChatRoom ? "chat room" : "conference call";
             string sNarrative = "Hi " + gUser(p).FirstName + ", " + u.FullUserName() 
-                + " is calling you into a chat.  <a " + sClose + " href='" + sURL + "'><br><b>Click here if you would like to go. </b></a>";
+                + " is calling you into a " + sRoomType + ".  <a " + sClose + " href='" + myChat.URL + "'><br><b>Click here if you would like to go. </b></a>";
 
-            BiblePayCommonNET.UICommonNET.MsgModalWithLinks(p, "Chat Request", sNarrative, 600, 300, true, true);
+            BiblePayCommonNET.UICommonNET.MsgModalWithLinks(p, "Chat Request for " + sRoomType, sNarrative, 600, 300, true, true);
             myChat.NotifiedOfChatRequest = true;
-            dictChats[gUser(p).id] = myChat;
+            dictChats2[myChat.chatGuid] = myChat;
             return "";
         }
 
@@ -546,7 +623,7 @@ namespace Unchained
 
             UICommon.ChatStructure myChat;
 
-            bool fGot = dictChats.TryGetValue(gUser(p).id, out myChat);
+            bool fGot = UICommon.GetChatStruct(gUser(p).id, out myChat);
 
             if (!fGot)
                 return "";
@@ -577,21 +654,26 @@ namespace Unchained
             sScreen += "<br>&nbsp;</div></div>";
             return sScreen;
         }
+        public static string GetProfileLink(Page p)
+        {
+            if (gUser(p).LoggedIn == false)
+            {
+                return Common.gUser(p).GetAvatarImage();
+            }
+            string sChangeProfileLink = UICommon.GetStandardAnchor("changeProfile", "ChangeProfile", Common.gUser(p).id, Common.gUser(p).GetAvatarImage(), "Change Profile Picture");
+            return sChangeProfileLink;
+        }
+
         public static string GetSideBar(Page p)
         {
             item = 0;
             string sWallet = "<a class='decoratedlink' href='Wallet'><i class='fa fa-wallet'></i>&nbsp;"
                 + GetAvatarBalance(p) + "</a>";
-            //  "<div class='pull-left info'><p>" + gUser(p).FirstName.ToNonNullString() + "</p>" + "</div><div class='myicons'><ul>" + sKeys + "</ul></div>"
-
             string sChain = IsTestNet(p) ? "TESTNET" : "MAINNET";
             string sDecoratedChain = IsTestNet(p) ? "<font color=lime>TESTNET</font>" : "<font color=silver>MAINNET</font>";
             string sChainAnchor = GetStandardAnchor("ancChain", "btnChangeChain", sChain, sDecoratedChain, "Change your Chain");
             string sKeys = gUser(p).FirstName.ToNonNullString().Length > 0 ? sWallet + " • <small>" + sChainAnchor  + "</small>" : "";
-            string sChangeProfileAction = gUser(p).LoggedIn ? "UnchainedUpload?action=setavatar&parentid=" + gUser(p).id : "";
-
-            string sChangeProfileLink = "<a href='" + sChangeProfileAction + "'>" + gUser(p).GetAvatarImage() + "</a>";
-
+            string sChangeProfileLink = GetProfileLink(p); 
             string html = "<div id='entireleftmenu'><aside class='main-sidebar' id='mySidenav'>";
             html += "<section class='sidebar'><div class='user-panel' class='trump'>"
               + "<a style='z-index:9999;font-size:150%;position:relative;left:-10px;' onclick='closeNav();' class='sidebar-toggle' data-toggle='offcanvas' role='button'>"
@@ -604,7 +686,6 @@ namespace Unchained
             string sFunction = "<script>function myfunc(iActive) { $('#bbpdd' + iActive.toString()).attr('expanded',0);  for (var i = 0; i < 50; i++) {   "
                 + "$('#bbpdd' + i.toString() ).attr('xexpanded', 0); $('#bbpdd' + i.toString()).css('display','none'); localStorage.setItem('bbpdd' + i.toString() , 1);   } localStorage.setItem('bbpdd' + iActive.toString() , 1);      }</script>";
             sFunction = "<script>function myfunc(iActive) { }</script>";
-
             html += sFunction;
             return html;
         }
@@ -634,7 +715,6 @@ namespace Unchained
             u.AvatarURL = dtUsers.Rows[0]["AvatarURL"].ToString();
             if (u.AvatarURL == String.Empty)
                 u.AvatarURL = EmptyAvatar();
-
             u.EmailAddress = dtUsers.Rows[0]["EmailAddress"].ToString();
             u.UserName = dtUsers.Rows[0]["UserName"].ToString();
             u.FirstName = dtUsers.Rows[0]["FirstName"].ToString();
@@ -798,7 +878,6 @@ namespace Unchained
 
         public static string GetAttachments(Page p, string sParentID, string sFilter, string sHeaderName, string sStyle)
         {
-            //DataTable dtAttachments = BiblePayDLL.Sidechain.RetrieveDataTable2(IsTestNet(p), "video1");
             var builder = Builders<BiblePayCommon.Entity.video1>.Filter;
             var filter = builder.Eq("Attachment", 1) & builder.Eq("ParentID", sParentID);
             IList<BiblePayCommon.Entity.video1> dtAttachments = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.video1>(IsTestNet(p), "video1",
@@ -836,7 +915,9 @@ namespace Unchained
             {
                 return "";
             }
-            string html = "<div style='display: none;' id='maingallery' class='html5gallery' data-responsive='true' data-skin='vertical' data-width='480' data-height='272'>";
+            string html = "<div id='t"+ sParentID + "' " + sStyle + " class='tab'>&nbsp;&nbsp;" + sHeaderName + "</div><div style='overflow-y:scroll;max-height:600px;' class='border'>";
+
+            html += "<div style='display: none;' id='maingallery' class='html5gallery' data-responsive='true' data-skin='vertical' data-width='480' data-height='272'>";
             for (int i = 0; i < dtAttachments.Count; i++)
             {
                 string sURL = dtAttachments[i].URL;
@@ -844,15 +925,25 @@ namespace Unchained
 
                 if (sURL.ToLower().Contains("png") || sURL.ToLower().Contains("jpeg") || sURL.ToLower().Contains("jpg"))
                 {
-                    string sRow="<a href='" + sURL + "'><img src='" + sURL + "' alt='" + sFN + "'></a>";
-
+                    string sRow="<a href='" + sURL + "' data-tile='mytitle'><img src='" + sURL + "' alt='" + sFN + "' /></a>";
                     html += sRow;
-      
                 }
-                else if (sURL.Contains("mp4"))
+                else if (sURL.Contains("mp4") || sURL.Contains("mov") || sURL.Contains("webm"))
                 {
-                    string sPoster = dtAttachments[i].URL2.Replace("/data", "/thumbnails/video.jpg");
-                    string sRow = "<a href='" + sURL + "'><img src='" + sPoster + "' alt='" + sFN + "'></a>";
+                    string sData =  dtAttachments[i].URL2.ToNonNullString();
+
+                    string sPoster = sData.Replace("/data", "/thumbnails/video.jpg");
+                    string sRow = "<a href='" + sURL + "'><img src='" + sPoster + "' alt='" + sFN + "' /></a>";
+                    html += sRow;
+                }
+                else if (sURL.Contains("pdf"))
+                {
+
+                    string sPDFLink = "GospelViewer?pdfsource=" + BiblePayCommon.Encryption.Base64Encode(sURL);
+                    string sPDF2 = "<a href='" + sPDFLink + "'>";
+                    string sPDFPic = "https://foundation.biblepay.org/images/pdf_icon.png";
+                    string sTitle = " data-link='" + sPDFLink + "' data-linktarget='_blank'";
+                    string sRow = "<a class='html5lightbox' href='" + sPDFPic + "' " + sTitle + "><img src='" + sPDFPic + "' alt='" + sFN + "' /></a>";
                     html += sRow;
 
                 }
@@ -911,7 +1002,7 @@ namespace Unchained
                         User u = UICommon.GetUserRecord(IsTestNet(p), v.UserID);
                         string sUserName = u.FullUserName();
                         string sElement = "";
-                        if ((sViewType == "video" || sViewType == "any") && (sURL.ToLower().Contains(".mp4") || sURL.ToLower().Contains(".webm")))
+                        if ((sViewType == "video" || sViewType == "any") && (sURL.ToLower().Contains(".mp4") || sURL.ToLower().Contains("mov") || sURL.ToLower().Contains(".webm")))
                         {
                             sElement = CurateVideo(p, nWidth, v.id, u,v.URL2,
                                 v.SVID,
@@ -987,7 +1078,7 @@ namespace Unchained
         */
 
 
-            /*
+       /*
         public static BiblePayCommon.BBPDataTable GetGroup(bool fTestNet, string table, string sFilter, string groupbycolumn)
         {
             // SQL Equivalent of : Select id,max(maxcolumn) group by groupbycolumn
@@ -1069,7 +1160,6 @@ namespace Unchained
             {
                 return "N/A";
             }
-            //sData = System.Web.HttpUtility.UrlEncode(sURL);
             return sData;
         }
 
@@ -1143,6 +1233,7 @@ namespace Unchained
                 return "";
             }
         }
+        
         public static string GetUserGallery(Page p, IList<BiblePayCommon.Entity.user1> dt, BiblePayPaginator.Paginator pag, int nCols)
         {
             string html = "";
@@ -1161,14 +1252,17 @@ namespace Unchained
                 for (int y = pag.StartRow; y <= pag.EndRow; y++)
                 {
                     User u = UICommon.GetUserRecord(IsTestNet(p), dt[y].id);
+                    string sConfAnchor = GetStandardAnchor("ancConf", "ConfNow", u.id.ToString(),
+                           " <i class='fa fa-phone'></i>", "Conference call with this user now", "");
                     string sChatAnchor = GetStandardAnchor("ancChat", "ChatNow", u.id.ToString(),
-                           " <i class='fa fa-chat'></i>", "Chat with this user Now", "");
+                           " <i class='fa fa-chat'></i>", "Chat with this user now", "");
+
                     string sBanAnchor = GetStandardAnchor("ancBan", "BanUser", u.id.ToString(), "<i class='fa fa-ban'></i>", "Ban this User", "user1");
 
                     string links = "";
                     if (u.id != gUser(p).id)
                     {
-                        links += sChatAnchor;
+                        links += sChatAnchor + sConfAnchor;
                         links += UICommon.GetTipControl(IsTestNet(p), u.id, u.id);
                     }
                     if (gUser(p).Administrator == 1)
@@ -1196,14 +1290,14 @@ namespace Unchained
                         else if (r.TXID == "WAITING_FOR_MY_ACCEPTANCE")
                         {
                             string btnAccept = "<a id='" + u.id + "_accept' class=\"dropdown-item\" onclick=\"var e={};e.Event='ApproveFriendRequest_Click';e.Value='" + u.id + "';BBPPostBack2(null, e);"
-                                + "\" title='Accept '><i class='fa fa-check'></i> Accept Request</a>";
+                               + "\" title='Accept '><i class='fa fa-check'></i> Accept Request</a>";
                             string btnReject = "<a id='" + u.id + "_reject' class=\"dropdown-item\" onclick=\"var e={};e.Event='Unfriend_Click';e.Value='" + u.id + "';BBPPostBack2(null, e);"
                                 + "\" title='Accept '><i class='fa fa-close'></i> Delete Request</a>";
                             string buttons = "<div class=\"dropdown\">"
-            + "<a class=\"btn btn-defualt p-1 dropdown-toggle\" href=\"#\" role=\"button\" id=\"dropdownMenuLink\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">  Respond To Request</a>"
-            + "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuLink\">"
-            + "<li>" + btnAccept + "</li>"
-            + "<li>" + btnReject + "</li></ul></div>";
+                               + "<a class=\"btn btn-defualt p-1 dropdown-toggle\" href=\"#\" role=\"button\" id=\"dropdownMenuLink\" data-bs-toggle=\"dropdown\" aria-expanded=\"false\">  Respond To Request</a>"
+                               + "<ul class=\"dropdown-menu\" aria-labelledby=\"dropdownMenuLink\">"
+                               + "<li>" + btnAccept + "</li>"
+                               + "<li>" + btnReject + "</li></ul></div>";
 
                             links += buttons;// GetStandardButton(u.id, "<i class='fa fa-check'></i> Accept Request", r.Event, r.Alt, "", "btnaccptfreindreq");
                         }
@@ -1219,22 +1313,22 @@ namespace Unchained
 
                     string personlink = "<a href = \"Person?id=" + u.id + "\" class=\"tile-link\"></a>";
                     string h = "<div class=\"col-md-6 col-xl-4\">"
-              + "<div class=\"card\">" +
-        "<div class=\"card-body d-flex align-items-center\">" +
-          "<div class=\"flex-shrink-0 align-items-center\"><span style = \"background-image: url(" + u.GetAvatarUrl() + ")\" class=\"avatar avatar-xl mr-3\">" + personlink + "</span></div>"
-            + "<div class=\"flex-grow-1 ms-2 overflow-hidden\">"
-              + "<h6 class=\"card-text mb-0 position-relative\">" + u.FullUserName() + personlink + " </h6> "
-              + "<p class=\"card-text text-uppercase text-muted domain-text small mb-1\" > " + dt[y].domain + " </p> "
-              + "<p class=\"card-text\"> "
-               + " Since: " + BiblePayCommon.Common.UnixTimeStampToDateControl(dt[y].time)
-              + "</p>"
-              + "<p class=\"card-link text-center border-top mb-0\"> "
-               + links
-              + "</p>"
-          + "</div>"
-        + "</div>"
-      + "</div>"
-    + "</div>";
+                            + "<div class=\"card\">" +
+                            "<div class=\"card-body d-flex align-items-center\">" +
+                              "<div class=\"flex-shrink-0 align-items-center\"><span style = \"background-image: url(" + u.GetAvatarUrl() + ")\" class=\"avatar avatar-xl mr-3\">" + personlink + "</span></div>"
+                                + "<div class=\"flex-grow-1 ms-2 overflow-hidden\">"
+                                  + "<h6 class=\"card-text mb-0 position-relative\">" + u.FullUserName() + personlink + " </h6> "
+                                  + "<p class=\"card-text text-uppercase text-muted domain-text small mb-1\" > " + dt[y].domain + " </p> "
+                                  + "<p class=\"card-text\"> "
+                                   + " Since: " + BiblePayCommon.Common.UnixTimeStampToDateControl(dt[y].time)
+                                  + "</p>"
+                                  + "<p class=\"card-link text-center border-top mb-0\"> "
+                                   + links
+                                  + "</p>"
+                              + "</div>"
+                            + "</div>"
+                          + "</div>"
+                        + "</div>";
                     html += h;
                     iCol++;
 
@@ -1247,7 +1341,6 @@ namespace Unchained
                 return "";
             }
         }
-
 
         public static string GetComments(bool fTestNet, string id, Page z, string sParentType, bool fMaskIfNone = false)
         {
@@ -1277,18 +1370,21 @@ namespace Unchained
             }
             for (int i = 0; i < dt.Count; i++)
             {
-                string sBody = "<div class='comments'>" + ReplaceURLs(dt[i].Body) + "</div>";
+                //string sBody = "<div class='comments'>" + ReplaceURLs(dt[i].Body) + "</div>";
+                string sBody = "<div class='comments'>" + dt[i].Body + "</div>";
+                sBody = sBody.Replace("iframe", "");
+                sBody = sBody.Replace("IFRAME", "");
 
                 // Edit comment and delete comment options
-                string sCluster = String.Empty;
+                string sTrashAnchor = String.Empty;
+                string sEditAnchor = String.Empty;
                 if (HasOwnership(IsTestNet(z), dt[i].id, "comment1", gUser(z).id))
                 {
-                    string sTrashAnchor = GetStandardAnchor("ancDelete", "DeleteObject", dt[i].id,
-                        "<i class='fa fa-trash'></i>", "Delete Comment", "comment1");
-                    string sEditAnchor = GetStandardAnchor("ancEdit", "EditObject", dt[i].id,
-                        "<i class='fa fa-edit'></i>", "Edit Comment", "comment1");
+                    sTrashAnchor = GetStandardAnchor("ancDelete", "DeleteObject", dt[i].id,
+                        "<i class='largeIcon fa fa-trash'></i>", "Delete Comment", "comment1");
 
-                    sCluster = sEditAnchor + "&nbsp;" + sTrashAnchor;
+                    sEditAnchor = GetStandardAnchor("ancEdit", "EditObject", dt[i].id,
+                        "<i class='largeIcon fa fa-edit'></i>", "Edit Comment", "comment1");
                 }
 
                 string div = "<tr><td><td>" + UICommon.GetUserAvatarAndName(z, dt[i].UserID)
@@ -1297,12 +1393,8 @@ namespace Unchained
                     + "</td><td>";
                 // string sValueControl = "<textarea class='comments' readonly id='txtCM" + dt[i].id.ToString() + "'>" + sBody + "</textarea>";
                 string sValueControl = "<div id='txtCM" + dt[i].id.ToString() + "'>" + sBody + "</div>";
-                //  string sRegJS1 = "var editor" + i.ToString() + "=new RichTextEditor('#txtCM" + dt[i].id.ToString() + "', { readOnly: true });";
-                //  ScriptManager.RegisterStartupScript(z, z.GetType(), "rteJSCM" + i.ToString(), sRegJS1, true);
-
-                div +=  sValueControl + "</td><td>"  + sCluster + "</td></tr>";
+                div +=  sValueControl + "</td><td>"  + sEditAnchor + "</td><td>" + sTrashAnchor + "</tr>";
                 sHTML += div;
-
             }
             sHTML += "</table>";
             if (fMaskIfNone == true)
@@ -1322,12 +1414,92 @@ namespace Unchained
             string sSaveArea = "<tr><td width=70%>"
                 + "<textarea id='txtComment' class='comments' name='txtComment' id='txtComment' rows=10 cols=10></textarea>"
                 + "<br><br></td></tr></table>";
-            // Register the JS:
-            string sRegJS = "var editor1 = new RichTextEditor('#txtComment', {maxHTMLLength:65535});";
+            // Register the JS:  (toolbar = basic/default)
+            string sRegJS = "var editor1 = new RichTextEditor('#txtComment', {skin:'rounded-corner',toolbar:'basic',maxHTMLLength:65535});";
             ScriptManager.RegisterStartupScript(z, z.GetType(), "rteJS1", sRegJS, true);
             sHTML += sSaveArea;
             string sJS = "var oComment=document.getElementById(\"txtComment\");oComment.value = encodeHTMLTags(oComment.value);";
-            sHTML += BiblePayCommonNET.UICommonNET.GetButtonTypeSubmit("btnSaveComments1", "SaveComments_Click", "Save Comments", sJS);
+            sHTML += BiblePayCommonNET.UICommonNET.GetButtonTypeSubmit("btnSaveComments1", "SaveComments_Click", "Save Comments", sJS, id);
+            return sHTML;
+        }
+        public static string GetChatComments(bool fTestNet, string id, Page z, UICommon.ChatStructure chat)
+        {
+            // Shows the chat type comments section for the object.  Also shows the replies to the comments.
+            var builder = Builders<BiblePayCommon.Entity.comment1>.Filter;
+            var filter = builder.Eq("ParentID", id);
+            filter &= builder.Regex("ParentID", new BsonRegularExpression(".*" + id + "*", "i"));
+            filter &= builder.Ne("deleted", 1);
+            // mission critical todo: pull this from the private chain:
+            IList<BiblePayCommon.Entity.comment1> dt = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.comment1>(fTestNet, "comment1",
+                filter, SERVICE_TYPE.PRIVATE_CACHE, "time", true);
+
+            string sHTML = "";
+
+
+            sHTML += "<div id='mainchatarea' onmousemove='PollChat();'><table class='saved2' width='100%'>"
+                + "<tr><th width=4%><th width=14%>User</th><th width=10%>Date-Time</th><th width=64%>Comment</th><th width=1%>Actions</th></tr>";
+
+            for (int i = 0; i < dt.Count; i++)
+            {
+                string sBody = "<div class='comments'>" + dt[i].Body + "</div>";
+                sBody = sBody.Replace("iframe", "");
+                sBody = sBody.Replace("IFRAME", "");
+                // Edit comment and delete comment options
+                string sTrashAnchor = String.Empty;
+                string sEditAnchor = String.Empty;
+                if (false)
+                {
+                    if (HasOwnership(IsTestNet(z), dt[i].id, "comment1", gUser(z).id))
+                    {
+                        sTrashAnchor = GetStandardAnchor("ancDelete", "DeleteObject", dt[i].id,
+                            "<i class='largeIcon fa fa-trash'></i>", "Delete Comment", "comment1");
+
+                        sEditAnchor = GetStandardAnchor("ancEdit", "EditObject", dt[i].id,
+                            "<i class='largeIcon fa fa-edit'></i>", "Edit Comment", "comment1");
+                    }
+                }
+
+                string div = "<tr><td><td>" + UICommon.GetUserAvatarAndName(z, dt[i].UserID)
+                    + "</td><td>" + GetPrettyDate(dt[i].time)  
+                    + "</td><td>";
+                string sValueControl = "<div id='txtCM" + dt[i].id.ToString() + "'>" + sBody + "</div>";
+                div += sValueControl + "</td><td>" + sEditAnchor + "</td><td>" + sTrashAnchor + "</tr>";
+                sHTML += div;
+            }
+
+            sHTML += "</table>";
+            sHTML += "<table class='comments' width='100%'>";
+
+            if (!gUser(z).LoggedIn)
+            {
+                sHTML += "<tr><td><font color=red>Sorry, you must be logged in first.</td></tr></table>";
+                return sHTML;
+            }
+
+            string sHTMLParticipants = "";
+            for (int i = 0; i < chat.participants.Count; i++)
+            {
+                User u1 = gUserById(z, chat.participants[i]);
+                sHTMLParticipants += u1.FullUserName() + "<br>";
+            }
+
+            
+            string sParticipants = "<div id='divparticipants' class='tab'>&nbsp;&nbsp; Participants</div><div style='overflow-y:scroll;min-height:245px;' class='border'>" + sHTMLParticipants + "</div>";
+            string sSaveArea = "<tr><td width=70%>"
+                + "<textarea id='txtComment' class='comments' name='txtComment' id='txtComment' rows=6 cols=10></textarea>"
+                + "<br><br></td><td width=20% style='vertical-align:top;'>" + sParticipants + "</td></tr></table>";
+            // Register the JS:  (toolbar = basic/default)
+            string sRegJS = "var editor1 = new RichTextEditor('#txtComment', {skin:'rounded-corner',toolbar:'basic',maxHTMLLength:65535});PollChat();";
+            ScriptManager.RegisterStartupScript(z, z.GetType(), "rteJS1", sRegJS, true);
+            sHTML += sSaveArea;
+            sHTML += "</div>";
+
+            string sJS = "var oComment=document.getElementById(\"txtComment\");oComment.value = encodeHTMLTags(oComment.value);";
+            sHTML += BiblePayCommonNET.UICommonNET.GetButtonTypeSubmit("btnSaveChatComments1", "SaveChatComments_Click", "Say Something", sJS, id, chat.chatGuid);
+            string sCloseChat = GetStandardButton(id, "Close Chat", "CloseChat", "Close chat and exit room");
+            string sClearChat = GetStandardButton(id, "Clear Chat", "ClearChat", "Clear chat history");
+            sHTML += sCloseChat + sClearChat;
+
             return sHTML;
         }
 
@@ -1356,6 +1528,10 @@ namespace Unchained
                 dt = dt.FilterBBPDataTable("administrator=1 or id='" + gUser(p).id + "' or id='" + sOriginatorID + "'");
                 dt = dt.OrderBy0("lastname,firstname desc");
             }
+            else
+            {
+                dt = dt.OrderBy0("lastname,firstname");
+            }
             string sOptions = "";
             sOptions += "<option></option>";
             for (int y = 0; y < dt.Rows.Count; y++)
@@ -1378,9 +1554,13 @@ namespace Unchained
             string sOptions = "";
             for (int y = 0; y < dt.Rows.Count; y++)
             {
+                string sID = dt.Rows[y]["id"].ToString();
+
                 string sColValue = dt.Rows[y][sColName].ToString(); // + " " + dt.Rows[y]["lastname"];
-                bool fSelected = sSelectedValue.ToLower() == sColValue.ToLower();
+                bool fSelected = sSelectedValue.ToLower() == sColValue.ToLower() || sSelectedValue == sID;
+
                 string sSel = fSelected ? " SELECTED " : "";
+                
                 string sRow = "<option " + sSel + "value='" + dt.Rows[y]["id"].ToString() + "'>"
                     + sColValue + "</option>\r\n";
                 sOptions += sRow;
@@ -1460,32 +1640,30 @@ namespace Unchained
 
         public static void NotifyOfSale(Page p, bool fTestNet, User u, BiblePayCommon.Entity.NFT n, double nOfferPrice, string sTXID)
         {
-            MailAddress r = new MailAddress("rob@saved.one", "The BiblePay Team");
-            MailAddress t = new MailAddress(u.EmailAddress, u.UserName);
             MailAddress bcc = new MailAddress("rob@biblepay.org", "Rob Andrews");
-            MailMessage m = new MailMessage(r, t);
+            BiblePayCommon.Common.BiblePayMailMessage m = new BiblePayMailMessage();
+            m.UserToAddress.Add(u);
             string sChainPrefix = fTestNet ? "[! TESTNET ! ] " : "";
-
-            m.Bcc.Add(bcc);
+            m.PrimaryMailMessage.Bcc.Add(bcc);
             // Add the Seller too
             User uSeller = gUserById(p, n.OwnerUserID);
             if (uSeller.EmailAddress.ToNonNullString() != "")
             {
-                m.CC.Add(uSeller.EmailAddress);
+                m.UserCC.Add(uSeller);
             }
 
             bool fOrphan = n.Type.ToLower().Contains("orphan");
             string sNarr = fOrphan ? "sponsored" : "purchased";
-            m.Subject = sChainPrefix + "You have successfully " + sNarr + " NFT ID " + n.id + "!";
+            m.PrimaryMailMessage.Subject = sChainPrefix + "You have successfully " + sNarr + " NFT ID " + n.id + "!";
 
             if (fOrphan)
             {
-                m.Subject += " [orphan]";
+                m.PrimaryMailMessage.Subject += " [orphan]";
                 bool fCameroon = n.LowQualityURL.ToLower().Contains("cameroon");
                 if (fCameroon)
                 {
                     MailAddress newcc = new MailAddress("todd.justin@cameroonone.org", "Todd Finklestone");
-                    m.CC.Add(newcc);
+                    m.PrimaryMailMessage.CC.Add(newcc);
                 }
             }
 
@@ -1493,11 +1671,11 @@ namespace Unchained
                 + nOfferPrice.ToString() + " BBP in TXID " + sTXID + "!  <br><br>To view your NFT's "
                 + " please navigate <a href='https://unchained.biblepay.org/NFTList'>here</a>.<br><br>Thank you for using Biblepay.  <br><br>Sincerely Yours,<br>The BiblePay Team";
 
-            m.IsBodyHtml = true;
-            m.Body = sBody;
+            m.PrimaryMailMessage.IsBodyHtml = true;
+            m.PrimaryMailMessage.Body = sBody;
             EmailNarr e = GetEmailFooter(p);
-
-            BiblePayDLL.Sidechain.SendMail(fTestNet, m, e.DomainName);
+            string sDomainName = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
+            BiblePayDLL.Sidechain.SendMail(fTestNet, m, e.DomainName, true);
         }
 
 
@@ -1548,7 +1726,6 @@ namespace Unchained
                 sBlurb = "N/A";
             n.Anchor = "<a href='" + sDisplayPage + "'>";
             sBlurb = CleanseBodyOfHTML(sBlurb);
-
             n.Body = Common.gUser(p).FullUserNameAnchor() + " " + n.Anchor + " " + sAction + " " + sHRObject + " about " + sBlurb + ". </a>";
             n.NotifierID = Common.gUser(p).id;
             n.Title = sAction;
@@ -1565,7 +1742,6 @@ namespace Unchained
             if (u.EmailAddress.ToNonNullString() == "")
             {
                 p.Session["stack"] = UICommon.Toast("ERROR", "There was an error while logging you in.");
-
                 return false;
             }
 
@@ -1601,24 +1777,36 @@ namespace Unchained
                 UICommon.LogIn(p, u);
                 return true;
             }
+
+            string sDD = Config("defaultdocumentlogoff");
+            if (sDD != "")
+            {
+                Log("Redirecting to " + sDD);
+                // This is the promo page
+                p.Response.Redirect(sDD);
+            }
+
             return false;
-
         }
-
 
 
         public static string GetBannerControls(Page p)
         {
+            
             string sUpload = GetStandardButton("btnUpload","<i class='fa fa-camera'></i>", "UploadVideo", "Upload a new Video", "", "largebuttondark");
 
             string sSwitchToVideoModule = GetStandardButton("btnVideoModule", "<i class='fa fa-video'></i>", "WatchVideos", "Watch Decentralized Videos", "", "largebuttondark");
             string sSwitchToPeopleModule= GetStandardButton("btnPeopleModule", "<i class='fa fa-users'></i>","PeopleModule", "Connect with Friends", "", "largebuttondark");
 
-            string s1 = GetStandardButton("btnLogIn", gUser(p).LoggedIn ? "<i class='fa fa-power-off'></i>" : "<i class='fa fa-key'></i>", gUser(p).LoggedIn ? "LogOut" : "LogIn", 
+            string s1 = GetStandardButton("btnLogIn", gUser(p).LoggedIn ? "Log Off" : "Log In", gUser(p).LoggedIn ? "LogOut" : "LogIn", 
                 gUser(p).LoggedIn ? "Log Out of the system" : "Log into the system", "" , "largebuttondark");
-            string s2 = GetStandardButton("btnLogIn", gUser(p).LoggedIn ? "<i class='fa fa-user'></i>" : "Sign Up", 
-                "SignUp", gUser(p).LoggedIn ? "Edit my user record" : "Join our community!", "", "largebuttondark");
-            
+            string s2 = gUser(p).LoggedIn ? 
+                GetStandardButton("btnLogIn",  "<i class='fa fa-user'></i>" , 
+                "EditUserRecord", "Edit my user record", "", "largebuttondark")
+            :      GetStandardButton("btnLogIn",  "Sign Up",
+                "SignUp", "Join our community!", "", "largebuttondark");
+
+
             string sOut = String.Empty;
             if (gUser(p).LoggedIn)
                 sOut += sUpload + "&nbsp;&nbsp;";
@@ -1627,8 +1815,6 @@ namespace Unchained
             if (gUser(p).LoggedIn)
                 sOut += sSwitchToPeopleModule + "&nbsp;&nbsp;";
             sOut += s1 + "&nbsp;&nbsp;" +  s2;
-
-
             return sOut;
         }
         
@@ -1650,7 +1836,7 @@ namespace Unchained
             string ext = Path.GetExtension(path).ToLower();
             if (ext.Length < 1) return false;
             ext = ext.Substring(1, ext.Length - 1);
-            string allowed = "jpg;jpeg;gif;bmp;png;pdf;csv;mp4;webm";
+            string allowed = "jpg;jpeg;gif;bmp;png;pdf;csv;mp4;webm;mov";
             string[] vallowed = allowed.Split(";");
             for (int i = 0; i < vallowed.Length; i++)
             {
@@ -1726,7 +1912,7 @@ namespace Unchained
             string sHTML = "";
             string sStatus = GetFollowStatus(fTestNet, sFollowedID, sMyUserID);
             string sAction = sStatus == "Follow" ? "follow" : "unfollow";
-            string sIcon = sStatus == "Follow" ? "fa-heart" : "fa-heart-broken";
+            string sIcon = sStatus == "Follow" ? "largeIcon fa-heart" : "largeIcon fa-heart-broken";
             sHTML += "<a title='Follow this channel' onclick='var o=document.getElementById(\"follow1"
                 + sFollowedID + "\");transmitfollow(\"" + sFollowedID + "\", o.innerHTML, \"follow1"
                 + sFollowedID + "\", \"\");'>"

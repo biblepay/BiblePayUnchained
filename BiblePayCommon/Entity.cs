@@ -132,6 +132,13 @@ namespace BiblePayCommon
                 return null;
             }
         }
+        public static string GetEntityString(object src, string propname)
+        {
+            object oOut = GetEntityValue(src, propname);
+            if (oOut == null)
+                return "";
+            return oOut.ToString();
+        }
         public static object GetEntityValue(object src, string propName)
         {
             try
@@ -287,7 +294,7 @@ namespace BiblePayCommon
 
         public static string RESTRICTED_FIELDS = "extrakey,_id,updated,chain,deleted,guid,hash,lastblockhash,signature,signingkey,signaturetime,height,time,id,userid,serversignature,"
             + "serversigningkey,serversignaturetime,domain,parentid";
-        public static string HIDDEN_FIELDS = "filename,fid,url2,transcriptjobid,svid,attachment,subject,organization";
+        public static string HIDDEN_FIELDS = "Attachment,filename,fid,url2,transcriptjobid,svid,attachment,subject,organization,nextblockhash";
         public static string READONLY_FIELDS = "duration,size,url,classification";
 
         private static bool InList(string[] vList, string sTarget)
@@ -372,6 +379,7 @@ namespace BiblePayCommon
     
     }
 
+
     public static class Entity
     {
         public class BaseEntity : IBBPObject
@@ -416,6 +424,18 @@ namespace BiblePayCommon
                 return GetSha256HashI(ParentID + UserID + Body);
             }
 
+        }
+
+        public class FlaggedContent : BaseEntity, IBBPObject
+        {
+            public string ParentType { get; set; }
+            public string Notes { get; set; }
+            public string OriginalUserID { get; set; }
+            public long Banned { get; set; }
+            public long Reviewed { get; set; }
+            public string ReviewedBy { get; set; }
+            public string BannedBy { get; set; }
+            public string BanReason { get; set; }
         }
 
 
@@ -473,6 +493,9 @@ namespace BiblePayCommon
             public string AIHashTags { get; set; }
             public string AISummary { get; set; }
             public string Category { get; set; }
+            public string Status { get; set; }
+            public string FinalURL { get; set; }
+
             public string Subject { get; set; } //to be removed in favor of Category, Title and Body
             public override string GetHash()
             {
@@ -526,8 +549,11 @@ namespace BiblePayCommon
             public string URLTitle { get; set; }
             public string URLDescription { get; set; }
             public string URLPreviewImage { get; set; }
+            
             public string Category { get; set; }
             public string SharedTimelineID { get; set; }
+
+
             public override string GetHash()
             {
                 return GetSha256HashI(Subject + Body + UserID);
@@ -538,6 +564,7 @@ namespace BiblePayCommon
         {
             public string Name { get; set; }
             public string Domain { get; set; }
+            public string BiblePayAddress { get; set; }
 
             public override string GetHash()
             {
@@ -596,6 +623,8 @@ namespace BiblePayCommon
             public string EmailAddress { get; set; }
             public int Verified { get; set; }
             public int FA2Verified { get; set; }
+            public int GDPRVerified { get; set; }
+            public int EmailDoNotAdvertise { get; set; }
             public int EmailVerified { get; set; }
             public string AvatarURL { get; set; }
             public int Administrator { get; set; }
@@ -688,7 +717,7 @@ namespace BiblePayCommon
 
         public class VideoRequest : BaseEntity, IBBPObject
         {
-            public static string HIDDEN_FIELDS = "Processed,URL2,ProcessTime";
+            public static string HIDDEN_FIELDS = "Processed,URL2,ProcessTime,nextblockhash";
 
             public string URL { get; set; }
             // URL is the Requested URL
@@ -738,6 +767,21 @@ namespace BiblePayCommon
             public override string GetHash()
             {
                 return GetSha256HashI(UserID + Subject + Body);
+            }
+        }
+
+        public class Chat : BaseEntity, IBBPObject
+        {
+            public static string CollectionName = "Public Chat";
+            public static string ObjectName = "Chat";
+            public string Subject { get; set; }
+            public string Body { get; set; }
+            public string Participant1 { get; set; }
+            public string Participant2 { get; set; }
+            public string RoomHash { get; set; }
+            public override string GetHash()
+            {
+                    return GetSha256HashI(UserID + Participant1 + Participant2);
             }
         }
 

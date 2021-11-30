@@ -6,6 +6,8 @@ using System.Data;
 using static Unchained.Common;
 using static BiblePayCommonNET.BiblePay;
 using static BiblePayCommonNET.StringExtension;
+using System.IO;
+using System.Diagnostics;
 
 namespace Unchained
 {
@@ -64,9 +66,15 @@ namespace Unchained
 
         }
 
+    public static void CleanOldFiles()
+    {
+          // Step 1: Clean up old telegram files
+          BiblePayCommon.Common.CleanDirectoryOfOldFiles("c:\\inetpub\\wwwroot\\Unchained\\Telegram\\Videos", "*.mp4", (60 * 60 * 24 * 10));
+    }
 
-        // This is the background thread that executes mission critical services.
-        public static void Executor()
+
+    // This is the background thread that executes mission critical services.
+    public static void Executor()
         {
             Log("Starting Executor v1.3...");
             System.Threading.Thread.Sleep(60000);
@@ -78,7 +86,8 @@ namespace Unchained
                 {
                     if (true)
                     {
-                        
+                        CleanOldFiles();
+
                         Sidechain.TranscodeVideos(false, GetFundingAddress(false), GetFundingKey(false), CoerceUser(false));
                         Sidechain.TranscodeVideos(true, GetFundingAddress(true), GetFundingKey(true), CoerceUser(true));
 
@@ -110,8 +119,6 @@ namespace Unchained
                 {
                     Log("Error in Executor::" + ex.Message);
                 }
-                
-
 
             }
         }

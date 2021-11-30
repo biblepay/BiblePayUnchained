@@ -111,6 +111,42 @@ namespace BiblePayDLL
             string s = BiblePayTestHarness.BBPInterface.SignMessage(fTestNet, sPrivKey, sMessage);
             return s;
         }
+
+
+        public static BiblePayCommon.IBBPObject GetObjectWithFilter(bool fTestNet, string sTable, string sFilter)
+        {
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, sTable);
+            dt = dt.FilterDataTable(sFilter);
+            BiblePayCommon.IBBPObject o = BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, sTable, 0);
+            return o;
+        }
+        public static bool UserPlaysRole(bool fTestNet, string sRoleName, string sUserID)
+        {
+            // 11-17-2021
+            BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "UserRole");
+            dt = dt.FilterBBPDataTable("UserID='" + sUserID + "'");
+            if (dt.Rows.Count == 0)
+                return false;
+            BBPDataTable dt1 = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "Role");
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                //string sRoleID = dt.GetColValue(i, "RoleID");
+                dynamic oRole = GetObjectWithFilter(fTestNet, "Role", "ID='" + dt.GetColValue(i, "RoleID") + "'");
+                if (oRole.Name == sRoleName)
+                {
+                    // Verify the server key here
+                    string sSourceOrg = oRole.OrganizationID;
+                    BiblePayCommon.Entity.Organization oOrg = (Organization)GetObjectWithFilter(fTestNet, "Organization", "ID='" + sSourceOrg + "'");
+                    if (oOrg != null)
+                    {
+                        bool fPass = BiblePayTestHarness.BBPInterface.VerifyRoleOrganization(fTestNet, oOrg);
+                        return fPass;
+                    }
+                }
+             }
+            return false;
+        }
+
         public static DACResult UploadFileTypeBlob(bool fTestNet, string sFullPath, User u = new User())
         {
             DACResult r = BiblePayTestHarness.BBPInterface.UploadFileTypeBlob(fTestNet, sFullPath, u);
@@ -132,7 +168,10 @@ namespace BiblePayDLL
             return l1;
         }
 
-
+        public static void EnsureAccessRights(ref User u)
+        {
+            BiblePayTestHarness.BBPInterface.DSQL.EnsureAccessRights(ref u);
+        }
 
         public static DACResult AdjustServiceAccountBalance(bool fTestNet, double nAdjAmt, string sBillFromAddress,
             string sBillToAddress, string sID, string sLineItem1, string sLineItem2, string sServiceName, bool fFlushNow, User u)
@@ -177,25 +216,31 @@ namespace BiblePayDLL
         {
             return 1010;
         }
-        public static DACResult InsertIntoDSQL(bool fTestNet, BiblePayCommon.IBBPObject o, User u = new User(), bool fBulkInsert = false)
+        public static DACResult InsertIntoDSQL(bool fTestNet, BiblePayCommon.IBBPObject o, User u = new User(), bool fInBackground = false)
         {
             DACResult r = new DACResult();
-            fBulkInsert = false;
-
+            
             try
             {
-                r = BiblePayTestHarness.BBPInterface.InsertIntoDSQL2(fTestNet, o, u, fBulkInsert);
+                //11-13-2021
+                if (!fInBackground)
+                {
+                    r = BiblePayTestHarness.BBPInterface.InsertIntoDSQL2(fTestNet, o, u);
+                }
+                else
+                {
+                    BiblePayTestHarness.BBPInterface.InsertIntoDSQL_Background(fTestNet, o, u);
+                    r.ExpandoObject = o;
+                }
+
                 if (r.fError())
                 {
                     Log2("InsertDSQL::Error::" + r.Error);
                 }
                 else
                 {
-                    if (!fBulkInsert)
-                    {
-                        string sEntityName = BiblePayCommon.EntityCommon.GetEntityName(fTestNet, o);
-                        UpdateDictionary(fTestNet, sEntityName, r.ExpandoObject);
-                    }
+                     string sEntityName = BiblePayCommon.EntityCommon.GetEntityName(fTestNet, o);
+                     UpdateDictionary(fTestNet, sEntityName, r.ExpandoObject);
                 }
                 return r;
             }
@@ -246,9 +291,9 @@ namespace BiblePayDLL
             BiblePayTestHarness.BBPInterface.DSQL.RestoreDatabase("c:\\dump.txt");
 
         }
-        public static DACResult SendMail(bool fTestNet, MailMessage message, string sFromFullName)
+        public static DACResult SendMail(bool fTestNet, BiblePayMailMessage message, string sDomain, bool fTransactional)
         {
-            return BiblePayTestHarness.BBPInterface.SendMail(fTestNet, message, sFromFullName);
+            return BiblePayTestHarness.BBPInterface.SendMail(fTestNet, message, sDomain, fTransactional);
         }
         public static void InsertIntoDSQL_Background(bool fTestNet, BiblePayCommon.IBBPObject o, User u)
         {
@@ -328,6 +373,18 @@ namespace BiblePayDLL
             BiblePayTestHarness.BBPInterface.BBPMuse.Transcode(fTestNet, dt, sPubKey, sPrivKey, u);
         }
 
+
+        public static async Task<string> AISummary(string sData, int nSentences)
+        {
+            return await BiblePayTestHarness.BBPInterface.BBPMuse.AILanguageSummarization(sData, nSentences);
+        }
+
+        public static async Task<List<string>> AILanguageTopics(string sData, int nTopics)
+        {
+            return await BiblePayTestHarness.BBPInterface.BBPMuse.AILanguageTopics(sData, nTopics);
+        }
+
+
         public static void TranscriptVideos(bool fTestNet, string sPubKey, string sPrivKey, User u)
         {
             DataTable dt = RetrieveDataTable3(fTestNet, "video1", false,true);
@@ -360,6 +417,11 @@ namespace BiblePayDLL
             return true;
         }
 
+        public static void cleans0()
+        {
+            BiblePayTestHarness.BBPInterface.DSQL.Cleanse0();
+
+        }
 
         public static void UpdateWatchCounts(bool fTestNet)
         {

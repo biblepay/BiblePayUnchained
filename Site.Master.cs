@@ -11,14 +11,18 @@ namespace Unchained
     public partial class SiteMaster : MasterPage
     {
 
-        private static int nVersion = 1406;
+        private static int nVersion = 1407;
         protected void Page_Load(object sender, EventArgs e)
         {
             string sThemeName = UICommon.GetCurrentThemeName(this.Page);
             string sFullPath = "/content/sidenav_" + sThemeName + ".css";
-            //<link rel="stylesheet" type="text/css" href="https://forum.biblepay.org/Themes/Offside/css/index.css?fin20" />
             string sLink = "<link rel=\"stylesheet\" type='text/css' href='" + sFullPath + "' />";
             sitecss.Text = sLink;
+            string sAppleTouchIcon = Unchained.Common.Config("appletouchicon", "/Images/unchained_apple_touch.png");
+            string sFavIcon = Unchained.Common.Config("favicon", "/Images/unchained_favicon.ico");
+
+            AppleTouchIcon.Href = sAppleTouchIcon;
+            FavIcon.Href = sFavIcon;
         }
 
         protected void btnMessageBox_Click(object sender, EventArgs e)

@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="View Person" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" EnableEventValidation="false" CodeBehind="People.aspx.cs" Inherits="Unchained.People" %>
+<%@ Register TagPrefix="BBP" Namespace="BiblePayPaginator"  Assembly="BiblePayPaginator"%>
 
-<%@ Register TagPrefix="BBP" Namespace="BiblePayPaginator" Assembly="BiblePayPaginator" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <link href="Content/pages/peopledirectory.css" rel="stylesheet" />
@@ -10,13 +10,13 @@
 
 
             <script>
-              function search(ele) {
-                  if (event.key === 'Enter') {
-$('#people-directory').addClass('loading');
-                      document.getElementById('<%= btnSearch.ClientID %>').click();
-                      ele.value = "";
-                  }
-              }
+                function search(ele) {
+                    if (event.key === 'Enter') {
+                        $('#people-directory').addClass('loading');
+                        document.getElementById('<%= btnSearch.ClientID %>').click();
+                        ele.value = "";
+                    }
+                }
             </script>
 
             <div class="inner-form">
@@ -42,12 +42,11 @@ $('#people-directory').addClass('loading');
             <BBP:Paginator ID="paginator1" runat="server"></BBP:Paginator>
 
             <script>
- $('body').on('click', '.pagination a', function () {
-$('#people-directory').addClass('loading');
-});
+                $('body').on('click', '.pagination a', function () {
+                    $('#people-directory').addClass('loading');
+                });
             </script>
         </ContentTemplate>
-
+         
     </asp:UpdatePanel>
-
 </asp:Content>

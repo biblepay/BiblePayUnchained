@@ -1,22 +1,19 @@
+using BiblePayCommon;
+using BiblePayCommonNET;
+using MongoDB.Driver;
+using ScrapySharp.Network;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Web.Http;
-using System.Web.Http.Results;
-using BiblePayCommon;
-using static BiblePayCommon.Entity;
-using BiblePayCommonNET;
-using static BiblePayCommon.Common;
-using System.Web;
-using ScrapySharp.Network;
-using System.Threading.Tasks;
-using static Unchained.Common;
-using MongoDB.Driver;
-using static BiblePayCommon.EntityCommon;
 using System.Net.Sockets;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Http;
+using static BiblePayCommon.Common;
+using static BiblePayCommon.Entity;
+using static Unchained.Common;
 
 namespace Unchained.WebApis
 {
@@ -24,68 +21,68 @@ namespace Unchained.WebApis
     {
 
         #region Functions
-        
-        
-        
-        
-	
-	 bool IsShadyAddress(string url)
-	 {
-	            try
-	            {
-	
-	                Uri myUri = new Uri(url);
-	                string host = myUri.Host;  
-	                bool fContainsNumbers = host.All(char.IsDigit);
-	                if (fContainsNumbers)
-	                {
-	                    return true;
-	                }
-	
-	                IPHostEntry hostEntry;
-	                hostEntry = Dns.GetHostEntry(host);
-	                IPAddress[] ipv4Addresses = Array.FindAll(
-	                        Dns.GetHostEntry(host).AddressList,
-	                            a => a.AddressFamily == AddressFamily.InterNetwork);
-	
-	                IPAddress[] ipv4MyAddresses = Dns.GetHostAddresses(Dns.GetHostName());
-	                //DNS supports more than one record
-	                for (int i = 0; i < hostEntry.AddressList.Length; i++)
-	                {
-	                    bool fIsLoopback = IPAddress.IsLoopback(hostEntry.AddressList[i]);
-	                    if (fIsLoopback)
-	                    {
-	                        return true;
-	                    }
-	
-	                }
-	                for (int i = 0; i < ipv4Addresses.Length; i++)
-	                {
-	                    bool fIsLoopback = IPAddress.IsLoopback(ipv4Addresses[i]);
-	                    if (fIsLoopback)
-	                    {
-	                        return true;
-	                    }
-	                    for (int j = 0; j < ipv4MyAddresses.Length; j++)
-	                    {
-	                        if (ipv4Addresses[i].ToString() == ipv4MyAddresses[j].ToString())
-	                            return true;
-	                    }
-	
-	                }
-	                string s99 = "";
-	
-	            }
-	            catch (Exception ex)
-	            {
-	                return true;
-	            }
-	            return false;
-	
+
+
+
+
+
+        bool IsShadyAddress(string url)
+        {
+            try
+            {
+
+                Uri myUri = new Uri(url);
+                string host = myUri.Host;
+                bool fContainsNumbers = host.All(char.IsDigit);
+                if (fContainsNumbers)
+                {
+                    return true;
+                }
+
+                IPHostEntry hostEntry;
+                hostEntry = Dns.GetHostEntry(host);
+                IPAddress[] ipv4Addresses = Array.FindAll(
+                        Dns.GetHostEntry(host).AddressList,
+                            a => a.AddressFamily == AddressFamily.InterNetwork);
+
+                IPAddress[] ipv4MyAddresses = Dns.GetHostAddresses(Dns.GetHostName());
+                //DNS supports more than one record
+                for (int i = 0; i < hostEntry.AddressList.Length; i++)
+                {
+                    bool fIsLoopback = IPAddress.IsLoopback(hostEntry.AddressList[i]);
+                    if (fIsLoopback)
+                    {
+                        return true;
+                    }
+
+                }
+                for (int i = 0; i < ipv4Addresses.Length; i++)
+                {
+                    bool fIsLoopback = IPAddress.IsLoopback(ipv4Addresses[i]);
+                    if (fIsLoopback)
+                    {
+                        return true;
+                    }
+                    for (int j = 0; j < ipv4MyAddresses.Length; j++)
+                    {
+                        if (ipv4Addresses[i].ToString() == ipv4MyAddresses[j].ToString())
+                            return true;
+                    }
+
+                }
+                string s99 = "";
+
+            }
+            catch (Exception ex)
+            {
+                return true;
+            }
+            return false;
+
         }
-        
-        
-        
+
+
+
         public static VoteSums GetVoteSum(bool fTestNet, string sParentID)
         {
             VoteSums v = new VoteSums();
@@ -106,7 +103,7 @@ namespace Unchained.WebApis
         }
         #endregion
         [Route("api/post/posts")]
-        public object GetPosts(string category, string sID, bool fHomogenized, bool me, bool IsTestNet, int pno,string post="")
+        public object GetPosts(string category, string sID, bool fHomogenized, bool me, bool IsTestNet, int pno, string post = "")
         {
             int take = 5;
             int skip = pno * take;
@@ -115,28 +112,28 @@ namespace Unchained.WebApis
 
             if (fHomogenized)
             {
-               
+
             }
-            else if(post==null || string.IsNullOrEmpty(post))
+            else if (post == null || string.IsNullOrEmpty(post))
             {
                 DataOps.FilterDataTable(ref dt, "userid='" + sID + "'");
             }
-            
-            if (category!=null)
-                if(!string.IsNullOrEmpty(category) & !category.ToLower().Equals("a"))
-            {
-                DataOps.FilterDataTable(ref dt, "category='" + category + "'");
-            }
-            if (post!=null & !string.IsNullOrEmpty(post))
+
+            if (category != null)
+                if (!string.IsNullOrEmpty(category) & !category.ToLower().Equals("a"))
+                {
+                    DataOps.FilterDataTable(ref dt, "category='" + category + "'");
+                }
+            if (post != null & !string.IsNullOrEmpty(post))
             {
                 DataOps.FilterDataTable(ref dt, "id='" + post + "'");
                 skip = 0;
                 take = 1;
             }
-            
+
             dt = dt.OrderBy("time desc");
             var data = dt.AsEnumerable().Skip(skip).Take(take);
-            
+
             List<object> posts = new List<object>();
             for (int i = 0; i < data.Count(); i++)
             {
@@ -208,13 +205,13 @@ namespace Unchained.WebApis
                     Comments = new List<object>(),
                     SharedPostId = sharedPostId,
                     Shared = !string.IsNullOrEmpty(sharedPostId),
-                    SharedPost=sharedPost,
+                    SharedPost = sharedPost,
                     Attachments = dtAttachments //.Select(s => new { s.id, s.ParentID, s.FileName })
                 };
 
-                
+
                 //var attch = UICommon.GetAttachments(null, p.id, "", "", "");
-                 DataTable dt2 = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "comment1");
+                DataTable dt2 = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet, "comment1");
 
                 dt2 = dt2.FilterDataTable("parentid='" + fields.Field<string>("id") + "'");
                 dt2 = dt2.OrderBy("time asc");
@@ -261,7 +258,7 @@ namespace Unchained.WebApis
                 o.Add(a);
             }
 
-            return new { total=dt.Rows.Count, result=o.Take(10).ToList() };
+            return new { total = dt.Rows.Count, result = o.Take(10).ToList() };
         }
 
         public static string Mid(string data, int nStart, int nLength)
@@ -290,7 +287,7 @@ namespace Unchained.WebApis
         }
 
         [Route("api/media")]
-        public object GetImages(string sID, bool isTestNet, string type = "images",int pno=0, int count = 9, string id = "")
+        public object GetImages(string sID, bool isTestNet, string type = "images", int pno = 0, int count = 9, string id = "")
         {
 
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(isTestNet, "video1");
@@ -313,14 +310,14 @@ namespace Unchained.WebApis
         }
 
         [Route("api/media/get-by-id")]
-        public object GetMediaById(string parentid, bool isTestNet,string id="")
+        public object GetMediaById(string parentid, bool isTestNet, string id = "")
         {
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(isTestNet, "video1");
 
             dt = dt.FilterDataTable("parentid='" + parentid + "'");
 
             List<object> result = new List<object>();
-            foreach(DataRow s in dt.Rows)
+            foreach (DataRow s in dt.Rows)
             {
                 string userId = s.Field<string>("UserId");
                 var userc = UICommon.GetUserRecord(isTestNet, userId);
@@ -335,7 +332,7 @@ namespace Unchained.WebApis
                     PostedOn = Encryption.UnixTimeStampToDateTime(BiblePayCommon.Common.GetDouble(s.Field<object>("time"))),
                     ProfilePicture = string.IsNullOrEmpty(userc.AvatarURL) ? "" : userc.AvatarURL,
                     FullName = userc.FullUserName(),
-                    Comments=new List<object>()
+                    Comments = new List<object>()
                 };
 
                 DataTable dt2 = BiblePayDLL.Sidechain.RetrieveDataTable3(isTestNet, "comment1");
@@ -384,21 +381,21 @@ namespace Unchained.WebApis
             ScrapingBrowser browser = new ScrapingBrowser();
             WebPage page;
             bool fShady = IsShadyAddress(url);
-            
-            
-	    bool fHTTProtocols = false;
-	    if (url.Contains("https://") || url.Contains("http://"))
-	    {
-	                    fHTTProtocols = true;
-	    }
-	    if (url.Contains("127.0.0.1") || url.Contains("localhost") || url.Contains("//127") || url.Contains("local"))
-	    {
-	                    url = "";
-	    }
-	    if (fShady || !fHTTProtocols)
-	    {
-	                    url = "";
-	    }
+
+
+            bool fHTTProtocols = false;
+            if (url.Contains("https://") || url.Contains("http://"))
+            {
+                fHTTProtocols = true;
+            }
+            if (url.Contains("127.0.0.1") || url.Contains("localhost") || url.Contains("//127") || url.Contains("local"))
+            {
+                url = "";
+            }
+            if (fShady || !fHTTProtocols)
+            {
+                url = "";
+            }
             string webUrl = url;
             page = await browser.NavigateToPageAsync(new Uri(webUrl));
 
@@ -410,11 +407,11 @@ namespace Unchained.WebApis
             if (string.IsNullOrEmpty(description))
                 description = page.Html.SelectSingleNode("//meta[@name='description']")?.GetAttributeValue("content", string.Empty);
 
-             var image = page.Html.SelectSingleNode("//meta[@property='og:image']")?.GetAttributeValue("content", string.Empty);
+            var image = page.Html.SelectSingleNode("//meta[@property='og:image']")?.GetAttributeValue("content", string.Empty);
             if (string.IsNullOrEmpty(image))
                 image = page.Html.SelectNodes("//img").FirstOrDefault().GetAttributeValue("src", string.Empty);
 
-            return new {embed=false, title, description, image };
+            return new { embed = false, title, description, image };
             //return null;
         }
 
@@ -433,7 +430,7 @@ namespace Unchained.WebApis
             t.Body = BiblePayCommon.Encryption.Base64DecodeWithFilter(body.Content);
 
             t.UserID = user.id;
-            BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(IsTestNet, t, user);
+            BiblePayCommon.Common.DACResult r = BiblePayDLL.Sidechain.InsertIntoDSQL(IsTestNet, t, user);
             if (r.fError())
             {
                 return new { success = false, result = "Sorry, the timeline was not saved." };
