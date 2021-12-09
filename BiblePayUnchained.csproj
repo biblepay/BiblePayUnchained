@@ -46,6 +46,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Dapper, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Dapper.2.0.123\lib\net461\Dapper.dll</HintPath>
+    </Reference>
     <Reference Include="FSharp.Core, Version=4.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\FSharp.Core.4.5.2\lib\net45\FSharp.Core.dll</HintPath>
     </Reference>
@@ -74,6 +77,10 @@
     <Reference Include="MongoDB.Driver, Version=2.13.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Dependencies\MongoDB.Driver.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Data, Version=6.6.4.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Dependencies\MySQL\v4.8\MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="netstandard" />
     <Reference Include="Google.Authenticator, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
@@ -213,7 +220,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="BanManagement.aspx" />
-    <Content Include="ChatViaDatabase - Copy.aspx" />
     <Content Include="Content\pages\chat.css" />
     <Content Include="Images\ANRFrontPage.htm" />
     <Content Include="Images\ANRFrontPage_files\4359-300x174.jpg" />
@@ -283,6 +289,9 @@
     <Content Include="Images\unchained_favicon.ico" />
     <Content Include="ChatViaDatabase.aspx" />
     <Content Include="EliteMeeting.aspx" />
+    <Content Include="NewsView.aspx" />
+    <Content Include="OrganizationView.aspx" />
+    <Content Include="UnchainedAttachments.aspx" />
     <Content Include="webhook.aspx" />
     <Content Include="RegisterNewUser.aspx" />
     <Content Include="AddNewsFeedItem.aspx" />
@@ -694,7 +703,7 @@
     <Content Include="ProposalAdd.aspx" />
     <Content Include="Leaderboard.aspx" />
     <Content Include="PortfolioBuilder.aspx" />
-    <Content Include="GospelViewer.aspx" />
+    <Content Include="FreedomViewer.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="AddObject.aspx" />
     <Content Include="Images\Armageddon.jpg" />
@@ -973,6 +982,7 @@
     <Content Include="Images\ANRFrontPage_files\wpstream-player.js.download" />
     <Content Include="Images\ANRFrontPage_files\www-widgetapi.js.download" />
     <Content Include="Images\ANRFrontPage_files\youtube.min.js.download" />
+    <Content Include="Content\UnchainedRoleAndPermissionSystem.pdf" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <Content Include="README.md" />
     <Content Include="Scripts\bootstrap.min.js.map" />
@@ -1021,13 +1031,6 @@
     <Compile Include="BanManagement.aspx.designer.cs">
       <DependentUpon>BanManagement.aspx</DependentUpon>
     </Compile>
-    <Compile Include="ChatViaDatabase - Copy.aspx.cs">
-      <DependentUpon>ChatViaDatabase - Copy.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ChatViaDatabase - Copy.aspx.designer.cs">
-      <DependentUpon>ChatViaDatabase - Copy.aspx</DependentUpon>
-    </Compile>
     <Compile Include="ChatViaDatabase.aspx.cs">
       <DependentUpon>ChatViaDatabase.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -1035,12 +1038,42 @@
     <Compile Include="ChatViaDatabase.aspx.designer.cs">
       <DependentUpon>ChatViaDatabase.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Code\DataMigration.cs" />
+    <Compile Include="Code\Retired.cs" />
     <Compile Include="EliteMeeting.aspx.cs">
       <DependentUpon>EliteMeeting.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="EliteMeeting.aspx.designer.cs">
       <DependentUpon>EliteMeeting.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="NewsView.aspx.cs">
+      <DependentUpon>NewsView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="NewsView.aspx.designer.cs">
+      <DependentUpon>NewsView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="OrganizationView.aspx.cs">
+      <DependentUpon>OrganizationView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="OrganizationView.aspx.designer.cs">
+      <DependentUpon>OrganizationView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="SiteFrame.Master.cs">
+      <DependentUpon>SiteFrame.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="SiteFrame.Master.designer.cs">
+      <DependentUpon>SiteFrame.Master</DependentUpon>
+    </Compile>
+    <Compile Include="UnchainedAttachments.aspx.cs">
+      <DependentUpon>UnchainedAttachments.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="UnchainedAttachments.aspx.designer.cs">
+      <DependentUpon>UnchainedAttachments.aspx</DependentUpon>
     </Compile>
     <Compile Include="webhook.aspx.cs">
       <DependentUpon>webhook.aspx</DependentUpon>
@@ -1333,12 +1366,12 @@
     <Compile Include="PortfolioBuilder.aspx.designer.cs">
       <DependentUpon>PortfolioBuilder.aspx</DependentUpon>
     </Compile>
-    <Compile Include="GospelViewer.aspx.cs">
-      <DependentUpon>GospelViewer.aspx</DependentUpon>
+    <Compile Include="FreedomViewer.aspx.cs">
+      <DependentUpon>FreedomViewer.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="GospelViewer.aspx.designer.cs">
-      <DependentUpon>GospelViewer.aspx</DependentUpon>
+    <Compile Include="FreedomViewer.aspx.designer.cs">
+      <DependentUpon>FreedomViewer.aspx</DependentUpon>
     </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
@@ -1534,6 +1567,7 @@
     <Content Include="Scripts\jquery-3.4.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.4.1.min.map" />
     <Content Include="Web.ashx" />
+    <Content Include="SiteFrame.Master" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

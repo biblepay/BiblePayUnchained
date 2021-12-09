@@ -54,9 +54,9 @@ namespace BiblePayDLL
             return fV;
         }
 
-        public static void SetBiblePayAddressAndSignature(bool fTestNet, string sDomainName, ref User u)
+        public static bool SetBiblePayAddressAndSignature(bool fTestNet, string sDomainName, ref User u, string sPassword)
         {
-            BiblePayTestHarness.BBPInterface.SetBiblePayAddressAndSignature(fTestNet, sDomainName, ref u);
+            return BiblePayTestHarness.BBPInterface.SetBiblePayAddressAndSignature(fTestNet, sDomainName, ref u, sPassword);
         }
 
         public static string sRSAPublicKey = "4309FF1439AA24569FF22109AA437FF25AA12059FF11441AA6119FF1907AA485FF223AA19339FF11133AA4883FF2695AA53491FF39675AA31301FF12055AA108389FF59641AA35047FF6741AA6739FF1253AA7897FF1499AA14351FF2749AA3397FF641AA1865FF289AA";
@@ -120,33 +120,55 @@ namespace BiblePayDLL
             BiblePayCommon.IBBPObject o = BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, sTable, 0);
             return o;
         }
-        public static bool UserPlaysRole(bool fTestNet, string sRoleName, string sUserID)
+
+
+        public static bool UserPlaysRole(bool fTestNet, string sRoleName, string sUserID, string sOrgPubKey)
         {
-            // 11-17-2021
+            bool fPlays = BiblePayTestHarness.BBPInterface.UserPlaysRole(fTestNet, sRoleName, sUserID, sOrgPubKey);
+            return fPlays;
+    }
+
+
+/*      public static bool UserPlaysRole0(bool fTestNet, string sRoleName, string sUserID, string sOrgPubKey)
+        {
+            // Remove this
             BBPDataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "UserRole");
             dt = dt.FilterBBPDataTable("UserID='" + sUserID + "'");
             if (dt.Rows.Count == 0)
                 return false;
-            BBPDataTable dt1 = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "Role");
+            // if Role Exists and user is admin
+            BBPDataTable dtUser = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "user1");
+            dtUser = dtUser.FilterBBPDataTable("id='" + sUserID + "'");
+            if (dtUser.Rows.Count == 0)
+                return false;
+
+            double dAdmin = dtUser.GetColDouble("Administrator");
+            if (dAdmin == 1 && false)
+            {
+                return true;
+            }
+
             for (int i = 0; i < dt.Rows.Count; i++)
             {
-                //string sRoleID = dt.GetColValue(i, "RoleID");
                 dynamic oRole = GetObjectWithFilter(fTestNet, "Role", "ID='" + dt.GetColValue(i, "RoleID") + "'");
-                if (oRole.Name == sRoleName)
+                if (oRole.Name.ToLower() == sRoleName.ToLower())
                 {
                     // Verify the server key here
                     string sSourceOrg = oRole.OrganizationID;
                     BiblePayCommon.Entity.Organization oOrg = (Organization)GetObjectWithFilter(fTestNet, "Organization", "ID='" + sSourceOrg + "'");
                     if (oOrg != null)
                     {
-                        bool fPass = BiblePayTestHarness.BBPInterface.VerifyRoleOrganization(fTestNet, oOrg);
-                        return fPass;
+                        if (sOrgPubKey == "" || sOrgPubKey == oOrg.BiblePayAddress || sOrgPubKey == oOrg.id)
+                        {
+                            return true;
+                        }
                     }
                 }
              }
             return false;
         }
-
+        */
+        
         public static DACResult UploadFileTypeBlob(bool fTestNet, string sFullPath, User u = new User())
         {
             DACResult r = BiblePayTestHarness.BBPInterface.UploadFileTypeBlob(fTestNet, sFullPath, u);
@@ -161,8 +183,7 @@ namespace BiblePayDLL
 
         public static IList<T> GetChainObjects<T>(bool fTestNet, string sTable, FilterDefinition<T> myFilter, SERVICE_TYPE stType, string sSortBy = "", bool fAscending = false, string sURL = "")
         {
-            Log2("Retrieving GetChainObjects::" + sTable);
-
+            Log2("Retrieving GetChainObjects::" + sTable, true);
             string fqTable = BiblePayCommon.EntityCommon.GetFQTableName(fTestNet, sTable);
             IList<T> l1 = BiblePayTestHarness.BBPInterface.DSQL.GetChainObjects<T>(fTestNet, sTable, myFilter, stType, sSortBy, fAscending, sURL);
             return l1;
@@ -373,7 +394,6 @@ namespace BiblePayDLL
             BiblePayTestHarness.BBPInterface.BBPMuse.Transcode(fTestNet, dt, sPubKey, sPrivKey, u);
         }
 
-
         public static async Task<string> AISummary(string sData, int nSentences)
         {
             return await BiblePayTestHarness.BBPInterface.BBPMuse.AILanguageSummarization(sData, nSentences);
@@ -383,7 +403,6 @@ namespace BiblePayDLL
         {
             return await BiblePayTestHarness.BBPInterface.BBPMuse.AILanguageTopics(sData, nTopics);
         }
-
 
         public static void TranscriptVideos(bool fTestNet, string sPubKey, string sPrivKey, User u)
         {
@@ -402,7 +421,7 @@ namespace BiblePayDLL
             // Permissions: The user must have ownership rights (see server signing plus user signing)
             var builder = Builders<dynamic>.Filter;
             var filter = builder.Eq("_id", sObjectID);
-            IList<dynamic> dt = BiblePayDLL.Sidechain.GetChainObjects<dynamic>(false, sTable, filter, SERVICE_TYPE.PUBLIC_CHAIN);
+            IList<dynamic> dt = BiblePayDLL.Sidechain.GetChainObjects<dynamic>(fTestNet, sTable, filter, SERVICE_TYPE.PUBLIC_CHAIN);
             if (dt.Count != 1)
                 return false;
             dynamic v = BiblePayCommon.EntityCommon.ExpandoToStronglyCastObject(dt[0], sTable);

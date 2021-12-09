@@ -431,6 +431,7 @@ namespace BiblePayCommon
             public string ParentType { get; set; }
             public string Notes { get; set; }
             public string OriginalUserID { get; set; }
+            public string OriginalURL { get; set; }
             public long Banned { get; set; }
             public long Reviewed { get; set; }
             public string ReviewedBy { get; set; }
@@ -445,6 +446,7 @@ namespace BiblePayCommon
             public string URL { get; set; }
             public string Title { get; set; }
             public string Body { get; set; }
+            public string ImageURL { get; set; }
             public int Expiration { get; set; }
             public override string GetHash()
             {
@@ -563,7 +565,6 @@ namespace BiblePayCommon
         public class Organization: BaseEntity, IBBPObject
         {
             public string Name { get; set; }
-            public string Domain { get; set; }
             public string BiblePayAddress { get; set; }
 
             public override string GetHash()

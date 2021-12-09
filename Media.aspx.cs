@@ -228,7 +228,9 @@ namespace Unchained
             
             string sTheirChannel = "VideoList?channelid=" + dt[0].UserID;
             string sShareAnchor = UICommon.GetStandardAnchor("share" + sID, "ShareVideo", sID, "Share&nbsp;<i class='largeIcon fa fa-share'></i>", "Share this Video", "video1");
-            string sBanAnchor = UICommon.GetStandardAnchor("ancBan" + sID, "ReportItemAsInappropriate", sID, "<i class='fa fa-ban'></i>", "Report this item as inappropriate content", "video1");
+            string sOrigURL = "Media?id=" + sID;
+
+            string sBanAnchor = UICommon.GetStandardAnchor("ancBan" + sID, "ReportItemAsInappropriate", sID, "<i class='fa fa-ban'></i>", "Report this item as inappropriate content", "video1", sOrigURL);
 
             video1.Footer = "Uploaded by <a href='" + sTheirChannel + "'>"
                 + UICommon.GetUserAvatarAndName(this, dt[0].UserID, true)

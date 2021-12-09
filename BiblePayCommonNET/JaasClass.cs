@@ -286,8 +286,7 @@ namespace BiblePayCommonNET
                         .WithOutboundCallEnabled(true)
                         .WithTranscriptionEnabled(true)
                         .WithModerator(true)
-                        .WithRoomName("*")
-                        .WithUserId(System.Guid.NewGuid().ToString());
+                        .WithRoomName("*") ;
                 }
 
                 /// Generate a signed JaaS JWT token string.
@@ -322,15 +321,8 @@ namespace BiblePayCommonNET
                 privateKeyContent = privateKeyContent.Replace(pkType == PKType.PKCS1 ? JAASProgram.END_PKCS1_PRIVATE_KEY : JAASProgram.END_PKCS8_PRIVATE_KEY, "");
                 var privateKeyDecoded = Convert.FromBase64String(privateKeyContent);
                 string converted = Encoding.UTF8.GetString(privateKeyDecoded, 0, privateKeyDecoded.Length);
-                string privateKey = BiblePayCommon.Encryption.CommonConfig("jitsiconfig");
-                if (pkType == PKType.PKCS1)
-                {
-                    // The old method: rsa=ImportPrivateKey2(converted);
-                }
-                else
-                {
-                }
-                // The new method:
+                //string privateKey = BiblePayCommon.Encryption.CommonConfig("jitsiprivkey");
+                string privateKey = System.IO.File.ReadAllText("c:\\inetpub\\wwwroot\\jitsi.privkey");
                 rsa.FromXmlString(privateKey);
                 return rsa;
             }
@@ -347,6 +339,7 @@ namespace BiblePayCommonNET
                                         .WithUserEmail(EmailAddress)
                                         .WithUserAvatar(AvatarURL)
                                         .WithAppID(sMyAppID)
+                                        .WithUserId(UserID)
                                         .SignWith(rsaPrivateKey);
                     /// Write JaaS JWT to standard output.
                     Console.Write(token);

@@ -8,6 +8,7 @@ using System.Net.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace BiblePayCommon
 {
@@ -133,6 +134,53 @@ namespace BiblePayCommon
             return source.Substring(0, iHowMuch);
         }
 
+        public static bool ContainsReservedWord(string sData)
+        {
+            string data = sData.ToLower();
+            Regex rgx = new Regex("[^a-zA-Z0-9]");
+            data = rgx.Replace(data, "");
+            if (data.Contains("javascript") || data.Contains("script") || data.Contains("javas"))
+            {
+                return true;
+            }
+            return false;
+        }
+        public static string CleanseXSS(string sData)
+        {
+            // Here is an evil one:
+            // https://unchained.biblepay.org/PrayerBlog?entity=townhall111%22%20onpointermove=alert%28document.cookie%29%3e
+            // Note how the attacker does not use the word javascript.. And he encodes the left and right parentheses; and the semicolon.
+            // So we catch the word script in other places, but we dont catch this.  Lets remove the %01-%99
+
+            // Note: Microsofts XSS method, htmlencode, does NOT protect against this!           
+            sData = sData.Replace("document.", "");
+            sData = sData.Replace(".domain", "");
+            sData = sData.Replace(".cookie", "");
+
+            sData = sData.Replace("javascript", "");
+            sData = sData.Replace("%22", "");
+            sData = sData.Replace("%20", "");
+            sData = sData.Replace("%2528", "");
+            sData = sData.Replace("%2529", "");
+            sData = sData.Replace("<", "");
+            sData = sData.Replace(">", "");
+            sData = sData.Replace("(", "{");
+            sData = sData.Replace(")", "}");
+
+            sData = sData.Replace("script:", "");
+            sData = sData.Replace("\\","");
+            sData = sData.Replace("%25", "");
+            sData = sData.Replace("%28", "");
+            sData = sData.Replace("%29", "");
+            sData = sData.Replace("%3e", "");
+            sData = sData.Replace("onmouse", "");
+            sData = sData.Replace("onpointer", "");
+            bool fCRW = ContainsReservedWord(sData);
+            if (fCRW)
+                return "blocked";
+            return sData;
+        }
+
         public static double GetCompounded(double nROI)
         {
             double nBank = 10000;
@@ -202,8 +250,11 @@ namespace BiblePayCommon
             public string Slogan { get; set; }
             public string Testimony { get; set; }
 
+            public string Action { get; set; }
+
             public string ThemeName { get; set; }
-            public string Domain { get; set; }
+            // domain is case sensitive: sigh
+            public string domain { get; set; }
             public string RSAKey { get; set; }
             public string Shared2FA { get; set; }
             public int FA2Verified { get; set; }
@@ -880,7 +931,9 @@ namespace BiblePayCommon
                     string sKey = vRow[0];
                     string sValue = vRow[1];
                     if (sKey.ToUpper() == _Key.ToUpper())
+                    {
                         return sValue;
+                    }
                 }
             }
             return string.Empty;
