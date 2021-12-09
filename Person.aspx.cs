@@ -260,9 +260,8 @@ namespace Unchained
             {
                 BiblePayCommon.Entity.comment1 o = new BiblePayCommon.Entity.comment1();
                 o.UserID = Common.gUser(this).id;
-                o.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(data.Body));
+                o.Body = CleanseXSS(HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(data.Body)));
                 o.ParentID = data.ParentID;
-
 
     	        BiblePayCommon.Entity.Timeline t = (BiblePayCommon.Entity.Timeline)Common.GetObject(Common.IsTestNet(this), "Timeline", o.ParentID);
                 string sURL = "Person?id=" + t.UserID;
@@ -466,13 +465,13 @@ namespace Unchained
                 catch { }
                 try
                 {
-                    t.URL = e.Extra.URL.ToString();
+                    t.URL = CleanseXSS(e.Extra.URL.ToString());
                 }
                 catch { }
                 try
                 {
                     string data = BiblePayCommon.Encryption.Base64Decode0(e.Extra.URLTitle.ToString(), true);
-                    string decoded = HttpUtility.UrlDecode(data);
+                    string decoded = CleanseXSS(HttpUtility.UrlDecode(data));
                     t.URLTitle = decoded;
                 }
                 catch { }
@@ -487,8 +486,7 @@ namespace Unchained
                 }
                 catch { }
                 var body = e.Extra.Body.ToString();
-                
-                t.Body = HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(body));
+                t.Body = CleanseXSS(HttpUtility.UrlDecode(BiblePayCommon.Encryption.Base64DecodeWithFilter(body)));
                 t.UserID = gUser(this).id;
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), t, gUser(this));
                 if (r.fError())
@@ -506,9 +504,7 @@ namespace Unchained
                     }
 
                     //UICommon.MsgBox("Error", "You Must be logged in first.", this);
-                    //SendBlastOutForTimeline(this, t);
                     ToastLater(this, "Success", "Your timeline entry has been saved!");
-
                     Response.Redirect(url);
                 }
 
@@ -522,7 +518,6 @@ namespace Unchained
                 }
 
                 Timeline t = new Timeline();
-
 
                 try
                 {
@@ -555,7 +550,6 @@ namespace Unchained
                     }
 
                     //UICommon.MsgBox("Error", "You Must be logged in first.", this);
-                    //SendBlastOutForTimeline(this, t);
                     ToastLater(this, "Success", "Your timeline entry has been saved!");
                     Response.Redirect(url);
                 }
@@ -720,7 +714,8 @@ namespace Unchained
                     UICommon.MsgBox("Error", "Sorry, cannot locate object.", this.Page);
                     return;
                 }
-                t.Body = BiblePayCommon.Encryption.Base64DecodeWithFilter(_bbpevent.Extra.Output.ToString());
+                t.Body = CleanseXSS(BiblePayCommon.Encryption.Base64DecodeWithFilter(_bbpevent.Extra.Output.ToString()));
+
 
 
                 BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, Common.IsTestNet(this), t, Common.gUser(this));

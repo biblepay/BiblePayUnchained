@@ -103,13 +103,16 @@ namespace Unchained
 
         }
 
+        public static string TEST_GUID = "1638810809";
+        public static string PROD_GUID = "c1f4d7c2fb3235e4ae4823659835559f0012a48370826f95ad90a3f51a4baa21";
+            
+
         void Application_Start(object sender, EventArgs e)
         {
 
             
-
             BiblePayCommon.Common.DOMAIN_NAME = System.Web.Hosting.HostingEnvironment.SiteName;
-            BiblePayCommon.Common.Log2("BiblePay Unchained v1.6 - Starting Up - Site Name: " + BiblePayCommon.Common.DOMAIN_NAME);
+            BiblePayCommon.Common.Log2("BiblePay Unchained v1.9 - Starting Up - Site Name: " + BiblePayCommon.Common.DOMAIN_NAME);
 
             bool fOK = BiblePayDLL.Sidechain.CheckForUpgrade();
             if (!fOK)
@@ -117,34 +120,10 @@ namespace Unchained
                 Environment.Exit(1);
             }
 
-
-            BiblePayCommon.Common.User uT = Common.CoerceUser(true);
-            BiblePayCommon.Common.User uP = Common.CoerceUser(false);
-            BiblePayCommon.Encryption.SetPrivateKey(uT, uP);
-            BiblePayCommon.Entity.user1 userTest = new BiblePayCommon.Entity.user1();
-            BiblePayCommon.Entity.user1 userProd = new BiblePayCommon.Entity.user1();
-            userTest.UserName = "Administrator";
-            userTest.FirstName = "Administrator";
-
-            userTest.EmailAddress = "contact@biblepay.org";
-            userTest.signingkey = uT.BiblePayAddress;
-            userTest.signaturetime = uT.SignatureTimestamp;
-            userTest.signature = uT.Signature;
-            userTest.BiblePayAddress = uT.BiblePayAddress;
-            userTest.id = "fbf35a7907a1958bf3d443bd178f729deefb0c8d2fea066680a49638d422bf4e";
-
-            userProd.UserName = "Administrator";
-            userProd.LastName = "Administrator";
-            userProd.EmailAddress = "contact@biblepay.org";
-            userProd.signingkey = uP.BiblePayAddress;
-            userProd.signaturetime = uP.SignatureTimestamp;
-            userProd.signature = uP.Signature;
-            userProd.BiblePayAddress = uP.BiblePayAddress;
-            userProd.id = "c1f4d7c2fb3235e4ae4823659835559f0012a48370826f95ad90a3f51a4baa21";
-
-            //BiblePayDLL.Sidechain.InsertIntoDSQL(true, userTest, uT);
-            //BiblePayDLL.Sidechain.InsertIntoDSQL(false, userProd, uP);
-
+            BiblePayCommon.Common.User userTest = Common.CoerceUser(true, TEST_GUID);
+            BiblePayCommon.Common.User userProd = Common.CoerceUser(false, PROD_GUID);
+            BiblePayCommon.Encryption.SetPrivateKey(userTest, userProd);
+            
             ScriptManager.ScriptResourceMapping.AddDefinition("jquery-ui", new ScriptResourceDefinition
             {
                 Path = "~/Scripts/jquery-ui-112.js",

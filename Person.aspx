@@ -683,7 +683,13 @@
                                     <polyline points="16 6 12 2 8 6"></polyline>
                                     <line x1="12" y1="2" x2="12" y2="15"></line>
                                 </svg>
-                                <p class="d-none d-md-block ms-2 mb-0">Share</p>
+                               <p class="d-none d-md-block ms-2 mb-0">Share</p>
+                            </a>
+
+                            &nbsp;&nbsp;&nbsp;
+                            <a href="javascript:;" onclick="var o=this.parentNode.parentNode.parentNode.parentNode;var e={};e.Event='ReportItemAsInappropriate_Click';e.Value=o.id;e.Table='Timeline';e.Snippet=window.location.href;BBPPostBack2(null, e);" class="banbtn d-flex align-items-center text-muted">
+                                <i class='fa fa-ban'></i>
+                                <p class="d-none d-md-block ms-2 mb-0">Inappropriate</p>
                             </a>
                         </div>
                         <div class="post-comments new-comment g-0 row">
@@ -859,8 +865,8 @@
                     if (response.length == 0) {
                         $('#no-vid').show();
                         vidfinished = true;
-//                        if (waypoint) {
-//                            waypoint.destroy();
+                        //                        if (waypoint) {
+                        //                            waypoint.destroy();
                         //}
                     }
                     else {
@@ -954,7 +960,7 @@
                 $('.header-links .stretched-link').each(function () {
                     $(this).on('shown.bs.tab', function (e) {
                         let t = e.target.attributes["data-bs-target"].value;
-                        console.log('tab changed ',t);
+                        console.log('tab changed ', t);
                         if (t == '#about') {
                             LoadAbout()
                         }

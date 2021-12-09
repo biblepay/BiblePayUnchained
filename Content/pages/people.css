@@ -462,36 +462,40 @@ textarea.newpost {
         .RadAsyncUpload ul li:last-child span {
             width: 84px;
         }
-#my-videos .gallery{
-    max-width:100%;
-}
-#my-videos .gallery img{
+
+#my-videos .gallery {
     max-width: 100%;
 }
 
-@media(max-width:400px){
+    #my-videos .gallery img {
+        max-width: 100%;
+    }
+
+@media(max-width:400px) {
     .icon-post {
         max-width: 17px;
     }
+
     .profile-header svg {
         width: 16px;
         height: 16px;
     }
-    ul.nav > li{
 
+    ul.nav > li {
     }
 }
 
-@media(max-width:501px){
-    iframe{
-        width:100% !important;
+@media(max-width:501px) {
+    iframe {
+        width: 100% !important;
     }
 
     .profile-page .profile-header .cover .cover-body .profile-name {
         margin-top: 0;
     }
 }
-@media(max-width:700px){
+
+@media(max-width:700px) {
     .profile-header-link a, .profile-header-link button {
         font-size: 10px;
         padding: 5px;

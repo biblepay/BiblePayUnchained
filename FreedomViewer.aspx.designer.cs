@@ -11,16 +11,7 @@ namespace Unchained
 {
 
 
-    public partial class ChatViaDatabaseBK
+    public partial class FreedomViewer
     {
-
-        /// <summary>
-        /// Up7 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.UpdatePanel Up7;
     }
 }

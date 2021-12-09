@@ -14,16 +14,16 @@ namespace Unchained
     public partial class ChatViaDatabase : BBPPage
     {
 
-        protected User me ;
+        protected User me;
         protected User to;
         //protected User u1;
         //protected User u2;
-       protected string myId = "";
+        protected string myId = "";
         protected string _roomhash = String.Empty;
         protected string _objid = String.Empty;
         protected string _roomname = String.Empty;
         protected UICommon.ChatStructure _chat = new UICommon.ChatStructure();
-       protected IList<Entity.comment1> chats = null;
+        protected IList<Entity.comment1> chats = null;
         public static string GetRoomHashCode(string ParticipantID1, string sParticipantID2)
         {
             List<string> l = new List<string>();
@@ -75,8 +75,8 @@ namespace Unchained
                 UICommon.MsgBox("Failure", "The chat no longer exists.", this);
             }
 
-           User u1 = gUserById(this, _chat.startedByUser);
-           User u2 = gUserById(this, _chat.chattingWithUser);
+            User u1 = gUserById(this, _chat.startedByUser);
+            User u2 = gUserById(this, _chat.chattingWithUser);
             if (u1.EmailAddress == null || u2.EmailAddress == null)
             {
                 UICommon.MsgBox("Failure", "The chat between these two users is missing key elements.", this);
@@ -103,12 +103,12 @@ namespace Unchained
         }
         public void GetChatPanel()
         {
-            if (_roomhash == "" || _objid=="")
+            if (_roomhash == "" || _objid == "")
             {
                 return;
             }
 
-           chats = UICommon.GetChatComments(IsTestNet(this), _objid, this, _chat);
+            chats = UICommon.GetChatComments(IsTestNet(this), _objid, this, _chat);
         }
 
         public string GetChatPanel1()

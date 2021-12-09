@@ -66,7 +66,13 @@ namespace Unchained
             string sAppID = "vpaas-magic-cookie-84a3b874fc5348aca7f739aa03d24859";
             string sAPIKey = "vpaas-magic-cookie-84a3b874fc5348aca7f739aa03d24859/a94001";
             // Testing token
-            string sJWT = BiblePayCommonNET.JAASProgram.GenerateJaasToken("rob@biblepay.org","rob@biblepay.org", "rob@biblepay.org", gUser(this).AvatarURL, sAppID, sAPIKey);
+            // Jitsi Chat Only feature :  initIframeAPI();api.executeCommand('overwriteConfig',    {                toolbarButtons: ['chat']    }); 
+            if (gUser(this).Administrator != 1 || !gUser(this).LoggedIn)
+            {
+                UICommon.MsgBox("Error", "Unauthorized.", this);
+                return string.Empty;
+            }
+            string sJWT = BiblePayCommonNET.JAASProgram.GenerateJaasToken(gUser(this).FullUserName(), gUser(this).id, "", gUser(this).AvatarURL, sAppID, sAPIKey);
             string sHTML = "<div id='meet' /><script src='https://8x8.vc/external_api.js'></script>"
                 + "<script type='text/javascript'>  let api;"
                 + " const initIframeAPI=()=> {"
@@ -74,14 +80,14 @@ namespace Unchained
                 + "    const options = {"
                 + "      roomName: '" + sAPIKey + "',"
                 + "      jwt: '" + sJWT + "',"
-                + "      width: 700,"
-                + "      height: 700,"
+                + "      width: 750,"
+                + "      height: 600,"
                 + "      parentNode: document.querySelector('#meet')"
                 + "    };"
                 + "    api = new JitsiMeetExternalAPI(domain, options);"
                 + "  };\r\n"
                 + "  window.onload=()=> {"
-                + "    initIframeAPI();"
+                + "  initIframeAPI();api.executeCommand('overwriteConfig',    {                dropbox: false    }); "
                 + " };</script>"
                 + "";
 

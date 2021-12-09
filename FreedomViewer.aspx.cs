@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Unchained
 {
-    public partial class GospelViewer : BBPPage
+    public partial class FreedomViewer : BBPPage
     {
         protected new void Page_Load(object sender, EventArgs e)
         {

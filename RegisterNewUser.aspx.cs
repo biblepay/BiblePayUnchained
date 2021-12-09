@@ -49,6 +49,8 @@ namespace Unchained
                 if (IsPasswordStrong(txtPRIVLOGONINFORMATION.Text) && fPWMatches)
                 {
                     u.PasswordHash = BiblePayCommon.Encryption.GetSha256HashI(txtPRIVLOGONINFORMATION.Text);
+                    this.Session["pwhash"] = BiblePayCommon.Encryption.EncryptAES256(txtPRIVLOGONINFORMATION.Text, "");
+
                 }
                 else
                 {
@@ -92,6 +94,7 @@ namespace Unchained
                 return;
             }
 
+            this.Session["pwhash"] = BiblePayCommon.Encryption.EncryptAES256(txtPRIVLOGONINFORMATIONConfirm.Text, "");
 
             DACResult r0 = SaveUserRecord(IsTestNet(this), u, this);
             if (!r0.fError())

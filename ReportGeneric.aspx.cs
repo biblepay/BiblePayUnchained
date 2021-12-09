@@ -86,9 +86,7 @@ namespace Unchained
             dt = dt.OrderBy(txtOrderBy.Text);
 
             _report = Report.GetTableHTML("Generic", dt, txtSelect.Text, "");
-            
+      
         }
-
-
     }
 }

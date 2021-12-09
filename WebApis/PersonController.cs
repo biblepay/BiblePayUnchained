@@ -236,7 +236,7 @@ namespace Unchained.WebApis
         }
 
         [Route("api/people/friends")]
-        public object GetFriendsList(string sID, bool isTestNet,int pno=0)
+        public object GetFriendsList(string sID, bool isTestNet, int pno = 0)
         {
             string id = sID;
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(isTestNet, "Friend");
@@ -300,7 +300,7 @@ namespace Unchained.WebApis
             dt = dt.FilterDataTable("userid='" + sID + "'");
             if (type == "images")
                 dt = dt.FilterDataTable("URL like '%.png%' or URL like '%.gif' or URL Like '%.jpeg' or URL like '%.jpg%' or URL like '%.jpeg%' or URL like '%.gif%'");
-            else 
+            else
                 dt = dt.FilterDataTable("URL like '%.mp4%' or URL like '%.webm' or URL Like '%.mov'");
 
             dt = dt.OrderBy("time desc");
@@ -309,17 +309,20 @@ namespace Unchained.WebApis
             {
                 skip = count * pno;
             }
-            
+
             var result = dt.AsEnumerable().Skip(skip).Take(count).Select(s => new {
-                SVID= s.Field<string>("SVID"),
-                FID=s.Field<string>("FID"),
-                time=s.Field<int>("time"),
-                Order=s.Field<double>("Order"),
-                Body=s.Field<string>("Body"),
+                SVID = s.Field<string>("SVID"),
+                FID = s.Field<string>("FID"),
+                time = s.Field<int>("time"),
+                Order = s.Field<double>("Order"),
+                Body = s.Field<string>("Body"),
                 id = s.Field<string>("id"),
                 URL2 = s.Field<string>("URL2"),
-                URL = s.Field<string>("URL"), Title = s.Field<string>("Title"), ParentId = s.Field<string>("ParentID") }).ToList();
-            
+                URL = s.Field<string>("URL"),
+                Title = s.Field<string>("Title"),
+                ParentId = s.Field<string>("ParentID")
+            }).ToList();
+
             //v.ord
             if (type == "videos")
             {

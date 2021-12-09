@@ -12,8 +12,11 @@ namespace Unchained
     {
         protected new void Page_Load(object sender, EventArgs e)
         {
+            if (gUser(this).Administrator != 1)
+            {
+                UICommon.MsgBox("ERROR", "Sorry, you must be an administrator.", this);
+            }
 
-         
         }
         
 
@@ -32,7 +35,7 @@ namespace Unchained
                 UICommon.MsgBox("ERROR", "Org and Domain must be populated.", this);
             }
             BiblePayCommon.Entity.Organization O = new BiblePayCommon.Entity.Organization();
-            O.Domain = txtDomainName.Text;
+            O.domain = txtDomainName.Text;
             O.Name = txtOrganizationName.Text;
             BiblePayCommon.IBBPObject oOld = GetObjectWithFilter(IsTestNet(this), "Organization", "Name='" + O.Name + "'");
             if (oOld.id != null)
