@@ -166,8 +166,9 @@ function showModalDialog(title, body, width, height, fReload)
                     }
                 },
             });
-            var e = document.getElementById("spandialog");
-            e.innerHTML = body;
+    var e = document.getElementById("spandialog");
+    if (e)
+        e.innerHTML = body;
 }
 
 function showModalDialogWithRedirect(title, body, width, height, sRedirect)
@@ -270,7 +271,7 @@ function showModalEmptyDialog(sParent, title, body, width, height)
         "width": width,
         "height": height,
         "position": {
-            my: 'left+370 top+80',
+            my: 'left+1400 top+80',
             at: 'left top',
 
         },
@@ -378,23 +379,47 @@ function PollChat() {
     if (elapsed > 1500) {
         var oComment = document.getElementById("txtComment");
         if (oComment.value.length === 0) {
+
             setRemoteValue('voting', 'pollchat|', '', '');
             setTimeout("PollChat()", 3000);
         }
     }
 }
 
+var lastupdatepollchat2 = 0;
 function PollChat2() {
-    setInterval(function () {
+    var ts = Date.now();
+    var elapsed = ts - lastupdatepollchat2;
+    if (elapsed > 2000)
+    {
         setRemoteValue2('voting', 'pollchat|', '', '');
-    }, 1500);
-
+        setTimeout("PollChat2()", 2500);
+        lastupdatepollchat2 = Date.now();
+    }
 }
+
+
+function PollChatComplete(returnValue) {
+
+    if (returnValue === "1") {
+        var e = {};
+        e.EventName = "PollChatComplete";
+        BBPPostBack3(null, e);
+    }
+    else {
+        //setTimeout("PollChat()", 12000);
+    }
+}
+
+
+
+var remoterequest;
+
 function setRemoteValue2(actionname, data1, elementToUpdate, elementToUpdate2) {
 
     if (remoterequest != null) {
-   if (remoterequest.readyState != 4)
-        return false;
+        if (remoterequest.readyState != 4)
+            return false;
     }
     remoterequest = $.ajax({
         type: "POST",
@@ -402,7 +427,7 @@ function setRemoteValue2(actionname, data1, elementToUpdate, elementToUpdate2) {
         data: { mydata: data1 },
         headers: { headeraction: data1 },
         success: function (response) {
-            
+
             var oResponse;
 
             try {
@@ -449,28 +474,22 @@ function setRemoteValue2(actionname, data1, elementToUpdate, elementToUpdate2) {
 }
 
 
-function PollChatComplete(returnValue) {
 
-    if (returnValue === "1") {
-        var e = {};
-        e.EventName = "PollChatComplete";
-        BBPPostBack3(null, e);
 
-    }
-    else {
-        //setTimeout("PollChat()", 12000);
-    }
-}
+
+
 
 var lastvalue1 = "";
 var notified = false;
-var remoterequest;
+
 function setRemoteValue(actionname, data1, elementToUpdate, elementToUpdate2) {
+
     if (remoterequest) {
         remoterequest.abort();
         remoterequest = null;
     }
-     remoterequest = $.ajax({
+
+    remoterequest = $.ajax({
                 type: "POST",
                 url: "LP.aspx/" + actionname,
                 data: { mydata: data1 },

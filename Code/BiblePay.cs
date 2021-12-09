@@ -24,7 +24,7 @@ namespace Unchained
             {
                 BiblePayCommon.Entity.price1 p = GetCryptoPrice(vTickers[i]);
                 // Not signed... cant do insert (MISSION CRITICAL)
-                DataOps.InsertIntoTable(null, fTestNet, p, Common.CoerceUser(fTestNet));
+                DataOps.InsertIntoTable(null, fTestNet, p, Common.CoerceUser(fTestNet, fTestNet ? Global.TEST_GUID : Global.PROD_GUID));
             }
         }
 

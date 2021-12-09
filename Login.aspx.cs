@@ -15,7 +15,24 @@ namespace Unchained
     {
         protected new void Page_Load(object sender, EventArgs e)
         {
-             if (!IsPostBack)
+
+            double nAvail = GetDouble(Config("Enable2FA"));
+            bool f2FA = Session["req2fa"].ToNonNullString() == "1";
+            if (nAvail == 1 || f2FA)
+            {
+                lbl2FA.Visible = true;
+                txt2FACode.Visible = true;
+                lblOptional.Visible = true;
+            }
+            else
+            {
+                lbl2FA.Visible = false;
+                txt2FACode.Visible = false;
+                lblOptional.Visible = false;
+            }
+
+
+            if (!IsPostBack)
             {
                 txtEmailAddress.Text = gUser(this).EmailAddress.ToNonNullString();
 
@@ -34,7 +51,7 @@ namespace Unchained
                     lblOptional.Visible = false;
                     lblFieldset.Text = "Log Out";
                     txt2FACode.Visible = false;
-                    
+
                 }
                 else
                 {
@@ -46,11 +63,11 @@ namespace Unchained
                     txtEmailAddress.Visible = true;
                     lblEmailAddress.Visible = true;
                     lblPassword.Visible = true;
-                    lbl2FA.Visible = true;
                     lblEye.Visible = true;
                     lblOptional.Visible = true;
                     lblFieldset.Text = "Log In";
-                    txt2FACode.Visible = true;
+
+                    
                 }
             }
         }
@@ -107,6 +124,8 @@ namespace Unchained
 
         protected void btnLogin_Click(object sender, EventArgs e)
         {
+            txtEmailAddress.Text = txtEmailAddress.Text.Trim();
+            txtPRIVLOGONINFORMATION.Text = txtPRIVLOGONINFORMATION.Text.Trim();
             if (txtEmailAddress.Text=="")
             {
                 MsgModal(this, "Error", "Please enter your e-mail address to login. ", 350, 150);
@@ -125,13 +144,23 @@ namespace Unchained
                     fPasswordPassed = true;
                 }
                 bool f2FAPassed = true;
+                if (u.FA2Verified == 1 && lbl2FA.Visible==false)
+                {
+                    Session["req2fa"] = "1";
+                    lbl2FA.Visible = true;
+                    txt2FACode.Visible = true;
+                    lblOptional.Visible = true;
+                    MsgModal(this, "Two Factor Enabled", "Two Factor is enabled; please populate 2fa code also.", 450, 200, true, false);
+                    return;
+
+                }
                 if (u.FA2Verified == 1)
                 {
                     f2FAPassed = BiblePayDLL.Sidechain.Verify2FA(IsTestNet(this), u, txt2FACode.Text);
                 }
                 if (!fPasswordPassed)
                 {
-                    MsgModal(this, "Authentication Error", "Sorry, that didn't work.", 450, 200, true);
+                    MsgModal(this, "Authentication Error", "Incorrect E-mail address or password entered, Please try again.", 450, 200, true);
                 }
                 else if (!f2FAPassed)
                 {
@@ -139,7 +168,7 @@ namespace Unchained
                 }
                 else if (f2FAPassed && fPasswordPassed)
                 {
-                    UICommon.LogIn(this, u);
+                    UICommon.LogIn(this, u, txtPRIVLOGONINFORMATION.Text);
                 }
                 else
                 {

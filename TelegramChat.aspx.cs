@@ -293,7 +293,7 @@ namespace Unchained
 
         protected string GetTelegram()
         {
-            string html = "<h3>TruthBook.Social - Telegram</h3><br><table>";
+            string html = "<h3>TruthBook.Social - Telegram</h3><br><table style='z-index:1;'>";
             
             List<BiblePayCommon.Common.TelegramMessage> lT = GetArchivedTelegramMessages(lANRSocialChatID);
             // Last :

@@ -76,10 +76,17 @@
         <legend>Advanced Options for Power Users (Optional):</legend>
 
         <br />
-        <label class="offset">Account 2FA Enabled:</label><asp:TextBox ID="txtTwoFactorEnabled" readonly="true" runat="server"></asp:TextBox>
-            <small><font color="red">** 2FA is Two-Factor authentication.  This option gives your account more security by requiring you to log in with both a password and a two-factor pin.  
-                   </font></small>
+        <label class="offset">Account 2FA Enabled:</label>
+        <asp:TextBox ID="txtTwoFactorEnabled" readonly="true" runat="server"></asp:TextBox>
+                         <small><font color="red">** Two-Factor authentication provides more security by requiring a password + two-factor pin.  </font></small>
         <br />
+        <label class="offset">Domain:</label> <asp:TextBox ID="txtDomain" readonly="true" runat="server"></asp:TextBox>
+        <br />
+        <br />
+        <label class="offset">User Roles:</label><%=UserRoles() %>
+            <br />
+            <br />
+
         <asp:Button ID="btnSetTwoFactor"  runat="server" Text="Set Up 2FA" OnClick="btnSetTwoFactor_Click" />
         <asp:Button ID="btnCheckTwoFactor" runat="server" Text="Test 2FA" OnClientClick="return true;var pin=prompt('Enter PIN >');var e={};e.Event='Validate2FA_Click';e.Value=pin;BBPPostBack2(null,e);return true;" 
             OnClick="btnValidateTwoFactor_Click" />

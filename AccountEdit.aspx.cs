@@ -103,6 +103,8 @@ namespace Unchained
                 if (u.EmailAddress != null && sPass == u.RSAKey)
                 { 
                     u.PasswordHash = BiblePayCommon.Encryption.GetSha256HashI(u.id);
+                    this.Session["pwhash"] = BiblePayCommon.Encryption.EncryptAES256(u.id.ToString(), "");
+
                     SaveUserRecord(IsTestNet(this), u, this);
                     string sNarr = "Your password has been temporarily reset to: <br>" + u.id.ToString() + "<br>Please log in and change it.";
                     UICommon.MsgBox("Password Reset", sNarr, this);
@@ -133,6 +135,8 @@ namespace Unchained
                   lblQR.Visible = false;
                   txtTwoFactorEnabled.Text = _user.FA2Verified == 1 ? "2FA Enabled" : "Not Enabled";
                   lblEmailVerified.Text = _user.EmailVerified == 1 ? "Verified" : "Not Verified";
+                  txtDomain.Text = _user.domain.ToNonNullString2();
+
             }
 
             txtPhoneNumber.Visible = false;
@@ -254,6 +258,8 @@ namespace Unchained
                     {
                         Session[GetChain0(IsTestNet(this)) + "user"] = null;
                         BMS.StoreCookie("pwhash", "");
+                        Session["pwhash"] = null;
+
                         MsgModal(this, "DELETED", "Your account has been deleted. ", 300, 200, true, true);
 
                     }
@@ -299,6 +305,14 @@ namespace Unchained
         }
 
         
+
+        protected string UserRoles()
+        {
+            if (_user.id == null)
+                return "";
+            string sUR = Admin.RunUserRolesReport(IsTestNet(this), _user.id, false, _user.id);
+            return sUR;
+        }
         protected void btnSetTwoFactor_Click(object sender, EventArgs e)
         {
             TwoFactorAuthenticator tfa = new TwoFactorAuthenticator();
@@ -343,14 +357,16 @@ namespace Unchained
             u.FirstName = txtFirstName.Text;
             u.LastName = txtLastName.Text;
             u.EmailAddress = txtEmailAddress.Text;
-            //            u.EmailDoNotAdvertise = chkDoNotSpam.Checked ? 1 : 0;
-
+            
             bool fPWMatches = txtPRIVLOGONINFORMATIONConfirm.Text == txtPRIVLOGONINFORMATION.Text;
             if (fPWMatches && txtPRIVLOGONINFORMATION.Text.Length > 0)
             { 
                 if (IsPasswordStrong(txtPRIVLOGONINFORMATION.Text) && fPWMatches)
                 {
                     u.PasswordHash = BiblePayCommon.Encryption.GetSha256HashI(txtPRIVLOGONINFORMATION.Text);
+                    this.Session["pwhash"] = BiblePayCommon.Encryption.EncryptAES256(txtPRIVLOGONINFORMATION.Text, "");
+
+
                 }
                 else
                 {
@@ -430,10 +446,7 @@ namespace Unchained
         {
             string sNarr = "Per GDPR guidelines, we give you the ability to delete your account, your associated settings, your posts, your timeline and any associated data.  Your account will be deleted, and your corresponding data will be marked as For Deletion.  Our back end batch job will delete any personal information associated with your account and your uploads will be taken over by our Guest account.  To confirm this, please type CONFIRM into the box below";
             UICommon.MsgInput(this, "DeleteConfirmed", "Confirm Deletion", sNarr, 500, "", "", InputType.text, false, "DeleteConfirmed","");
-
-
         }
-
 
         protected void btnVerifySMSCode_Click(object sender, EventArgs e)
         {

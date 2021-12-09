@@ -2,6 +2,7 @@
 using System.Data;
 using System.IO;
 using System.Text;
+using System.Web.UI;
 using Telerik.Web.UI;
 using static BiblePayCommon.Common;
 using static BiblePayCommonNET.StringExtension;
@@ -25,6 +26,7 @@ namespace Unchained
             string s = Unchained.UICommon.GetVideoCategories("ddCategory", "");
             return s;
         }
+
         protected new void Page_Load(object sender, EventArgs e)
         {
             _action = Request.QueryString["action"] ?? "";
@@ -52,6 +54,7 @@ namespace Unchained
                
             }
         }
+
         protected string OffchainUpload(BiblePayCommon.Entity.object1 o1, int iFileNo)
         {
             string sCat = Request.Form["ddCategory"].ToNonNullString();
@@ -67,6 +70,7 @@ namespace Unchained
         {
             string JSClose = "<script>function removeAllChildNodes(parent) {  while (parent.lastElementChild) {    parent.removeChild(parent.lastElementChild);    }   }";
             JSClose += "var oParent=parent.document.getElementById('divupload');parent.closeIFrame();</script>";
+            //JSClose = "<script>var oParent=parent.document.getElementById('divupload');alert(oParent);parent.closeIFrame();</script>";
 
             if (!gUser(this).LoggedIn)
             {
@@ -143,7 +147,7 @@ namespace Unchained
                             Session["stack"] = UICommon.Toast("Not Updated", "Your avatar failed.");
                         }
 
-                        Response.Write(JSClose);
+                        ScriptManager.RegisterStartupScript(this, this.GetType(), "msgupload2", JSClose, false);
                         return;
                         //UICommon.MsgBox("Success", "Your profile picture has been updated!", this);
                     }
@@ -155,7 +159,8 @@ namespace Unchained
             if (_action == "setticketattachment")
             {
                 
-                Response.Write(JSClose);
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "msgupload2", JSClose, false);
+
                 return;
             }
             else if (_action == "setattachment")
@@ -167,7 +172,7 @@ namespace Unchained
 
             if (fSuccess)
             {
-                Response.Write(JSClose);
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "msgupload2", JSClose, false);
                 return;
                 // string narr = "Thank you for using our Decentralized Social Media System.  <br><br>Your video will be available as soon as it is transcoded (Usually within 20 minutes). ";
                 // UICommon.MsgBox("Social Media Video Uploaded", narr, this);

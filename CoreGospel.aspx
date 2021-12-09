@@ -6,22 +6,22 @@
 
     <br />
 
-    <a href="GospelViewer?type=TheSinnersPrayer">The Sinners Prayer</a>
+    <a href="FreedomViewer?type=TheSinnersPrayer">The Sinners Prayer</a>
     <br />
 
-    <a href="GospelViewer?type=TheLordsPrayer">The Lords Prayer</a>
+    <a href="FreedomViewer?type=TheLordsPrayer">The Lords Prayer</a>
     <br />
 
-    <a href="GospelViewer?type=ApostlesCreed">The Apostles Creed</a>
+    <a href="FreedomViewer?type=ApostlesCreed">The Apostles Creed</a>
     <br />
 
-    <a href="GospelViewer?type=NiceneCreed">The Nicene Creed</a>
+    <a href="FreedomViewer?type=NiceneCreed">The Nicene Creed</a>
     <br />
 
-    <a href="GospelViewer?type=TenCommandments">The Ten Commandments</a>
+    <a href="FreedomViewer?type=TenCommandments">The Ten Commandments</a>
     <br />
 
-    <a href="GospelViewer?type=JesusConciseCommandments">Jesus Concise Commandments</a>
+    <a href="FreedomViewer?type=JesusConciseCommandments">Jesus Concise Commandments</a>
     <br />
 
 </asp:Content>

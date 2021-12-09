@@ -1,25 +1,27 @@
-﻿<%@ Page Title="Unchained-Upload" Language="C#" MasterPageFile="~/SiteFrame.Master" AutoEventWireup="true"  CodeBehind="UnchainedUpload.aspx.cs" Inherits="Unchained.UnchainedUpload"  ValidateRequest="true" %>
+﻿<%@ Page Title="Unchained Attachments" Language="C#" MasterPageFile="~/SiteFrame.Master" AutoEventWireup="true"  CodeBehind="UnchainedAttachments.aspx.cs" Inherits="Unchained.UnchainedAttachments"  ValidateRequest="true" %>
 <%@ Register TagPrefix="telerik" Namespace="Telerik.Web.UI" Assembly="Telerik.Web.UI" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-
 <link rel="stylesheet" type="text/css" href="Content/telerikstyles.css" />
 
 <script>
 
     function validateForm() {
-        var sPrefix = 'MainContent_';
-        var oSubject = document.getElementById(sPrefix + 'txtSubject');
-        var oBody = document.getElementById(sPrefix + 'txtBody');
-        if (oSubject.value.length < 3 || oBody.value.length < 3) {
-            alert('Sorry, the Subject or Body must be greater than 3 characters.'); return false;
-        }
-
-        if (getCount() == 0)
-        {
-            alert('Please choose at least one file before saving the record. If you have already chosen files, please wait until they have uploaded (the dot will become green when they are finished).');
+        //var sPrefix = 'MainContent_';
+        var btn = document.getElementById("MainContent_btnUnchainedSave");
+        if (getCount() == 0) {
+            if (btn.value == "Save File(s)") {
+                alert('Please choose at least one file before saving the record. If you have already chosen files, please wait until they have uploaded (the dot will become green when they are finished).');
+            }
+            else {
+                clickmou();
+            }
             return false;
         }
+        return true;
+    }
+
+    function doValidate() {
         return true;
     }
 
@@ -46,10 +48,6 @@
                     .bind({ "dragleave": function (e) { dragLeaveHandler(e, dropZone1); } })
                     .bind({ "drop": function (e) { dropHandler(e, dropZone1); } });
 
-                var dropZone2 = $(document).find("#DropZone2");
-                dropZone2.bind({ "dragenter": function (e) { dragEnterHandler(e, dropZone2); } })
-                    .bind({ "dragleave": function (e) { dragLeaveHandler(e, dropZone2); } })
-                    .bind({ "drop": function (e) { dropHandler(e, dropZone2); } });
             }
         };
 
@@ -85,10 +83,20 @@
         }
     }
 
-   
 
     $(document).ready(function () {
     });
+
+
+    function MyFileUploaded(sender, args) {
+        var contentType = args.get_fileInfo().ContentType;
+        var filename = args.get_fileName();
+        var currentRowElement = args.get_row();
+        // Change the text 
+        var btn = document.getElementById("MainContent_btnUnchainedSave");
+        btn.value = "Save File(s)";
+
+    }
 
 
 </script>
@@ -114,8 +122,8 @@
 }
 
 .ruButton {
-    xbackground-position-x: -100px !important;
-    xleft:-100px !important;
+    xbackground-position-x: -10px !important;
+    xleft:-10px !important;
     xposition:relative !important;
     xcursor:hand !important;
 }
@@ -126,7 +134,7 @@
 
     .ruFileLI .ruUploading {
         position:relative !important;
-        top:-40px !important;
+        top:-20px !important;
         color:aqua !important;
         xpadding:20px;
     }
@@ -144,13 +152,6 @@
     height:7px !important;
 }
 
-.DropZone2 {
-  margin-top: -100px;
-  margin-left: -250px;
-  width: 500px;
-  height: 200px;
-  border: 4px dashed #fff;
-}
 
 
 .DropZone1 {
@@ -169,41 +170,27 @@
 
 
 </style>
+    <!-- attachments area -->
 
-    <small>
-    <asp:Label ID="lblHideArea" runat="server" Text="">
-    <asp:Label runat="server" ID="lblSubject">Title:</asp:Label>
-       <br />
-    <asp:TextBox ID="txtSubject" width="200px" runat="server"></asp:TextBox>
-       <br /> 
-    <asp:Label runat="server" ID="lblBody">Body:</asp:Label>
-       <br />
-    <asp:TextBox ID="txtBody" runat="server" TextMode="MultiLine"  Rows="2" style="width: 200px">        </asp:TextBox>
-       <br />
-    <asp:Label runat="server" ID="Label1">Category:</asp:Label>
+    <%=GetAttachments() %>
 
-        <br />
-    </asp:Label>
-    <%=GetVideoCategories()%>
-        <br />
-        <br />
-
-    &nbsp;&nbsp;<asp:Button ID="btnUnchainedSave" runat="server" OnClick="btnUnchainedSave_Click" OnClientClick="return validateForm();"                      Text="Save your File" />
-
+    <!--new file area -->
+   
+        <div class="DropZone1" style="max-width:290px;" >
+            <div class="attachment-container" style="padding-left:1px;position:relative;top:-20px;max-width:290px;max-height:145px;">
+                          <telerik:RadAsyncUpload RenderMode="Lightweight" runat="server" CssClass="async-attachment" enablefileinputskinning="true" Height="150" Width="250px" InputSize="4"
+                   OnClientFileUploaded="MyFileUploaded"     style="color:gold;"    ID="AsyncUpload1" HideFileInput="true" MultipleFileSelection="Automatic" DropZones=".DropZone1" 
+                            AllowedFileExtensions=".jpeg,.jpg,.bmp,.svg,.png,.pdf,.gif,.xlsx,.mp3,.webm,.mp4,.mov" />
+                    <div style="position:relative;left:-1px;top:-41px;font-size:20px;color:lime" onclick="clickmou(0);">
+                        Drop files here
+                </div>
+            </div>
+              
+    </div>
     <br />
-    </small>
-        <div class="DropZone1" style="max-width:290px;" onclick="clickmou(0);">
-    
-    <div class="attachment-container" style="padding-left:1px;xposition:relative;">
-                  <telerik:RadAsyncUpload RenderMode="Lightweight" runat="server" CssClass="async-attachment" enablefileinputskinning="true" Height="150" Width="250px" InputSize="4"
-                style="color:gold;"    ID="AsyncUpload1" HideFileInput="true" MultipleFileSelection="Automatic" DropZones=".DropZone1" 
-                    AllowedFileExtensions=".jpeg,.jpg,.bmp,.svg,.png,.pdf,.gif,.xlsx,.mp3,.webm,.mp4,.mov" />
-
-            <div style="position:relative;left:-50px;top:-72px;font-size:20px;color:lime">
-            Drop files or click here
+    <div style="z-index:9999;font-size:125%;position:relative;">
+    <asp:Button ID="btnUnchainedSave" runat="server" OnClick="btnUnchainedSave_Click" OnClientClick="return validateForm();"  Text="+ Add Attachment" />
         </div>
-    </div>
-    </div>
      
 </asp:Content>
 

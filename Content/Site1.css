@@ -74,7 +74,7 @@ i.facircle {
     position: fixed;
     right: 0;
     left: 0;
-    z-index: 1030;
+    z-index: 2;
 }
 
 .navbar-fixed-top {
@@ -135,7 +135,7 @@ i.facircle {
     line-height: 1.5125;
     word-break: break-word;
     white-space: pre-wrap;
-    z-index: 100;
+    z-index: 1;
 }
 
 .avatar-normal {
@@ -168,15 +168,18 @@ i.facircle {
 
 .globalalert {
     position: relative;
-    top: -34px;
+    top:-6px;
+    xleft:-80px;
     width: 100%;
     min-width: 100%;
-    background-color: yellow;
+    xoverflow:scroll;
+    background-color: orange;
+    color:black;
     font-weight: bold;
     font-size: 12px;
+    max-height:150px;
     border: 1px solid black;
     text-align: left;
-    padding-left: 250px;
 }
 
 .attachment-container .RadUpload .ruUploadProgress {
@@ -211,7 +214,7 @@ i.facircle {
 }
 
 .user-panel {
-    height: 65px;
+    height: 74px;
 }
 
 .main-sidebar, left-side {

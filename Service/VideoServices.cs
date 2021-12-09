@@ -167,7 +167,7 @@ namespace Service
 
         public static BiblePayCommon.Common.User RetrieveUser(bool fTestNet, string sFilter)
         {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "user1");
+            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "user1");
             dt = dt.FilterDataTable(sFilter);
             Object o = new BiblePayCommon.Common.User();
             if (dt.Rows.Count < 1)
@@ -185,7 +185,7 @@ namespace Service
                 if (sVideoPath == "")
                     return;
 
-                DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable2(fTestNet, "VideoRequest", true);
+                DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, "VideoRequest", true);
                 dt = dt.FilterDataTable("processTime=0");
 
                 for (int i = 0; i < dt.Rows.Count; i++)
@@ -221,7 +221,7 @@ namespace Service
                             {
                                 string sCategory = "Religion";
                                 BiblePayCommon.Common.User u = RetrieveUser(fTestNet, "id='" + sUserID + "'");
-                                Console.WriteLine("Uploading video "+ sTitle + " from " + u.FullUserName() + " in domain " + u.Domain);
+                                Console.WriteLine("Uploading video "+ sTitle + " from " + u.FullUserName() + " in domain " + u.domain);
 
                                 vr.URL2 = InsertNewVideo(u, fTestNet, sPath, sCategory, sTitle, sBody);
                                 vr.Processed = "FILLED";

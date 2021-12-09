@@ -41,17 +41,20 @@ namespace Unchained
             return "";
         }
 
-        public static BiblePayCommon.Common.User CoerceUser(bool fTestNet)
+        public static BiblePayCommon.Common.User CoerceUser(bool fTestNet, string sUserID)
         {
             // This allows the server to perform certain actions as Administrator (such as saving a User record the first time)...
             // But note; this function does not give the server owner unlimited permissions to alter chain data
             // It only allows the server to Add to a chain, or EDIT its own authorized chain data.
             // A server cannot edit another federated servers chain data, but a server may add a new record or edit its own data.
             BiblePayCommon.Common.User u = new BiblePayCommon.Common.User();
+            u = gUserById(fTestNet, sUserID);
+
+
             u.BiblePayAddress = GetFundingAddress(fTestNet);
-            u.UserName = "Administrator";
-            u.FirstName = "Administrator";
-            u.LastName = "";
+            //u.UserName = "Administrator";
+            //u.FirstName = "Administrator";
+            //u.LastName = "";
             u.SignatureTimestamp = (int)BiblePayCommon.Common.UnixTimestampUTC();
             u.Signature = BiblePayDLL.Sidechain.SignMessage(fTestNet, GetFundingKey(fTestNet), u.SignatureTimestamp.ToString());
             return u;
@@ -79,17 +82,26 @@ namespace Unchained
         }
         public static string GetGlobalAlert(Page p)
         {
+            // This feature needs refactored as it is too upgly on the mobile phone.  
+            return "";
+
             string sAlert = String.Empty;
             // Verify they are cookie compliant first
             double nCookieConsent = GetDouble(BMS.GetCookie("cookieconsent"));
             string sPrivacyPolicy = Config("PrivacyPolicyURL", "Content/PrivacyPolicy.htm");
+            //nCookieConsent = 0;
+            bool fMobile = BiblePayCommonNET.UICommonNET.fBrowserIsMobile(p);
 
             if (nCookieConsent == 0)
             {
                 string sNarr = "This web site uses cookies to store your session information and user preferences.  Click <a target='_blank' href='" + sPrivacyPolicy + "'>here to read our privacy policy</a>.   ";
                 string sAccept = GetStandardButton("confirmCookies", "Allow Cookies", "ConfirmCookies", "Allow Cookies on this site");
-                string sDeny = GetStandardButton("denyCookies", "Disable Cookies and Limit Site Functionality", "DenyCookies", "Disable Cookies and Limit Site Functionality");
+                string sDeny = GetStandardButton("denyCookies", "Limit Features", "DenyCookies", "Disable Cookies and Limit Site Functionality");
                 sNarr += "&nbsp;&nbsp;&nbsp;" + sAccept + "&nbsp;" + sDeny;
+                if (fMobile)
+                {
+                   // sNarr = sAccept + "&nbsp;" + sDeny;
+                }
                 sAlert = "<div class='globalalert'>" + sNarr + "</div>";
                 return sAlert;
             }
@@ -101,6 +113,11 @@ namespace Unchained
                 string sDontRemindMe = GetStandardButton("confirmCookies", "Dont Remind me Again", "ConfirmCookiesDontRemindMe", "Disable cookies and dont remind me again.");
 
                 sNarr += "&nbsp;&nbsp;&nbsp;" + sAccept + "&nbsp;" + sDontRemindMe;
+                if (fMobile)
+                {
+                   // sNarr = sAccept + "&nbsp;" + sDontRemindMe;
+                }
+
                 sAlert = "<div class='globalalert'>" + sNarr + "</div>";
                 return sAlert;
             }
@@ -176,7 +193,8 @@ namespace Unchained
                         if ((fQuiet && iRowModulus % 10 == 0) || (!fQuiet))
                         {
                             mLastLogData = sData;
-                            string sPath = GetFolderUnchained("unchained.log");
+                            
+                            string sPath = GetFolderUnchained("unchained_" + BiblePayCommon.Common.DOMAIN_NAME + ".log");
                             System.IO.StreamWriter sw = new System.IO.StreamWriter(sPath, true);
                             string Timestamp = DateTime.Now.ToString();
                             sw.WriteLine(Timestamp + ": " + sData);
@@ -284,9 +302,9 @@ namespace Unchained
             return sPrefix;
         }
 
-        public static User RetrieveUser(Page p, FilterDefinition<dynamic> oFilter)
+        public static User RetrieveUser(bool fTestNet, FilterDefinition<dynamic> oFilter)
         {
-            IList<dynamic> dt = BiblePayDLL.Sidechain.GetChainObjects<dynamic>(IsTestNet(p), "user1", oFilter, SERVICE_TYPE.PUBLIC_CHAIN);
+            IList<dynamic> dt = BiblePayDLL.Sidechain.GetChainObjects<dynamic>(fTestNet, "user1", oFilter, SERVICE_TYPE.PUBLIC_CHAIN);
             Object o = new User();
             if (dt.Count < 1)
                 return (User)o;
@@ -358,7 +376,7 @@ namespace Unchained
         {
             var builder = Builders<dynamic>.Filter;
             var filter = builder.Eq("EmailAddress", sEmailAddress);
-            User u = RetrieveUser(p, filter);
+            User u = RetrieveUser(IsTestNet(p), filter);
             return u;
         }
 
@@ -366,16 +384,24 @@ namespace Unchained
         {
             var builder = Builders<dynamic>.Filter;
             var filter = builder.Eq("firstname", sFirstName) & builder.Eq("lastname", sLastName);
-            User u = RetrieveUser(p, filter);
+            User u = RetrieveUser(IsTestNet(p), filter);
             return u;
         }
         public static User gUserById(Page p, string id)
         {
             var builder = Builders<dynamic>.Filter;
             var filter = builder.Eq("_id", id);
-            User u = RetrieveUser(p, filter);
+            User u = RetrieveUser(IsTestNet(p), filter);
             return u;
         }
+        public static User gUserById(bool fTestNet, string id)
+        {
+            var builder = Builders<dynamic>.Filter;
+            var filter = builder.Eq("_id", id);
+            User u = RetrieveUser(fTestNet, filter);
+            return u;
+        }
+
 
         public static int GetVoteCount(bool fTestNet, string sID, int nType)
         {
@@ -653,7 +679,7 @@ namespace Unchained
 
             string sDomainName = HttpContext.Current.Request.Url.Host;
             o.domain = sDomainName;
-            u.Domain = sDomainName;
+            u.domain = sDomainName;
 
             r = DataOps.InsertIntoTable(p, fTestNet, o, u);
             if (r.fError())
@@ -668,7 +694,16 @@ namespace Unchained
                     NotifyOfNewUser(u, p);
                 u = gUser(p, u.EmailAddress);
                 // This is where we save the users session
-                BiblePayDLL.Sidechain.SetBiblePayAddressAndSignature(IsTestNet(p), sDomainName, ref u);
+                String sPW = BiblePayCommon.Encryption.DecryptAES256((p.Session["pwhash"] ?? "").ToString(), "");
+                
+                bool fResult =                 BiblePayDLL.Sidechain.SetBiblePayAddressAndSignature(IsTestNet(p), sDomainName, ref u, sPW);
+                if (!fResult)
+                {
+                    MsgModal(p, "Error 12062021", "Unable to save user record.", 400, 200, true, false);
+                    r.Error = "Unable to save user record.";
+                    return r;
+                    
+                }
                 p.Session[GetChain0(fTestNet) + "user"] = u;
                 r.fIsNew = fIsNew;
 
@@ -695,16 +730,25 @@ namespace Unchained
 
         public static BiblePayCommon.IBBPObject GetObjectWithFilter(bool fTestNet, string sTable, string sFilter)
         {
-            DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, sTable);
-            dt = dt.FilterDataTable(sFilter);
-            BiblePayCommon.IBBPObject o = BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, sTable, 0);
-            return o;
+            try
+            {
+                DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(fTestNet, sTable);
+                dt = dt.FilterDataTable(sFilter);
+                BiblePayCommon.IBBPObject o = BiblePayCommon.EntityCommon.TableRowToStronglyCastObject(dt, sTable, 0);
+                return o;
+            }catch(Exception ex)
+            {
+                BiblePayCommon.Entity.BaseEntity o = new BiblePayCommon.Entity.BaseEntity();
+                return o;
+            }
         }
 
 
         public static bool HasOwnership(bool fTestNet, string sObjectID, string sTable, string sUserID)
         {
-            if (System.Diagnostics.Debugger.IsAttached) return true;
+            //bool fPlays = BiblePayDLL.Sidechain.UserPlaysRole(fTestNet, "Superuser", sUserID, "");
+            //            if (gUser(this).Administrator == 1)
+            //    return true;
 
             if (sUserID == null || sUserID == "")
                 return false;

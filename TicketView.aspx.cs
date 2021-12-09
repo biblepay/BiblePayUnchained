@@ -170,8 +170,7 @@ namespace Unchained
             string sAddOPAttachmentButton = "";
             if (gUser(this).Administrator == 1 || gUser(this).id == dt.Rows[0]["UserID"].ToString())
             {   
-                sAddOPAttachmentButton = UICommon.GetStandardButton(id,
-                  "<i class='fa fa-file'></i>", "AddAttachment", "Add media to this ticket, such as a URL, a video, an mp3, a pdf, an image...etc");
+                //sAddOPAttachmentButton = UICommon.GetStandardButton(id,                  "<i class='fa fa-file'></i>", "AddAttachment", "Add media to this ticket, such as a URL, a video, an mp3, a pdf, an image...etc");
             }
             string div = "<table class='comments'>"
                 + "<tr><th class='objheader' colspan=3><h3>" + _ObjectName + " #" + dt.GetColValue(0, "TicketNumber")
@@ -186,18 +185,25 @@ namespace Unchained
                 + "<tr><td>Last Interaction:<td colspan=6><textarea class='pc90 comments' rows=10 columns=10 readonly=true>" + sLastInteraction + "</textarea></td></tr>"
                 + "<tr><td>" + sAddOPAttachmentButton + "</td></tr>";
             //string sOPAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetLightboxGallery(this,              id, "", "Ticket Attachments", "") + "</td></tr></table></td></tr>";
-            string sOPAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetAttachments(this,
+
+            string sOPAttachments = "<tr><td colspan=1><table width=80%><tr><td>" + UICommon.GetAttachments(this,
                  id, "", "Ticket Attachments", "") + "</td></tr></table></td></tr>";
+            // OP Attachments 2.0
+            sOPAttachments = "<tr><td>Attachments:</td><td width='75%'><div class='comments'><iframe width='95%' height='400px' src='UnchainedAttachments?parentid=" + id + "'></iframe></div></td></tr>";
+            //sOPAttachments = "";
+
+            //sOPAttachments = "<tr><td>Attachments:</td></tr>";
 
             // Any Ticket OP attachments?
             div += sOPAttachments;
 
-            div += "</table>";
+            div += "</table>\r\n";
 
             // End of OP Post
 
             // Ticket History
-            string sHistory = "<hr><table class='comments'>";
+            div += "<hr>";
+            string sHistory = "<table class='comments'>";
 
             // If the ticket is assigned to me, or if Im an admin: show the reply module
             bool fPerms = (sAssignedTo == gUser(this).id || gUser(this).Administrator == 1);
@@ -237,8 +243,7 @@ namespace Unchained
                 string sAddHistoryAttachmentButton = "";
                 if (th.GetColValue(i, "UserID") == gUser(this).id)
                 {
-                    sAddHistoryAttachmentButton = UICommon.GetStandardButton(th.Rows[i]["id"].ToString(),
-                        "<i class='fa fa-file'></i>", "AddAttachment", "Add media to this post, such as a URL, a video, an mp3, a pdf, an image...etc");
+                   // sAddHistoryAttachmentButton = UICommon.GetStandardButton(th.Rows[i]["id"].ToString(),        "<i class='fa fa-file'></i>", "AddAttachment", "Add media to this post, such as a URL, a video, an mp3, a pdf, an image...etc");
                 }
 
                 sRow += "<td>" + th.Rows[i]["Disposition"].ToString() + "</td>";
@@ -253,22 +258,18 @@ namespace Unchained
                 sHistory += sRow;
 
                 // Display the attachments
-                string sAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetAttachments(this, th.Rows[i]["id"].ToString(), "", "Ticket Attachments", "") + "</td></tr></table></td></tr>";
-                //string sAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetLightboxGallery(this,  th.Rows[i]["id"].ToString(), "", "Ticket Attachments", "") + "</td></tr></table></td></tr>";
-
-
-                sHistory += sAttachments;
+                // string sAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetAttachments(this, th.Rows[i]["id"].ToString(), "", "Ticket Attachments", "") + "</td></tr></table></td></tr>";
+                // string sAttachments = "<tr><td colspan=6><table width=85%><tr><td>" + UICommon.GetLightboxGallery(this,  th.Rows[i]["id"].ToString(), "", "Ticket Attachments", "") + "</td></tr></table></td></tr>";
+                // sHistory += "</table></td></tr>";
             }
 
             // Ticket History
 
-            // Original Post
-
-            string sBody1 = dt.GetColValue(0, "Body").ToString();
-            string sNewRow = "<td width=10%>Initiated By:</td><td>" + UICommon.GetUserAvatarAndName(this, dt.GetColValue("UserID")) + "</td>";
-            sNewRow += "<tr><td colspan=6><textarea class='pc90 comments' rows=10 columns=10 readonly=true>" + sBody1 + "</textarea>"
-                + "</td></tr>";
-            sHistory += sNewRow;
+            // Original Post is last in the ticket (since it is oldest):
+            string sOPBody = dt.GetColValue(0, "Body").ToString();
+            //string sOPPost = "<td width=10%>Initiated By:</td><td>" + UICommon.GetUserAvatarAndName(this, dt.GetColValue("UserID")) + "</td>";
+            string sOPRow = "<tr><td colspan=6><textarea class='pc90 comments' rows=10 columns=10 readonly=true>" + sOPBody + "</textarea></td></tr>";
+            sHistory += sOPRow;
             // End of OP Post
 
             sHistory += "</table>";

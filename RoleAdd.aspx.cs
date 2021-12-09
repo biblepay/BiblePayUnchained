@@ -12,7 +12,9 @@ namespace Unchained
     {
         protected new void Page_Load(object sender, EventArgs e)
         {
-            if (gUser(this).Administrator != 1)
+            bool fPlays = BiblePayDLL.Sidechain.UserPlaysRole(IsTestNet(this), "Superuser", gUser(this).id, "");
+
+            if (!fPlays)
             {
                 UICommon.MsgBox("ERROR", "Sorry, you must be an administrator.", this);
             }
@@ -21,7 +23,10 @@ namespace Unchained
 
         protected void btnSaveRole_Click(object sender, EventArgs e)
         {
-            if (gUser(this).Administrator != 1)
+
+            bool fPlays = BiblePayDLL.Sidechain.UserPlaysRole(IsTestNet(this), "Superuser", gUser(this).id, "");
+
+            if (!fPlays)
             {
                 UICommon.MsgBox("ERROR", "Sorry, you must be an administrator.", this);
             }
@@ -44,6 +49,11 @@ namespace Unchained
             {
                 UICommon.MsgBox("Error", "This role already exists.", this);
             }
+
+
+           
+
+
 
             R.id = Guid.NewGuid().ToString();
             BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(this, IsTestNet(this), R, gUser(this));

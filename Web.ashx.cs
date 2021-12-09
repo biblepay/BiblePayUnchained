@@ -16,7 +16,7 @@ namespace Unchained
         public void ProcessRequest(HttpContext context)
         {
 
-               context.Response.ContentType = "text/plain";
+                context.Response.ContentType = "text/plain";
                 context.Response.Expires = -1;
                 try
                 {

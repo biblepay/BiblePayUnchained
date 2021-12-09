@@ -42,7 +42,7 @@ namespace Unchained
             o.Data = sData;
             o.DateTime = System.DateTime.UtcNow.ToString();
 
-            BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(null, fTestNet, o, CoerceUser(fTestNet));
+            BiblePayCommon.Common.DACResult r = DataOps.InsertIntoTable(null, fTestNet, o, CoerceUser(fTestNet, fTestNet ? Global.TEST_GUID : Global.PROD_GUID));
             Log("Created daily export for " + fTestNet.ToString());
 
             if (r.fError())
@@ -74,7 +74,14 @@ namespace Unchained
 
 
     // This is the background thread that executes mission critical services.
-    public static void Executor()
+    public static void ExecuteMini(bool fTestNet)
+        {
+            Sidechain.TranscodeVideos(fTestNet, GetFundingAddress(fTestNet), GetFundingKey(fTestNet), CoerceUser(fTestNet, fTestNet ? Global.TEST_GUID:Global.PROD_GUID));
+            Sidechain.TranscriptVideos(fTestNet, GetFundingAddress(fTestNet), GetFundingKey(fTestNet), CoerceUser(fTestNet, fTestNet ? Global.TEST_GUID:Global.PROD_GUID));
+            DailyUTXOExport(fTestNet);
+            Sidechain.UpdateWatchCounts(fTestNet);
+        }
+        public static void Executor()
         {
             Log("Starting Executor v1.3...");
             System.Threading.Thread.Sleep(60000);
@@ -87,19 +94,9 @@ namespace Unchained
                     if (true)
                     {
                         CleanOldFiles();
-
-                        Sidechain.TranscodeVideos(false, GetFundingAddress(false), GetFundingKey(false), CoerceUser(false));
-                        Sidechain.TranscodeVideos(true, GetFundingAddress(true), GetFundingKey(true), CoerceUser(true));
-
-                        Sidechain.TranscriptVideos(true, GetFundingAddress(true), GetFundingKey(true), CoerceUser(true));
-                        Sidechain.TranscriptVideos(false, GetFundingAddress(false), GetFundingKey(false), CoerceUser(false));
-                        
-                        DailyUTXOExport(true);
-                        DailyUTXOExport(false);
-
-                        Sidechain.UpdateWatchCounts(true);
-                        Sidechain.UpdateWatchCounts(false);
-                        
+                        // Insert CryptoPrices, Insert UTXO Integration Record, Transcode Video, Transcript a video.
+                        ExecuteMini(false);
+                        ExecuteMini(true);
 
                         double nPrice1 = BiblePayCommon.Common.GetDouble(BiblePayCommon.HalfordDatabase.GetKVDWX("price1"));
                         if (nPrice1 == 0)

@@ -84,13 +84,27 @@ namespace Unchained
                 // This item needs to be reviewed by an administrator
                 FLO();
                 string sID = _bbpevent.EventValue;
-
+                if (sID.Contains("post"))
+                {
+                    sID = sID.Replace("post-", "");
+                }
                 BiblePayCommon.Entity.FlaggedContent f = new BiblePayCommon.Entity.FlaggedContent();
 
                 f.UserID = Common.gUser(this).id; // Reported By
                 f.ParentID = sID;
                 f.ParentType = _bbpevent.Extra.Table.ToString();
+                f.OriginalURL = _bbpevent.Extra.Snippet.ToString();
+                if (f.ParentType=="Timeline")
+                {
+                    if (f.OriginalURL.Contains("post"))
+                    {
+                        f.OriginalURL = f.OriginalURL.Replace("post", "xp");
+                    }
+                    f.OriginalURL = f.OriginalURL.Replace("#", "");
 
+                    string sSuffix = f.OriginalURL.Contains("?") ? "&post=" + sID : "?post=" + sID;
+                    f.OriginalURL += sSuffix;
+                }
                 dynamic o1 = Common.GetObject(Common.IsTestNet(this), f.ParentType, f.ParentID);
 
                 if (o1 == null)
@@ -224,6 +238,7 @@ namespace Unchained
             else if (_bbpevent.EventName=="ChatNow_Click")
             {
                 FLO();
+                UICommon.ClearChatStruct(Common.gUser(this).id);
                 // This area is for our database driven chatroom
                 Session["chatactiveuser"] = _bbpevent.EventValue;
                 UICommon.ChatStructure c = new UICommon.ChatStructure();
@@ -652,7 +667,8 @@ namespace Unchained
         protected void Page_Load(object sender, EventArgs e)
         {
             // Entity
-            string sEntity = (Request.QueryString["entity"] ?? "").ToString();
+            string sEntity = CleanseXSS((Request.QueryString["entity"] ?? "").ToString());
+
             SetEntityInformation(sEntity);
             GetEventTarget();
             if (_bbpevent.EventAction != String.Empty)

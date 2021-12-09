@@ -17,9 +17,9 @@
         </script>
         
 
-     <div style="z-index:1;top:-50px;">
+     <div style="top:-20px;">
         <small>
-        <asp:TextBox ID="txtSearch" width="500px" runat="server" onkeydown = "search(this);return (event.keyCode!=13);"></asp:TextBox>
+        <asp:TextBox ID="txtSearch" width="300px" runat="server" onkeydown = "search(this);return (event.keyCode!=13);"></asp:TextBox>
         <asp:Button ID="btnSearch" runat="server" Text="Search" OnClick="btnSearch_Click" /></small>
     </div>
     

@@ -112,16 +112,16 @@ namespace Unchained
                     sRow += "<td class='saved'>" + sAnchor + "</td>";
                     
                 }
-                if (gUser(this).Administrator == 1 && sTable.ToLower()=="organization")
+                if (sTable.ToLower()=="organization")
                 {
-                    string sRoles = "<td>" + UICommon.GetStandardAnchor("ancRoles", "EditRoles", sID, "<i class='fa fa-wrench'></i>", "Edit Org Roles", "Organization") + "</td>";
-                    sRow += sRoles;
+                    bool fPlays = BiblePayDLL.Sidechain.UserPlaysRole(IsTestNet(this), "Superuser", gUser(this).id, dt.GetColValue(y, "BiblePayAddress"));
+                    if (fPlays)
+                    {
+                        string sRoles = "<td>" + UICommon.GetStandardAnchor("ancRoles", "EditRoles", sID, "<i class='fa fa-wrench'></i>", "Edit Org Roles", "Organization") + "</td>";
+                        sRow += sRoles;
+                    }
                 }
-                if (BiblePayCommon.Common.GetDouble(dt.Rows[y]["Amount"]) == 99.51)
-                {
-                    string sTest = "";
 
-                }
                 html.Append(sRow + "</tr>");
 
             }

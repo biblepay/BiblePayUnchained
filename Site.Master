@@ -35,14 +35,11 @@
 
     <webopt:bundlereference runat="server" path="~/Content/css" />
   
-
-
     <!-- The global favicon for our site, and the apple-touch icon for MAC and iPhone shortcuts -->
     <link href="dummy" rel="shortcut icon" type="image/x-icon" id="FavIcon" runat="server"/>
 
     <link rel="apple-touch-icon" href="dummy" id="AppleTouchIcon" runat="server"/>
-            
-
+     
     
     <!--     <script type='text/javascript' src='https://www.google.com/jsapi'></script> -->
     <!--    <script src="https://muse.ai/static/js/embed-player.min.js"></script>-->
@@ -55,23 +52,54 @@
             .leftspace + td{
                 padding-left:10px !important;
             }
+            .rightspace{
+                display:none !important;
+            }
+            .rightspace + td{
+                padding-right:20px !important;
+            }
+            .toplogo {
+                 display:none !important;
+            }
+            .bottomlogo {
+                display:normal !important;
+                overflow:hidden;
+                max-height:65px;
+            }
+            .mynavbar {
+                height:100px;
+            }
+        }
+
+        @media(min-width:767px){
+            .toplogo{
+                display:normal !important;
+                padding-top:15px;
+            }
+            .bottomlogo{
+                display:none !important;
+                overflow:hidden;
+                max-height:65px;
+          
+        
+            }
+            .mynavbar {
+                height:74px;
+            }
         }
     </style>
 </head>     
 
 <body onload="afterload();">
-    <form runat="server">
-        
-
+    <form runat="server" style="">
+     
         <asp:ScriptManager runat="server">
             <Scripts>
                 <%--To learn more about bundling scripts in ScriptManager see https://go.microsoft.com/fwlink/?LinkID=301884 --%>
                 <%--Framework Scripts--%>
                 <asp:ScriptReference Name="MsAjaxBundle" />
                 <asp:ScriptReference Path="~/Scripts/bootstrap.min.js" />
-
                 <asp:ScriptReference Name="jquery" />
-                
                 <asp:ScriptReference Name="WebForms.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebForms.js" />
                 <asp:ScriptReference Name="WebUIValidation.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebUIValidation.js" />
                 <asp:ScriptReference Name="MenuStandards.js" Assembly="System.Web" Path="~/Scripts/WebForms/MenuStandards.js" />
@@ -95,82 +123,97 @@
         </asp:ScriptManager>
 
 
-
-
-
-
     <div class="Page" id="main">
  
 
-    
-                <asp:UpdatePanel runat="server" ID="UpdatePanel9" UpdateMode="Conditional" ChildrenAsTriggers="false">
-                 <ContentTemplate>
+        <asp:UpdatePanel runat="server" ID="UpdatePanel9" UpdateMode="Conditional" ChildrenAsTriggers="false">
+        <ContentTemplate>
 
         <!--Above div height is used to calculate the whole page size (so the footer knows the page height)-->
-        <div class="xnavbar navbar-inverse navbar-fixed-top" style="z-index:256;height:64px;max-height:64px;">
-        <table>
+        <div class="xnavbar navbar-inverse navbar-fixed-top mynavbar" style="max-height:120px;overflow:hidden;">
+        <table style="">
             <tr>
 
                 <td class="leftspace" style="min-width:255px;width:255px;" width="5%">
                     &nbsp;
                 </td>
 
-                <td style="padding:0px;white-space:nowrap;max-height:84px;padding-right:15px;" width="20%">
+                <td style="padding:0px;white-space:nowrap;max-height:128px;padding-right:15px;" width="20%">
                            
-                         <div style="overflow:hidden;position:relative;top:-8px;max-height:90px;"><%=Unchained.UICommon.GetBannerControls(this.Page) %>&nbsp;</div>
-                         <span style="position:relative;top:-11px;font-family:candara;color:antiquewhite;font-size:18px;"><%=Unchained.Common.Config("SiteName") %></span>
-                         <div id='rightmenubutton' style='float:right;' class="close-sidebar hidden-lg hidden-sm"></div>
+                         <div style="overflow:hidden;"><%=Unchained.UICommon.GetBannerControls(this.Page) %>&nbsp;</div>
+                         <span style="font-family:candara;color:antiquewhite;font-size:18px;"><%=Unchained.Common.Config("SiteName") %></span>
                 </td>
-                <td width="6%">
-                    <a href="#" onclick="openNav();" style="font-size:150%;padding-right:10px;" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                <td width="7%">
+                                 <div id='rightmenubutton' style='float:right;' class="close-sidebar hidden-lg hidden-sm">
+                                     </div>
+            
+                    <a href="#" onclick="openNav();" style="position:relative;font-size:170%;padding-right:10px;" class="sidebar-toggle" data-toggle="offcanvas" role="button">
                            <i class="fa fa-navicon"></i>
                     </a>
+                    <span>&nbsp;</span>
                 </td>
-                <td width="5%"><div id="gNotificationConsole">
-                        <%=Unchained.UICommon.GetNotificationConsole(this.Page) %>
-
+                <td style="padding-left:10px;overflow:hidden;" width="20%">
+                    <div class="toplogo">
+                    <%=GetHeaderImage(this.Page) %>
                     </div>
                 </td>
-                <td style="padding-left:20px;" width="40%">
-
-                         <img style="height:72px;position:relative;" src="<%=Unchained.UICommon.GetHeaderImage(this.Page) %>" />
-                         <br />
-                         <span style="text-align:right;left:24px;top:-32px;position:relative;font-size:7px;">
-                            <%=Unchained.Common.Config("poweredby") %>
-                         </span>
+                <td width="40%">
+      
+                    <table width="100%"><tr><td>
+                      <div style="float:right;position:relative;">
+                        <div style="float:right;font-size:12px;position:relative;top:-0px;max-height:35px;">
+                             <%=GetLogOnLogOffButton(this.Page) %>
+                            </div>
+                          <td>
+                    <div id="gNotificationConsole" style="float:left;padding-left:18px;padding-right:10px;">
+                        <%=Unchained.UICommon.GetNotificationConsole(this.Page) %>
+                    </div>
+                              </td></tr></table>
                 </td>
 
-                <td width="5%">
-    
+              <td class="rightspace" style="min-width:200px;width:200px;" width="7%">
+                     &nbsp;
+               </td>
+           </tr>
+            <!-- mobile phones only -->
+            <tr class="bottomlogo">
+                <td class="leftspace" style="min-width:255px;width:255px;" width="5%">
+                    &nbsp;
                 </td>
-                </tr>
-        
+
+                <td colspan="5" style="padding-left:5px;overflow:hidden;position:relative;top:-15px;">
+                    <div class="bottomlogo">
+                    <%=GetHeaderImage(this.Page) %>
+                    </div>
+                </td>
+            </tr>
            </table>  
+      
+<!--old global alert-->
             
-            <%=Unchained.Common.GetGlobalAlert(this.Page) %>
-                
         </div>
 
                      
             <%=Unchained.UICommon.GetSideBar(this.Page) %>
-
+           
             <div class="body-content">
     
                 <div id="divdialog" title="" class='spandialog'><span id="spanVersion1"></span><span id="spandialog"></span></div>
 
 
+                 <%=Unchained.Common.GetGlobalAlert(this.Page) %>
 
 
                  <asp:HiddenField ID="hidSourceID" runat="server" />
                  <button id="hfNewButton1" style="visibility:hidden; margin:0; height:0;padding:0;border:none;"></button>
-                <input id="hfPostback" style="visibility:hidden;margin:0; height:0;padding:0;border:none;" />
+                 <input id="hfPostback" style="visibility:hidden;margin:0; height:0;padding:0;border:none;" />
                  
-                <br />
+                 <br />
 
-                <div id="load1" class="hidden">
+                 <div id="load1" class="hidden">
                         <div class="loader"></div>
                         <span style="position:relative; top:-90px;left:80px;" id="spanLoader1">50%</span>
-                </div>
+                 </div>
                 
                 <%=Unchained.UICommon.GetChatBox2(this.Page) %>  
  
@@ -183,16 +226,10 @@
 
 
          <p></p><p></p>
-                      </ContentTemplate>
-                 </asp:UpdatePanel>
+         </ContentTemplate>
+         </asp:UpdatePanel>
 
-    
     </div>        
-
-
- 
-
-
 
     </form>
  </body>

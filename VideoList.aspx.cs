@@ -245,6 +245,8 @@ namespace Unchained
             else if (sType == "pdf")
             {
                 filter &= builder.Regex("URL", new BsonRegularExpression(".*pdf.*", "i"));
+                filter &= builder.Ne("Attachment", 1);
+
             }
             else if (sType == "wiki")
             {
@@ -274,7 +276,7 @@ namespace Unchained
 
             bool fVideoContainer = (sType == "video");
 
-            string html = UICommon.GetGallery(this, l1, null, sType, 33, 400, 300, fVideoContainer, false, "");
+            string html = UICommon.GetGallery(this, l1, null, sType, 33, 400, 300, fVideoContainer, false, "", false);
             return html;
         }
     }

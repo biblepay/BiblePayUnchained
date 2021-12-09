@@ -6,6 +6,9 @@ using static Unchained.Common;
 using static BiblePayCommon.Common;
 using System.Web.UI;
 using BiblePayDLL;
+using MySql.Data.MySqlClient;
+using System.Collections.Generic;
+using Dapper;
 
 namespace Unchained
 {
@@ -38,14 +41,6 @@ namespace Unchained
             return r;
         }
 
-        /*
-        public static DACResult InsertIntoTable(bool fTestNet, BiblePayCommon.IBBPObject o, User u = new User())
-        {
-            // string sEntityName = BiblePayCommon.EntityCommon.GetEntityName(fTestNet, o);
-            DACResult r = BiblePayDLL.Sidechain.InsertIntoDSQL(fTestNet, o, u);
-            return r;
-        }
-        */
 
 
         public static void InsertIntoTable_Background(bool fTestNet, BiblePayCommon.IBBPObject o, User u)
@@ -86,6 +81,89 @@ namespace Unchained
             return data;
         }
     }
+
+
+    public class MySQLData
+    {
+        private static string MySqlConn()
+        {
+            string connStr = "server=" + Config("mysqlhost") + ";user=" + Config("mysqluser") + ";database="
+                + Config("mysqldatabase") + ";port=3306;password=" + Config("mysqlpassword");
+            return connStr;
+        }
+
+        public static List<T> RunSelect<T>(string query)
+        {
+            dynamic m = new List<T>();
+            try 
+            {
+                MySqlConnection conn = new MySqlConnection(MySqlConn());
+                conn.Open();
+                m = conn.Query<T>(query).AsList<T>();
+                conn.Close();
+            }
+            catch (Exception ex)
+            {
+                Log(ex.Message);
+            }
+            return m;
+        }
+        public static string GetScalarString(string sql, int ordinal)
+        {
+            try
+            {
+                MySqlDataReader dr = MySQLData.GetMySqlDataReader(sql);
+                while (dr.Read())
+                {
+                    return dr[ordinal].ToString();
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+            return "";
+        }
+
+        public static MySqlDataReader GetMySqlDataReader(string sql)
+        {
+            MySqlConnection conn = new MySqlConnection(MySqlConn());
+            MySqlDataReader rdr = null;
+            try
+            {
+                conn.Open();
+                MySqlCommand cmd = new MySqlCommand(sql, conn);
+                rdr = cmd.ExecuteReader();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            return rdr;
+        }
+
+        public static bool ExecuteNonQuery(string sql)
+        {
+            MySqlConnection conn = new MySqlConnection(MySqlConn());
+            try
+            {
+                conn.Open();
+                MySqlCommand cmd = new MySqlCommand(sql, conn);
+                cmd.ExecuteNonQuery();
+                conn.Close();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log("ExecuteNonQuery[mysql]::" + ex.Message);
+                return false;
+            }
+
+        }
+    }
+
+
 
     public class Data
     {
