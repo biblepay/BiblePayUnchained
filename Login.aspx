@@ -1,7 +1,23 @@
 ﻿<%@ Page Title="Login" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" EnableEventValidation="false" CodeBehind="Login.aspx.cs" Inherits="Unchained.Login" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
-   
+   <style>
+       #MainContent_lblEye{
+           margin-left: 0;
+position: absolute;
+top: 33px;
+right: 5px;
+       }
+             @media screen and (max-width: 480px) 
+       {
+  .ui-dialog{
+      
+    width: 94% !important;
+    top: 170.008px !important;
+    left: 3% !important;
+  }
+}
+   </style>
 <br />
 <br />
 <br />
@@ -10,19 +26,22 @@
 <br />
 <br />
 
-     <fieldset style="width:70%;">
+     <fieldset style="width:100%; max-width:450px; margin:auto; float:none;">
 
-         <asp:Panel ID="p" runat="server" DefaultButton="btnLogin">
+         <asp:Panel ID="p" runat="server" DefaultButton="btnLogin" CssClass="p-3">
 
         <legend><asp:Label ID="lblFieldset" runat="server">Log In:</asp:Label><small><asp:Label ID="lblInfo" runat="server" Text=""></asp:Label></small></legend>
-        <asp:Label ID="lblEmailAddress" Width="110px" runat="server" Text="">E-Mail Address:</asp:Label><asp:TextBox ID="txtEmailAddress" style="width:400px;" runat="server"></asp:TextBox>
+           
+        <asp:Label ID="lblEmailAddress" Width="110px" runat="server" CssClass="mb-1" Text="">E-Mail Address:</asp:Label><asp:TextBox ID="txtEmailAddress" style="max-width:400px;width:100%;margin-left:5px;" runat="server"></asp:TextBox>
         <br />
-         <asp:Label ID="lblPassword" Width="110px" runat="server" Text="">Password:</asp:Label><asp:TextBox ID="txtPRIVLOGONINFORMATION" autocomplete="off" class="SENSITIVE" style="width:200px;" runat="server"></asp:TextBox>
+             <div class="position-relative">
+         <asp:Label ID="lblPassword" Width="110px" runat="server" CssClass="mb-1" Text="">Password:</asp:Label><asp:TextBox ID="txtPRIVLOGONINFORMATION" autocomplete="off" class="SENSITIVE" style="max-width:400px;width:100%;margin-left:5px;" runat="server"></asp:TextBox>
          <asp:Label ID="lblEye" runat="server"><i class="fa fa-eye" id="togglePassword"></i></asp:Label>
+                 </div>
        <br />
 
-       <asp:Label ID="lbl2FA" Width="110px" runat="server" Text="">2FA Code:</asp:Label><asp:TextBox ID="txt2FACode" autocomplete="off" style="width:200px;" runat="server"></asp:TextBox>
-       <asp:Label ID="lblOptional" runat="server"><font color="red"><small>** Optional (enter if you enabled 2FA)</small></font></asp:Label>
+       <asp:Label ID="lbl2FA" Width="110px" runat="server" CssClass="mb-1" Text="">2FA Code:</asp:Label><asp:TextBox ID="txt2FACode" autocomplete="off" style="max-width:400px;width:100%;margin-left:5px;" runat="server"></asp:TextBox>
+     <br /> <asp:Label ID="lblOptional" runat="server"><font color="red"><small style="font-size:12px;">** Optional (enter if you enabled 2FA)</small></font></asp:Label>
 
         <br />
         <br />

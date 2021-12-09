@@ -7,23 +7,16 @@ using MongoDB.Driver;
 using static BiblePayCommon.EntityCommon;
 using System.Collections.Generic;
 using System.Web.UI;
-using BiblePayCommon;
 
 namespace Unchained
 {
-    public partial class ChatViaDatabase : BBPPage
+    public partial class ChatViaDatabaseBK : BBPPage
     {
 
-        protected User me ;
-        protected User to;
-        //protected User u1;
-        //protected User u2;
-       protected string myId = "";
         protected string _roomhash = String.Empty;
         protected string _objid = String.Empty;
         protected string _roomname = String.Empty;
         protected UICommon.ChatStructure _chat = new UICommon.ChatStructure();
-       protected IList<Entity.comment1> chats = null;
         public static string GetRoomHashCode(string ParticipantID1, string sParticipantID2)
         {
             List<string> l = new List<string>();
@@ -75,8 +68,8 @@ namespace Unchained
                 UICommon.MsgBox("Failure", "The chat no longer exists.", this);
             }
 
-           User u1 = gUserById(this, _chat.startedByUser);
-           User u2 = gUserById(this, _chat.chattingWithUser);
+            User u1 = gUserById(this, _chat.startedByUser);
+            User u2 = gUserById(this, _chat.chattingWithUser);
             if (u1.EmailAddress == null || u2.EmailAddress == null)
             {
                 UICommon.MsgBox("Failure", "The chat between these two users is missing key elements.", this);
@@ -97,29 +90,16 @@ namespace Unchained
             }
             _objid = c1.id;
             _roomname = this.Title;
-            me = gUser(this);
-            to = u1.id == me.id ? u2 : u1;
-            GetChatPanel();
         }
-        public void GetChatPanel()
+        public string GetChatPanel()
         {
             if (_roomhash == "" || _objid=="")
-            {
-                return;
-            }
-
-           chats = UICommon.GetChatComments(IsTestNet(this), _objid, this, _chat);
-        }
-
-        public string GetChatPanel1()
-        {
-            if (_roomhash == "" || _objid == "")
             {
                 return "Unknown chat room.";
             }
 
             string div = "<h4>" + _roomname + "</h4><br>";
-            div += UICommon.GetChatComments(IsTestNet(this), _objid, this, _chat);
+            div += UICommon.GetChatCommentsTable(IsTestNet(this), _objid, this, _chat);
             return div;
         }
     }

@@ -213,6 +213,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="BanManagement.aspx" />
+    <Content Include="ChatViaDatabase - Copy.aspx" />
+    <Content Include="Content\pages\chat.css" />
     <Content Include="Images\ANRFrontPage.htm" />
     <Content Include="Images\ANRFrontPage_files\4359-300x174.jpg" />
     <Content Include="Images\ANRFrontPage_files\4826451.jpg" />
@@ -1018,6 +1020,13 @@
     </Compile>
     <Compile Include="BanManagement.aspx.designer.cs">
       <DependentUpon>BanManagement.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ChatViaDatabase - Copy.aspx.cs">
+      <DependentUpon>ChatViaDatabase - Copy.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ChatViaDatabase - Copy.aspx.designer.cs">
+      <DependentUpon>ChatViaDatabase - Copy.aspx</DependentUpon>
     </Compile>
     <Compile Include="ChatViaDatabase.aspx.cs">
       <DependentUpon>ChatViaDatabase.aspx</DependentUpon>

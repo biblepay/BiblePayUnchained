@@ -744,7 +744,7 @@ namespace Unchained
             return HTML;
         }
 
-        private static string CurateVideo(Page p, int nWidth, string sID, User u, string sURL2, string SVID,
+        public static string CurateVideo(Page p, int nWidth, string sID, User u, string sURL2, string SVID,
             string FID, int nAdded, string sTitle, string sBody, bool fShowRearrange, double nOrder, string sSnippet)
         {
             string sDiv = "<div class='gallery'><a href=Media.aspx?id=" + sID + ">";
@@ -781,6 +781,40 @@ namespace Unchained
                     sDiv += "&nbsp;" + sRearrangeUp + "&nbsp;" + sRearrangeDown;
                 }
             }
+            sDiv += "</div>";
+            return sDiv;
+        }
+
+        public static string CurateVideo2(bool istestnet, int nWidth, string sID, User u, string sURL2, string SVID,
+            string FID, int nAdded, string sTitle, string sBody, bool fShowRearrange, double nOrder, string sSnippet)
+        {
+            string sDiv = "<div class='gallery'><a href=Media.aspx?id=" + sID + ">";
+            string sVideo1 = GetInnerPoster(FID, sURL2, nWidth);
+            sDiv += sVideo1;
+            if (sBody.Length > 255)
+            {
+                sBody = sBody.Substring(0, 255) + "...";
+            }
+            sDiv += "</a></div><div class='gallery-description'><small>"
+                + sTitle + " • " + sBody + "<br>Uploaded by " + u.FullUserName() + " "
+                + BiblePayCommon.Common.ConvertFromUnixTimestamp(nAdded).ToShortDateString();
+
+            sDiv += "</small></span>";
+
+            //if (HasOwnership(istestnet, sID, "video1", sID))
+            //{
+            //    string sTrashAnchor = GetStandardAnchor("ancDelete", "DeleteObject", sID, "<i class='fa fa-trash'></i>", "Delete Video Object", "video1");
+            //    if (!fShowRearrange)
+            //    {
+            //        sDiv += "&nbsp;" + sTrashAnchor;
+            //    }
+            //    if (fShowRearrange)
+            //    {
+            //        string sRearrangeUp = GetStandardAnchor(sID, "RearrangeObjectUp", sID, "<i class='fa fa-arrow-up'></i>", "Rearrange Item - Move Up", "video1", sSnippet);
+            //        string sRearrangeDown = GetStandardAnchor(sID, "RearrangeObjectDown", sID, "<i class='fa fa-arrow-down'></i>", "Rearrange Item - Move Down", "video1", sSnippet);
+            //        sDiv += "&nbsp;" + sRearrangeUp + "&nbsp;" + sRearrangeDown;
+            //    }
+            //}
             sDiv += "</div>";
             return sDiv;
         }
@@ -1124,10 +1158,10 @@ namespace Unchained
         }
 
         public static string GetStandardAnchor(string sID, string sEvent, string sValue, string sCaption, string sAltText,
-            string sOptTable = "", string sOptSnippet = "", string sOptJS = "")
+            string sOptTable = "", string sOptSnippet = "", string sOptJS = "", string cssClass="")
         {
             string sAnchor = "<a id='" + sID + "' onclick=\"var e={};e.Event='" + sEvent + "_Click';e.Value='" + sValue + "';e.Table='"
-                + sOptTable + "';e.Snippet='" + sOptSnippet + "';BBPPostBack2(null, e);" + sOptJS + "\" title='" + sAltText + "'>" + sCaption + "</a>";
+                + sOptTable + "';e.Snippet='" + sOptSnippet + "';BBPPostBack2(null, e);" + sOptJS + "\" title='" + sAltText + "' class='"+cssClass+"'>" + sCaption + "</a>";
             return sAnchor;
         }
 
@@ -1422,7 +1456,85 @@ namespace Unchained
             sHTML += BiblePayCommonNET.UICommonNET.GetButtonTypeSubmit("btnSaveComments1", "SaveComments_Click", "Save Comments", sJS, id);
             return sHTML;
         }
-        public static string GetChatComments(bool fTestNet, string id, Page z, UICommon.ChatStructure chat)
+        public static IList<Entity.comment1> GetChatComments(bool fTestNet, string id, Page z, UICommon.ChatStructure chat)
+        { 
+            string sHTML = "";
+
+            if (!gUser(z).LoggedIn)
+            {
+                return null;
+            }
+            // Shows the chat type comments section for the object.  Also shows the replies to the comments.
+            var builder = Builders<BiblePayCommon.Entity.comment1>.Filter;
+            var filter = builder.Eq("ParentID", id);
+            filter &= builder.Regex("ParentID", new BsonRegularExpression(".*" + id + "*", "i"));
+            filter &= builder.Ne("deleted", 1);
+            // mission critical todo: pull this from the private chain:
+            IList<BiblePayCommon.Entity.comment1> dt = BiblePayDLL.Sidechain.GetChainObjects<BiblePayCommon.Entity.comment1>(fTestNet, "comment1",
+                filter, SERVICE_TYPE.PRIVATE_CACHE, "time", true);
+
+            return dt;
+            
+            //for (int i = 0; i < dt.Count; i++)
+            //{
+            //    string sBody = "<div class='comments'>" + dt[i].Body + "</div>";
+            //    sBody = sBody.Replace("iframe", "");
+            //    sBody = sBody.Replace("IFRAME", "");
+            //    // Edit comment and delete comment options
+            //    string sTrashAnchor = String.Empty;
+            //    string sEditAnchor = String.Empty;
+            //    if (false)
+            //    {
+            //        if (HasOwnership(IsTestNet(z), dt[i].id, "comment1", gUser(z).id))
+            //        {
+            //            sTrashAnchor = GetStandardAnchor("ancDelete", "DeleteObject", dt[i].id,
+            //                "<i class='largeIcon fa fa-trash'></i>", "Delete Comment", "comment1");
+
+            //            sEditAnchor = GetStandardAnchor("ancEdit", "EditObject", dt[i].id,
+            //                "<i class='largeIcon fa fa-edit'></i>", "Edit Comment", "comment1");
+            //        }
+            //    }
+
+            //    string div = "<tr><td><td>" + UICommon.GetUserAvatarAndName(z, dt[i].UserID)
+             //      + "</td><td>" + GetPrettyDate(dt[i].time)  
+            //        + "</td><td>";
+            //    string sValueControl = "<div id='txtCM" + dt[i].id.ToString() + "'>" + sBody + "</div>";
+            //    div += sValueControl + "</td><td>" + sEditAnchor + "</td><td>" + sTrashAnchor + "</tr>";
+            //    sHTML += div;
+            //}
+
+            //sHTML += "</table>";
+            //sHTML += "<table class='comments' width='100%'>";
+
+            
+
+            //string sHTMLParticipants = "";
+            //for (int i = 0; i < chat.participants.Count; i++)
+            //{
+            //    User u1 = gUserById(z, chat.participants[i]);
+            //    sHTMLParticipants += u1.FullUserName() + "<br>";
+            //}
+
+            
+            //string sParticipants = "<div id='divparticipants' class='tab'>&nbsp;&nbsp; Participants</div><div style='overflow-y:scroll;min-height:245px;' class='border'>" + sHTMLParticipants + "</div>";
+            //string sSaveArea = "<tr><td width=70%>"
+            //    + "<textarea id='txtComment' class='comments' name='txtComment' id='txtComment' rows=6 cols=10></textarea>"
+            //    + "<br><br></td><td width=20% style='vertical-align:top;'>" + sParticipants + "</td></tr></table>";
+            //// Register the JS:  (toolbar = basic/default)
+            //string sRegJS = "var editor1 = new RichTextEditor('#txtComment', {skin:'rounded-corner',toolbar:'basic',maxHTMLLength:65535});PollChat();";
+            //ScriptManager.RegisterStartupScript(z, z.GetType(), "rteJS1", sRegJS, true);
+            //sHTML += sSaveArea;
+            //sHTML += "</div>";
+
+            //string sJS = "var oComment=document.getElementById(\"txtComment\");oComment.value = encodeHTMLTags(oComment.value);";
+            //sHTML += BiblePayCommonNET.UICommonNET.GetButtonTypeSubmit("btnSaveChatComments1", "SaveChatComments_Click", "Say Something", sJS, id, chat.chatGuid);
+            //string sCloseChat = GetStandardButton(id, "Close Chat", "CloseChat", "Close chat and exit room");
+            //string sClearChat = GetStandardButton(id, "Clear Chat", "ClearChat", "Clear chat history");
+            //sHTML += sCloseChat + sClearChat;
+
+            //return sHTML;
+        }
+        public static string GetChatCommentsTable(bool fTestNet, string id, Page z, UICommon.ChatStructure chat)
         {
             // Shows the chat type comments section for the object.  Also shows the replies to the comments.
             var builder = Builders<BiblePayCommon.Entity.comment1>.Filter;
@@ -1460,7 +1572,7 @@ namespace Unchained
                 }
 
                 string div = "<tr><td><td>" + UICommon.GetUserAvatarAndName(z, dt[i].UserID)
-                    + "</td><td>" + GetPrettyDate(dt[i].time)  
+                    + "</td><td>" + GetPrettyDate(dt[i].time)
                     + "</td><td>";
                 string sValueControl = "<div id='txtCM" + dt[i].id.ToString() + "'>" + sBody + "</div>";
                 div += sValueControl + "</td><td>" + sEditAnchor + "</td><td>" + sTrashAnchor + "</tr>";
@@ -1483,7 +1595,7 @@ namespace Unchained
                 sHTMLParticipants += u1.FullUserName() + "<br>";
             }
 
-            
+
             string sParticipants = "<div id='divparticipants' class='tab'>&nbsp;&nbsp; Participants</div><div style='overflow-y:scroll;min-height:245px;' class='border'>" + sHTMLParticipants + "</div>";
             string sSaveArea = "<tr><td width=70%>"
                 + "<textarea id='txtComment' class='comments' name='txtComment' id='txtComment' rows=6 cols=10></textarea>"

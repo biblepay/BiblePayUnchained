@@ -163,15 +163,15 @@ namespace Unchained
                 }
                 else if (r.TXID == "WAITING_FOR_MY_ACCEPTANCE")
                 {
-                    FriendButton = GetStandardButton(user.id, "<i class='fa fa-check'></i> Accept Request", r.Event, r.Alt, "", "btnaccptfreindreq btn btn-info text-light mb-4");
+                    FriendButton = GetStandardButton(user.id, "<i class='fa fa-check'></i> <span class=\"d-none d-md-inline\">Accept Request</span>", r.Event, r.Alt, "", "btnaccptfreindreq btn btn-info text-light mb-4");
                 }
                 else if (r.TXID == "FRIENDS")
                 {
-                    FriendButton = GetStandardButton(user.id, "<i class='fa fa-user-minus'></i> Unfriend", r.Event, r.Alt, "", "btnfreindreq btn btn-info text-light mb-4");
+                    FriendButton = GetStandardButton(user.id, "<i class='fa fa-user-minus'></i><span class=\"d-none d-md-inline\">Unfriend</span> ", r.Event, r.Alt, "", "btnfreindreq btn btn-info text-light mb-4");
                 }
                 else if (r.Event == "AddFriendRequest")
                 {
-                    FriendButton = GetStandardButton(user.id, "<i class='fa fa-user-plus'></i> Make Friend", r.Event, r.Alt, "", "btnfreindreq btn btn-info text-light mb-4");
+                    FriendButton = GetStandardButton(user.id, "<i class='fa fa-user-plus'></i> <span class=\"d-none d-md-inline\">Make Friend</span>", r.Event, r.Alt, "", "btnfreindreq btn btn-info text-light mb-4");
                 }
             }
         }

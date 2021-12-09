@@ -162,8 +162,8 @@
 
 
                  <asp:HiddenField ID="hidSourceID" runat="server" />
-                 <button id="hfNewButton1" style="visibility:hidden"></button>
-                <input id="hfPostback" style="visibility:hidden" />
+                 <button id="hfNewButton1" style="visibility:hidden; margin:0; height:0;padding:0;border:none;"></button>
+                <input id="hfPostback" style="visibility:hidden;margin:0; height:0;padding:0;border:none;" />
                  
                 <br />
 

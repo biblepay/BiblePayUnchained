@@ -378,12 +378,76 @@ function PollChat() {
     if (elapsed > 1500) {
         var oComment = document.getElementById("txtComment");
         if (oComment.value.length === 0) {
-
             setRemoteValue('voting', 'pollchat|', '', '');
             setTimeout("PollChat()", 3000);
         }
     }
 }
+
+function PollChat2() {
+    setInterval(function () {
+        setRemoteValue2('voting', 'pollchat|', '', '');
+    }, 1500);
+
+}
+function setRemoteValue2(actionname, data1, elementToUpdate, elementToUpdate2) {
+
+    if (remoterequest != null) {
+   if (remoterequest.readyState != 4)
+        return false;
+    }
+    remoterequest = $.ajax({
+        type: "POST",
+        url: "LP.aspx/" + actionname,
+        data: { mydata: data1 },
+        headers: { headeraction: data1 },
+        success: function (response) {
+            
+            var oResponse;
+
+            try {
+                oResponse = JSON.parse(response);
+            }
+            catch (e) {
+                console.log(actionname);
+                console.log(data1);
+                console.log(response);
+            }
+
+            if (oResponse.Error !== null) {
+                alert(oResponse.Error);
+                return false;
+            }
+
+            if (oResponse.CustomResponse === "ChatResponse") {
+                PollChatComplete(oResponse.CustomResponseValue);
+                return true;
+            }
+            var e1 = document.getElementById(elementToUpdate);
+            var e2 = document.getElementById(elementToUpdate2);
+
+            if (e1) {
+                e1.innerHTML = oResponse.Div1;
+                console.log('updated');
+            }
+            if (e2) {
+                e2.innerHTML = oResponse.Div2;
+            }
+            return true;
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(jqXHR);
+            console.log(textStatus);
+            console.log(errorThrown);
+            if (!notified) {
+                alert('Wallet error' + textStatus);
+                notified = true;
+                return false;
+            }
+        }
+    });
+}
+
 
 function PollChatComplete(returnValue) {
 
@@ -391,17 +455,22 @@ function PollChatComplete(returnValue) {
         var e = {};
         e.EventName = "PollChatComplete";
         BBPPostBack3(null, e);
+
     }
     else {
         //setTimeout("PollChat()", 12000);
     }
-
 }
 
 var lastvalue1 = "";
 var notified = false;
- function setRemoteValue(actionname, data1, elementToUpdate, elementToUpdate2) {
-            $.ajax({
+var remoterequest;
+function setRemoteValue(actionname, data1, elementToUpdate, elementToUpdate2) {
+    if (remoterequest) {
+        remoterequest.abort();
+        remoterequest = null;
+    }
+     remoterequest = $.ajax({
                 type: "POST",
                 url: "LP.aspx/" + actionname,
                 data: { mydata: data1 },

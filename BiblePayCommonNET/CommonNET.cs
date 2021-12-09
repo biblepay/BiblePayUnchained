@@ -275,8 +275,8 @@ namespace BiblePayCommonNET
             o1.eventname = sEventValue;
             Random r = new Random();
             o1.niteration = r.Next(1000);
-            string sData = Newtonsoft.Json.JsonConvert.SerializeObject(o1);
-            sData = sData.Replace("\"", "\\\"");
+            //string sData = Newtonsoft.Json.JsonConvert.SerializeObject(o1);
+            //sData = sData.Replace("\"", "\\\"");
             string sOnClientClick = sJS + "var e={};e.Value=\"" + sEventValue + "\";e.ExtraID=\"" + sExtraID + "\";e.Event=\"" + sEventName + "\";BBPPostBack2(this,e);";
             string sButton = "<button id='" + sID + "' name='" + sID + "' type='reset' value='Submit' onclick='" + sOnClientClick + "'>" + sCaption + "</button>";
             sHTML += sButton;

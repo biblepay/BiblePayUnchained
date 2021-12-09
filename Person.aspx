@@ -2,6 +2,7 @@
 <%@ Register TagPrefix="BBP" Namespace="BiblePayPaginator" Assembly="BiblePayPaginator" %>
 <%@ Register TagPrefix="telerik" Namespace="Telerik.Web.UI" Assembly="Telerik.Web.UI" %>
 
+
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <link href="Scripts/emoji/emojionearea.min.css" rel="stylesheet" />
     <link href="Content/pages/people.css" rel="stylesheet" />
@@ -18,7 +19,7 @@
                                     <%= user.GetAvatarImageNoDims("profile-pic") %>
                                     <span class="profile-name"><%= user.FullUserName() %></span>
                                 </div>
-                                <div class="d-none d-md-block">
+                                <div class="profile-header-link">
                                     <% if (IsMe)
                                         {%>
                                     <a class="btn btn-primary btn-icon-text btn-edit-profile" href="/Profile">
@@ -26,9 +27,20 @@
                                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                         </svg>
-                                        Edit profile
+                                      <span class="d-none d-md-inline">Edit profile</span>  
+                                       
                                     </a>
-                                    <% }  %>
+                                    <% }
+                                        else
+                                        {
+                                            string sConfAnchor = Unchained.UICommon.GetStandardAnchor("ancConf", "ConfNow", user.id.ToString(),
+                                            " <i class='fa fa-phone'></i> <span class=\"d-none d-md-inline\"> Call User</span> ", "Conference call with this user now", "","","","btn btn-primary btn-icon-text btn-edit-profile mb-4");
+                                            string sChatAnchor = Unchained.UICommon.GetStandardAnchor("ancChat", "ChatNow", user.id.ToString(),
+                                                   " <i class='fa fa-chat'></i> <span class=\"d-none d-md-inline\">Message User</span>", "Chat with this user now", "","","","btn btn-primary btn-icon-text btn-edit-profile mb-4");
+                                             %>
+                                    <%=sConfAnchor %>
+                                    <%=sChatAnchor %>
+                                    <%} %>
                                     <%=FriendButton %>
                                 </div>
                             </div>
@@ -36,15 +48,15 @@
                         <div class="header-links">
                             <ul class="links d-flex align-items-center mt-3 mt-md-0 nav nav-tabs " id="myTab1" role="tablist">
                                 <li class="header-link-item d-flex align-items-center">
-                                    <a class="stretched-link nav-link tab-link" id="home-tab" data-bs-toggle="tab" 
+                                    <a class="stretched-link" id="home-tab" data-bs-toggle="tab" 
                                         data-bs-target="#home"  role="tab" aria-controls="home" aria-selected="true"></a>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-columns me-1 icon-md">
                                         <path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"></path>
                                     </svg>
                                     <span class="pt-1px d-none d-md-block">Timeline</span>
                                 </li>
-                                <li class="header-link-item ms-3 ps-3 border-start d-flex align-items-center" >
-                                <a class="stretched-link nav-link tab-link" id="about-tab" data-bs-toggle="tab" 
+                                <li class="header-link-item ms-2 ms-md-3  ps-3 border-start d-flex align-items-center" >
+                                <a class="stretched-link" id="about-tab" data-bs-toggle="tab" 
                                     data-bs-target="#about"  role="tab" aria-controls="about" aria-selected="true"></a>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user me-1 icon-md">
                                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -53,8 +65,8 @@
                                  <span class="pt-1px d-none d-md-block">About</span>
                                        
                                 </li>
-                                <li class="header-link-item ms-3 ps-3 border-start d-flex align-items-center" >
-                                <a class="stretched-link nav-link tab-link" id="friends-tab" data-bs-toggle="tab" 
+                                <li class="header-link-item ms-2 ms-md-3 ps-3 border-start d-flex align-items-center" >
+                                <a class="stretched-link" id="friends-tab" data-bs-toggle="tab" 
                                     data-bs-target="#friends"  role="tab" aria-controls="friends" aria-selected="true"></a>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users me-1 icon-md">
                                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -64,8 +76,8 @@
                                     </svg>
                                     <span class="pt-1px d-none d-md-block" >Friends <span id="friendscount" class="text-muted tx-12"></span></span>   
                               </li>
-                              <li class="header-link-item ms-3 ps-3 border-start d-flex align-items-center" >
-                                 <a class="stretched-link nav-link tab-link" id="photos-tab" data-bs-toggle="tab" 
+                              <li class="header-link-item ms-2 ms-md-3 ps-3 border-start d-flex align-items-center" >
+                                 <a class="stretched-link" id="photos-tab" data-bs-toggle="tab" 
                                  data-bs-target="#photos"  role="tab" aria-controls="photos" aria-selected="true"></a>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-image me-1 icon-md">
                                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -74,8 +86,8 @@
                                     </svg>
                                     <a class="pt-1px d-none d-md-block" href="#">Photos</a>
                                 </li>
-                                <li class="header-link-item ms-3 ps-3 border-start d-flex align-items-center">
-                                 <a class="stretched-link nav-link tab-link" id="videos-tab" data-bs-toggle="tab" 
+                                <li class="header-link-item ms-2 ms-md-3 ps-3 border-start d-flex align-items-center">
+                                 <a class="stretched-link" id="videos-tab" data-bs-toggle="tab" 
                                   data-bs-target="#videos"  role="tab" aria-controls="videos" aria-selected="true"></a>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-video me-1 icon-md">
                                         <polygon points="23 7 16 12 23 17 23 7"></polygon>
@@ -93,7 +105,8 @@
             <div class="row <%= SinglePost?"":"profile-body" %>">
                 <!-- left wrapper start -->
                  <% if (!SinglePost)
-                     {%><div class="d-none d-md-block col-md-4 col-xl-3 left-wrapper">
+                     {%>
+                <div class="d-none d-md-block col-md-4 col-xl-3 left-wrapper">
                     <div class="card rounded">
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between mb-2">
@@ -391,19 +404,97 @@
 
                       </div>
                       <div class="tab-pane fade" id="about" role="tabpanel" aria-labelledby="about-tab">
-                          <h3>About</h3>
+                          <h3>About
+                              <% if (IsMe)
+                                    {%>
+                              <a href="/Profile" class="btn btn-primary text-light float-end">Edit Information</a>
+                          
+                                <%} %>
+                            </h3>
+                          <% if (!string.IsNullOrEmpty(user.PublicText))
+                                { %>
+                            <h6><b>Public</b></h6>
+                            <p>
+                                <%= user.PublicText %>
+                            </p>
+                            <% } %>
+                            <% if (!string.IsNullOrEmpty(user.PrivateText))
+                                { %>
+                            <h6><b>Private/ Friends Only</b></h6>
+                            <p>
+                                <%= user.PrivateText %>
+                            </p>
+                            <% } %>
+                            <% if (!string.IsNullOrEmpty(user.ProfessionalText))
+                                { %>
+                            <h6><b>Professional</b></h6>
+                            <p>
+                                <%= user.ProfessionalText %>
+                            </p>
+                            <% } %>
+                            <% if (!string.IsNullOrEmpty(user.ReligiousText))
+                                { %>
+                            <h6><b>Belief</b></h6>
+                            <p>
+                                <%= user.ReligiousText%>
+                            </p>
+                            <% } %>
+                            <%--  <hr />
+                   <div class="mt-3">
+                        <label class="tx-11 font-weight-bold mb-0 text-uppercase">Email:</label>
+                        <p class="text-muted"><%= user.EmailAddress %></p>
+                    </div>--%>
+                            <hr />
+
+                            <% if (!string.IsNullOrEmpty(user.TelegramLinkName))
+                                {%>
+                            <div class="mt-3">
+                                <label class="tx-11 font-weight-bold mb-0 text-uppercase">Telegram Name:</label>
+                                <p class="text-muted"><%= user.TelegramLinkName %></p>
+                            </div>
+                            <%} %>
+
+                            <% if (!string.IsNullOrEmpty(user.TelegramLinkURL))
+                                {%>
+                            <div class="mt-3">
+                                <label class="tx-11 font-weight-bold mb-0 text-uppercase">Telegram URL:</label>
+                                <p class="text-muted"><%= user.TelegramLinkURL %></p>
+                            </div>
+                            <% } %>
+
+                            <% if (!string.IsNullOrEmpty(user.TelegramLinkDescription))
+                                {%>
+                            <div class="mt-3">
+                                <label class="tx-11 font-weight-bold mb-0 text-uppercase">Telegram Description</label>
+                                <p class="text-muted"><%= user.TelegramLinkDescription %></p>
+                            </div>
+                            <% } %>
                       </div>
                       <div class="tab-pane fade" id="friends" role="tabpanel" aria-labelledby="friends-tab">
-                          <h3>Friends List</h3>
+                          <h3>Friends List
+                              <a href="People.aspx" class="btn btn-primary text-light float-end">Add Friends</a>
+                          </h3>
+                          <div class="row" id="my-friends-container">
+
+                          </div>
                       </div>
                       <div class="tab-pane fade" id="photos" role="tabpanel" aria-labelledby="photos-tab">
                           
                           <div class="row" id="my-images">
-                              <h3 class="col-12">Photos</h3>
+                              <h3 class="col-12">Photos
+                                       <a href="People.aspx" class="btn btn-primary text-light float-end"
+                                          onclick="var e={};e.Event='UploadVideo_Click';if (e.Event=='_Click') return false;e.Value='btnUpload';BBPPostBack2(null, e);return false;" >Add Photo</a>
+                         
+                              </h3>
                                         </div>
                       </div>
                       <div class="tab-pane fade" id="videos" role="tabpanel" aria-labelledby="videos-tab">
-                          <h3>Videos</h3>
+                          <div class="row" id="my-videos">
+                              <h3 class="col-12">Videos
+                                  <a href="People.aspx" class="btn btn-primary  text-light float-end"
+                                          onclick="var e={};e.Event='UploadVideo_Click';if (e.Event=='_Click') return false;e.Value='btnUpload';BBPPostBack2(null, e);return false;" >Add Video</a>
+                              </h3>
+                                        </div>
                       </div>
                     </div>
 
@@ -758,39 +849,84 @@
             //})
             let loadingvid = false, vidfinished = false, vidpno = 0;
             function LoadVideos() {
+                console.log('loadin photos with ', loadingvid, vidfinished);
                 if (loadingvid || vidfinished)
                     return false;
 
-                vidpost = true;
-                let posturl = `api/media?type=videos&count=9&sID=${userId}&isTestNet=${isTestNet}&pno=${phpno}`;
+                loadingvid = true;
+                let posturl = `api/media?type=videos&count=9&sID=${userId}&isTestNet=${isTestNet}&pno=${vidpno}`;
                 $.get(posturl, function (response) {
                     if (response.length == 0) {
                         $('#no-vid').show();
-                        postfinished = true;
-                        if (waypoint) {
-                            waypoint.destroy();
-                        }
+                        vidfinished = true;
+//                        if (waypoint) {
+//                            waypoint.destroy();
+                        //}
                     }
                     else {
                         $('#no-vid').hide();
                         vidpno += 1;
                     }
-                    $.each(response, function (i, v, a) {
-
+                    $.each(response, function (i, v) {
+                        let temp = '<div class="col-md-6">' + v.html + '</div>'
+                        $('#my-videos').append(temp);
                     })
+
+                    loadingvid = false;
                 })
             }
 
 
+            let loadingfr = false, frfinished = false, frpno = 0;
+            function LoadFriend() {
+
+                console.log('loadin photos with ', loadingfr, frfinished);
+                if (loadingfr || frfinished)
+                    return false;
+
+                let posturl = `api/people/friends?sID=${userId}&isTestNet=${isTestNet}&pno=${frpno}&count=20`;
+                loadingfr = true;
+                $.get(posturl, function (response) {
+                    if (response.length == 0) {
+                        $('#no-frd').show();
+                        frfinished = true;
+                        //                        if (waypoint) {
+                        //                            waypoint.destroy();
+                        //}
+                    }
+                    else {
+                        $('#no-frd').hide();
+                        frpno += 1;
+                    }
+                    $.each(response.result, function (i, v, a) {
+                        let template = $('#friend-template').html().toString();
+                        let p = '';
+                        if (v.ProfilePicture.startsWith('<img'))
+                            p = $(v.ProfilePicture).attr('src');
+                        else {
+                            p = v.ProfilePicture;
+                        }
+                        template = template.replaceAll('{{userpic}}', p);
+                        template = template.replaceAll('{{user}}', v.FullName);
+                        template = template.replaceAll('{{userid}}', v.Id);
+                        $('#my-friends-container').append(template);
+                    })
+                    loadingfr = false;
+
+                })
+            }
+
             let loadingph = false, phfinished = false, phpno = 0;
             function LoadPhotos() {
+                console.log('loadin photos with ', loadingph, phfinished);
                 if (loadingph || phfinished)
                     return false;
 
-                phpost = true;
-                let posturl = `api/media?type=images&count=9&sID=${userId}&isTestNet=${isTestNet}&pno=${phpno}&count=12`;
+                loadingph = true;
+                let posturl = `api/media?type=images&count=9&sID=${userId}&isTestNet=${isTestNet}&pno=${phpno}&count=12&callingphotos=1`;
 
                 $.get(posturl, function (response) {
+                    loadingph = false;
                     if (response.length == 0) {
                         $('#no-ph').show();
                         postfinished = true;
@@ -815,18 +951,21 @@
 
 
             $(function () {
-                $('.stretched-link.nav-link.tab-link').each(function () {
+                $('.header-links .stretched-link').each(function () {
                     $(this).on('shown.bs.tab', function (e) {
-                        console.log(e);
                         let t = e.target.attributes["data-bs-target"].value;
-                        if (t == 'about') {
+                        console.log('tab changed ',t);
+                        if (t == '#about') {
                             LoadAbout()
                         }
-                        else if (t == 'videos') {
+                        else if (t == '#videos') {
                             LoadVideos()
                         }
-                        else if (t == 'photos') {
+                        else if (t == '#photos') {
                             LoadPhotos()
+                        }
+                        else if (t == '#friends') {
+                            LoadFriend()
                         }
                         else if (t == 'home') {
 

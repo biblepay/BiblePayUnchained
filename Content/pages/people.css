@@ -20,6 +20,7 @@ body {
     color: #fff;
 }
 
+
 .profile-page .profile-header {
     box-shadow: 0 0 10px 0 rgba(183, 192, 206, 0.2);
     border: 1px solid #f2f4f9;
@@ -461,3 +462,38 @@ textarea.newpost {
         .RadAsyncUpload ul li:last-child span {
             width: 84px;
         }
+#my-videos .gallery{
+    max-width:100%;
+}
+#my-videos .gallery img{
+    max-width: 100%;
+}
+
+@media(max-width:400px){
+    .icon-post {
+        max-width: 17px;
+    }
+    .profile-header svg {
+        width: 16px;
+        height: 16px;
+    }
+    ul.nav > li{
+
+    }
+}
+
+@media(max-width:501px){
+    iframe{
+        width:100% !important;
+    }
+
+    .profile-page .profile-header .cover .cover-body .profile-name {
+        margin-top: 0;
+    }
+}
+@media(max-width:700px){
+    .profile-header-link a, .profile-header-link button {
+        font-size: 10px;
+        padding: 5px;
+    }
+}

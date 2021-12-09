@@ -236,13 +236,18 @@ namespace Unchained.WebApis
         }
 
         [Route("api/people/friends")]
-        public object GetFriendsList(string sID, bool isTestNet)
+        public object GetFriendsList(string sID, bool isTestNet,int pno=0)
         {
             string id = sID;
             DataTable dt = BiblePayDLL.Sidechain.RetrieveDataTable3(isTestNet, "Friend");
             dt = dt.FilterDataTable("UserID='" + sID + "' or RequesterID='" + sID + "'");
             List<object> o = new List<object>();
-
+            int skip = 0;
+            int count = 6;
+            if (pno > 0)
+            {
+                skip = count * pno;
+            }
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 string sRequestor = dt.Rows[i]["RequesterID"].ToString();
@@ -258,7 +263,7 @@ namespace Unchained.WebApis
                 o.Add(a);
             }
 
-            return new { total = dt.Rows.Count, result = o.Take(10).ToList() };
+            return new { total = dt.Rows.Count, result = o.Skip(skip).Take(count).ToList() };
         }
 
         public static string Mid(string data, int nStart, int nLength)
@@ -295,8 +300,8 @@ namespace Unchained.WebApis
             dt = dt.FilterDataTable("userid='" + sID + "'");
             if (type == "images")
                 dt = dt.FilterDataTable("URL like '%.png%' or URL like '%.gif' or URL Like '%.jpeg' or URL like '%.jpg%' or URL like '%.jpeg%' or URL like '%.gif%'");
-            else if (type == "")
-                dt = dt.FilterDataTable("URL like '%.png%' or URL like '%.gif' or URL Like '%.jpeg' or URL like '%.jpg%' or URL like '%.jpeg%' or URL like '%.gif%'");
+            else 
+                dt = dt.FilterDataTable("URL like '%.mp4%' or URL like '%.webm' or URL Like '%.mov'");
 
             dt = dt.OrderBy("time desc");
             int skip = 0;
@@ -304,8 +309,37 @@ namespace Unchained.WebApis
             {
                 skip = count * pno;
             }
-            var result = dt.AsEnumerable().Skip(skip).Take(count).Select(s => new { id = s.Field<string>("id"), URL = s.Field<string>("URL"), Title = s.Field<string>("Title"), ParentId = s.Field<string>("ParentID") });
+            
+            var result = dt.AsEnumerable().Skip(skip).Take(count).Select(s => new {
+                SVID= s.Field<string>("SVID"),
+                FID=s.Field<string>("FID"),
+                time=s.Field<int>("time"),
+                Order=s.Field<double>("Order"),
+                Body=s.Field<string>("Body"),
+                id = s.Field<string>("id"),
+                URL2 = s.Field<string>("URL2"),
+                URL = s.Field<string>("URL"), Title = s.Field<string>("Title"), ParentId = s.Field<string>("ParentID") }).ToList();
+            
+            //v.ord
+            if (type == "videos")
+            {
+                List<object> ov = new List<object>();
+                foreach (var r in result)
+                {
+                    User u = UICommon.GetUserRecord(isTestNet, sID);
 
+                    //string sUserName = u.FullUserName();
+                    string sElement = "";
+                    sElement = UICommon.CurateVideo2(isTestNet, 300, r.id, u, r.URL2,
+                          r.SVID,
+                          r.FID, (int)r.time,
+                          r.Title, r.Body.ToNonNullString(), false,
+                          r.Order, "");
+                    ov.Add(new { html = sElement });
+
+                }
+                return ov;
+            }
             return result;
         }
 
