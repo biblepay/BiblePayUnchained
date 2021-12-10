@@ -56,6 +56,24 @@
                 <asp:RequiredFieldValidator ID="RequiredFieldValidator3" runat="server" ControlToValidate="txtWeight" ErrorMessage="Please add weight" Font-Bold="True" Font-Size="Large" ForeColor="Red">*</asp:RequiredFieldValidator>
             </td>
         </tr> 
+            <tr>
+            <td>
+                  <asp:Label ID="lblPoliticalLeaning" runat="server" Text="Political Leaning:" ></asp:Label>
+            </td>
+            <td>
+                <asp:TextBox ID="txtPoliticalLeaning" onkeypress="return isNumberKey(event)"  width="400px" runat="server"></asp:TextBox>
+                 <asp:rangevalidator id="rvCompare0"
+                  controltovalidate="txtPoliticalLeaning" 
+                  minimumvalue="0"
+                  maximumvalue="100" 
+                  type="Double" 
+                  errormessage="Political Leaning range must between 0 to 100" 
+                  runat="server"/>
+            </td>
+            <td>
+                <asp:RequiredFieldValidator ID="RequiredFieldValidator4" runat="server" ControlToValidate="txtWeight" ErrorMessage="Please add weight" Font-Bold="True" Font-Size="Large" ForeColor="Red">*</asp:RequiredFieldValidator>
+            </td>
+        </tr> 
         <tr>
             <td style="vertical-align:top">
                  <asp:Label ID="lblNotes" runat="server" Text="Notes:"></asp:Label>

@@ -1,5 +1,10 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="NewsFeedItemList.aspx.cs" Inherits="Unchained.NewsFeedItemList" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="SyncFeedItems.aspx.cs" Inherits="Unchained.SyncFeedItems" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
+
+
+
+
+
     <script>
         function OnDelete() {
             if (confirm("Are you sure wants to delete?")) {
@@ -13,7 +18,7 @@
     <table style="width:100%">
         <tr>
             <td style="text-align:left;">
-                <asp:Label ID="lblHeading" runat="server" Text="News Feed List" Font-Bold="True" Font-Size="Large"></asp:Label>
+                <asp:Label ID="lblHeading" runat="server" Text="News Feed Item List" Font-Bold="True" Font-Size="Large"></asp:Label>
                 <br />
                  
                   </td>
@@ -24,11 +29,10 @@
         <tr>
             <td>
 
-                  <asp:LinkButton ID="btnAddNewFeed" runat="server" Font-Underline="True" OnClick="btnAddNewFeed_Click">Create New Feed</asp:LinkButton>
+                  <asp:LinkButton ID="btnSyncFeedItem" runat="server" Font-Underline="True" OnClick="btnSyncFeedItem_Click" >Sync All Feed Items</asp:LinkButton>
+                 &nbsp;&nbsp;
 
-                    <a href="SyncFeedItems">Sync News Feed Items Manually</a>
-                
-
+                  <asp:LinkButton ID="btnDeleteAll" runat="server" Font-Underline="True" OnClick="btnDeleteAll_Click" >Delete All</asp:LinkButton>
                  </td>
         </tr>
         <tr>
@@ -41,29 +45,25 @@
             <td  align="left">
                 <div style="height:500px; overflow:auto">
 
-                <asp:GridView ID="GvNewsFeedItem" runat="server" AutoGenerateColumns="False" BackColor="White" BorderColor="#999999" BorderStyle="Solid" BorderWidth="1px" CellPadding="3" ForeColor="Black" GridLines="Vertical" OnRowCommand="GvNewsFeedItem_RowCommand" Width="100%">
+                        <asp:GridView ID="GvNewsFeedItem" runat="server" AutoGenerateColumns="False" BackColor="White" BorderColor="#999999" BorderStyle="Solid" BorderWidth="1px" CellPadding="3" ForeColor="Black" GridLines="Vertical" OnRowCommand="GvNewsFeedItem_RowCommand" Width="100%">
         <AlternatingRowStyle BackColor="#CCCCCC" />
         <Columns>
 
-            <asp:BoundField DataField="FeedName" HeaderText="Feed Name">
+            <asp:BoundField DataField="URL" HeaderText="URL">
             <HeaderStyle ForeColor="White" />
             </asp:BoundField>
-            <asp:BoundField DataField="URL" HeaderText="Url">
+            <asp:BoundField DataField="Title" HeaderText="Title">
             <HeaderStyle ForeColor="White" />
             </asp:BoundField>
-            <asp:BoundField DataField="Weight" HeaderText="Weight">
+            <asp:BoundField DataField="Body" HeaderText="Body">
             <HeaderStyle ForeColor="White" />
             </asp:BoundField>
-            <asp:BoundField DataField="Notes" HeaderText="Notes">
+            <asp:BoundField DataField="Expiration" HeaderText="Expiration">
             <HeaderStyle ForeColor="White" />
-            </asp:BoundField>
-         
- 
-             <asp:TemplateField>
-                <ItemTemplate>
-                    <asp:LinkButton ID="btnEdit" runat="server" CommandArgument='<%# Bind("id") %>' CommandName="Edit" Font-Underline="true">Edit</asp:LinkButton>
-                </ItemTemplate>
-            </asp:TemplateField>
+            </asp:BoundField> 
+             <asp:BoundField DataField="FeedName" HeaderText="FeedName">
+            <HeaderStyle ForeColor="White" />
+            </asp:BoundField> 
             <asp:TemplateField>
                 <ItemTemplate>
                     <asp:LinkButton ID="btnDelete" OnClientClick="return OnDelete();" runat="server" CommandArgument='<%# Bind("id") %>' CommandName="Delete" Font-Underline="true">Delete</asp:LinkButton>
@@ -74,7 +74,7 @@
                             <EmptyDataTemplate>
                                 <table cellspacing="0" cellpadding="3" rules="cols" id="MainContent_GvNewsFeedItem" style="color:Black;background-color:White;border-color:#999999;border-width:1px;border-style:Solid;width:100%;border-collapse:collapse;">
 			<tbody><tr style="color:White;background-color:Black;font-weight:bold;">
-				<th scope="col" style="color:White;">Feed Name</th><th scope="col" style="color:White;">Url</th><th scope="col" style="color:White;">Weight</th><th scope="col" style="color:White;">Notes</th><th scope="col">&nbsp;</th><th scope="col">&nbsp;</th>
+				<th scope="col" style="color:White;">URL</th><th scope="col" style="color:White;">Title</th><th scope="col" style="color:White;">Body</th><th scope="col" style="color:White;">Expiration</th><th scope="col">&nbsp;</th><th scope="col">&nbsp;</th>
 			</tr><tr>
 				<td colspan="6">Records not found</td>
 			</tr>
@@ -93,5 +93,4 @@
             </td>
         </tr>
     </table>
-    
 </asp:Content>

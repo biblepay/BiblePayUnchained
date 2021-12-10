@@ -19,7 +19,6 @@ namespace Unchained
                 UICommon.MsgBox("Error", "You are not authorized to edit newsfeeditems: You must have superuser.", this);
             }
 
-
             if (!Page.IsPostBack)
             {
                 _EntityName = "NewsFeedSource";

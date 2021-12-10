@@ -21,7 +21,7 @@ namespace Unchained
     {
         private int iPageSize = 10;
 
-        protected void Page_Load(object sender, EventArgs e)
+        protected new void Page_Load(object sender, EventArgs e)
         {
             if (!Page.IsPostBack)
             {
@@ -46,9 +46,11 @@ namespace Unchained
             DataTable dtData = BiblePayDLL.Sidechain.RetrieveDataTable3(IsTestNet(this), _EntityName);
             dtData = dtData.SortDataTable("time desc");
 
+            // Dictionary<Entity.NewsFeedSource, List<Entity.NewsFeedItem>> ObjFeeds = new Dictionary<Entity.NewsFeedSource, List<Entity.NewsFeedItem>>();
+            Dictionary<string, int> dictSourceRow = new Dictionary<string, int>();
             List<Entity.NewsFeedItem> lstItemSource = new List<Entity.NewsFeedItem>();
-            Dictionary<Entity.NewsFeedSource, List<Entity.NewsFeedItem>> ObjFeeds = new Dictionary<Entity.NewsFeedSource, List<Entity.NewsFeedItem>>();
-            for (int iRowNumber = 0; iRowNumber < 5000; iRowNumber++)
+
+            while (true)
             {
                 foreach (DataRow item in dtDataSource.Rows)
                 {
@@ -59,20 +61,24 @@ namespace Unchained
                     newsFeedSource.time = Convert.ToInt64(item["time"]);
                     newsFeedSource.Weight = item["Weight"].ToDouble();
                     //newsFeedSource.PoliticalLeaning = item["PoliticalLeaning"].ToDouble();
-
                     string sqlWhere = $"NewsFeedSourceID={item["id"].ToString()}";
                     DataRow[] dataRows = dtData.Select(sqlWhere);
+
+                    int iRowPointer = 0;
+                    dictSourceRow.TryGetValue(item["id"].ToString(), out iRowPointer);
+
 
                     int iNFI = 0;
                     foreach (DataRow tempRow in dataRows)
                     {
-                        if (iNFI >= iRowNumber)
+                        if (iNFI >= iRowPointer)
                         {
 
                             Random random = new Random();
                             var randomWeight = random.Next(0, 100);
+                            
 
-                            if (newsFeedSource.Weight <= randomWeight)
+                            if (randomWeight <= newsFeedSource.Weight*100)
                             {
                                 Entity.NewsFeedItem ObjNewsFeedItem = new Entity.NewsFeedItem();
                                 ObjNewsFeedItem.Body = tempRow["Body"].ToString();
@@ -84,19 +90,17 @@ namespace Unchained
                                 ObjNewsFeedItem.time = Convert.ToInt64(tempRow["time"]);
                                 ObjNewsFeedItem.Expiration = Convert.ToInt32(tempRow["Expiration"]);
                                 lstItemSource.Add(ObjNewsFeedItem);
+                                dictSourceRow[item["id"].ToString()] = iNFI + 1;
                             }
                             // break whether we have chosen one for this row or not
                             break;
                         }
                         iNFI++;
                     }
-                    if (lstItemSource.Count > 0)
-                        ObjFeeds.Add(newsFeedSource, lstItemSource);
                 }
                 // Break out when we have 50 *chosen* items:
-                if (ObjFeeds.Count >= 50)
+                if (lstItemSource.Count >= 50)
                     break;
-
             }
 
 
@@ -185,7 +189,7 @@ namespace Unchained
         protected void Repeater2_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             int PageNo = Convert.ToInt32(e.CommandArgument);
-            Response.Redirect($"NewsProofOfConcept.aspx?PageNo={PageNo}");
+            Response.Redirect($"NewsView.aspx?PageNo={PageNo}");
         }
 
         //protected string GetNews()

@@ -462,6 +462,7 @@ namespace BiblePayCommon
             public string Notes { get; set; }
             public string URL { get; set; }
             public double Weight { get; set; }
+            public double PoliticalLeaning { get; set; }
             public override string GetHash()
             {
                 return GetSha256HashI(organization + URL);

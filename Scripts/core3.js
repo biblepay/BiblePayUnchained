@@ -417,10 +417,13 @@ var remoterequest;
 
 function setRemoteValue2(actionname, data1, elementToUpdate, elementToUpdate2) {
 
-    if (remoterequest != null) {
+    /*
+     * if (remoterequest != null) {
         if (remoterequest.readyState != 4)
             return false;
     }
+    */
+
     remoterequest = $.ajax({
         type: "POST",
         url: "LP.aspx/" + actionname,
