@@ -465,7 +465,7 @@ function setRemoteValue2(actionname, data1, elementToUpdate, elementToUpdate2) {
             console.log(textStatus);
             console.log(errorThrown);
             if (!notified) {
-                alert('Wallet error' + textStatus);
+                alert('Wallet error type 2.0::' + textStatus);
                 notified = true;
                 return false;
             }
@@ -484,10 +484,13 @@ var notified = false;
 
 function setRemoteValue(actionname, data1, elementToUpdate, elementToUpdate2) {
 
+    /*
     if (remoterequest) {
         remoterequest.abort();
         remoterequest = null;
     }
+    */
+
 
     remoterequest = $.ajax({
                 type: "POST",
@@ -537,7 +540,7 @@ function setRemoteValue(actionname, data1, elementToUpdate, elementToUpdate2) {
                     console.log(textStatus);
                     console.log(errorThrown);
                     if (!notified) {
-                        alert('Wallet error' + textStatus);
+                        alert('Wallet error type 3.0::' + textStatus);
                         notified = true;
                         return false;
                     }
@@ -570,7 +573,7 @@ function setRemoteValue2Retired(actionname, data1, elementToUpdate)
             console.log(textStatus);
             console.log(errorThrown);
             if (!notified) {
-                alert('Wallet error' + textStatus);
+                alert('Wallet error type1.0::' + textStatus);
                 notified = true;
                 return false;
             }
